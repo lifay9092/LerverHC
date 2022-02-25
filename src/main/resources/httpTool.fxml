@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane fx:id="rootPane" prefHeight="756.0" prefWidth="1476.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.HttpToolController">
+    <top>
+        <MenuBar>
+            <menus>
+                <Menu text="管理项">
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#propertiesManage" text="属性管理" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+    <center>
+        <TabPane layoutX="29.0" layoutY="20.0" prefHeight="721.0" prefWidth="1392.0" tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab text="Http工具">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="641.0" prefWidth="1339.0">
+                            <children>
+                                <TreeView fx:id="httpTreeView" layoutX="20.0" layoutY="28.0" prefHeight="634.0" prefWidth="205.0" />
+                                <Label alignment="CENTER" contentDisplay="CENTER" layoutX="28.0" layoutY="5.0" prefHeight="15.0" prefWidth="83.0" text="Http树" textFill="#400404">
+                                    <font>
+                                        <Font size="14.0" />
+                                    </font>
+                                </Label>
+                                <Button layoutX="1395.0" layoutY="4.0" mnemonicParsing="false" onAction="#saveHttp" prefHeight="23.0" prefWidth="52.0" style="-fx-background-color: #31ac5a;" text="保存" textFill="#f2eaea" />
+                                <Button layoutX="149.0" layoutY="3.0" mnemonicParsing="false" text="另存为" />
+                                <ChoiceBox fx:id="selectMethod" layoutX="370.0" layoutY="3.0" prefHeight="45.0" prefWidth="55.0" />
+                                <TextArea fx:id="url" layoutX="425.0" layoutY="3.0" prefHeight="44.0" prefWidth="620.0" />
+                                <Button alignment="CENTER" contentDisplay="CENTER" graphicTextGap="5.0" layoutX="1189.0" layoutY="3.0" lineSpacing="11.0" mnemonicParsing="false" onAction="#sendHttp" prefHeight="23.0" prefWidth="66.0" style="-fx-background-color: #5151e5" text="发送" textFill="#fcf9f9" />
+                                <ChoiceBox fx:id="selectContentType" layoutX="320.0" layoutY="48.0" prefHeight="23.0" prefWidth="139.0" />
+                                <Label layoutX="236.0" layoutY="45.0" prefHeight="27.0" prefWidth="84.0" text="Content-Type:" />
+                                <Label layoutX="465.0" layoutY="49.0" prefHeight="22.0" prefWidth="97.0" text="Authorization:" />
+                                <TextField fx:id="authorization" layoutX="549.0" layoutY="49.0" prefHeight="23.0" prefWidth="565.0" />
+                                <Button layoutX="1269.0" layoutY="3.0" mnemonicParsing="false" onAction="#sendHttpAndSave" prefHeight="23.0" prefWidth="113.0" style="-fx-background-color: #48256a" text="发送并导出结果" textFill="aliceblue" />
+                                <TextArea fx:id="bodyStr" layoutX="243.0" layoutY="268.0" prefHeight="375.0" prefWidth="467.0" wrapText="true" />
+                                <Label alignment="CENTER" layoutX="659.0" layoutY="241.0" prefHeight="25.0" prefWidth="53.0" text="参数" textFill="#18b234" />
+                                <TextArea fx:id="responseStr" editable="false" layoutX="740.0" layoutY="124.0" prefHeight="524.0" prefWidth="650.0" wrapText="true" />
+                                <Label layoutX="740.0" layoutY="93.0" prefHeight="22.0" prefWidth="43.0" text="状态:" />
+                                <Label fx:id="httpStatus" layoutX="788.0" layoutY="93.0" prefHeight="22.0" prefWidth="87.0" />
+                                <CheckBox fx:id="checkBatch" layoutX="1058.0" layoutY="6.0" mnemonicParsing="false" text="批量执行" />
+                                <Button fx:id="btnDataFile" layoutX="241.0" layoutY="205.0" mnemonicParsing="false" onAction="#selectDataFile" text="选择数据文件" />
+                                <TextArea fx:id="batchDataFilePath" layoutX="339.0" layoutY="205.0" prefHeight="23.0" prefWidth="373.0" />
+                                <CheckBox fx:id="checkAsync" layoutX="1134.0" layoutY="7.0" mnemonicParsing="false" text="异步" />
+                                <Button layoutX="241.0" layoutY="240.0" mnemonicParsing="false" onAction="#checkDataFile" text="检查数据" />
+                                <TextField fx:id="checkResult" editable="false" layoutX="316.0" layoutY="242.0" prefHeight="23.0" prefWidth="352.0" />
+                                <Label fx:id="batchFileNameLabel" layoutX="1058.0" layoutY="27.0" prefHeight="19.0" prefWidth="99.0" text="批量模板文件名：" />
+                                <TextField fx:id="batchFileNameText" layoutX="1157.0" layoutY="25.0" prefHeight="0.0" prefWidth="134.0" />
+                                <Label fx:id="batchFileExtLabel" layoutX="1296.0" layoutY="27.0" prefHeight="19.0" prefWidth="99.0" text=".json" />
+                                <Label layoutX="913.0" layoutY="93.0" prefHeight="22.0" prefWidth="66.0" text="当前时间:" />
+                                <Label fx:id="nowTimeLabel" layoutX="971.0" layoutY="93.0" prefHeight="22.0" prefWidth="154.0" />
+                                <Button layoutX="1189.0" layoutY="93.0" mnemonicParsing="false" onAction="#openOutputFolder" text="打开输出目录" />
+                                <ImageView fx:id="reloadHttpTreeImg" fitHeight="20.0" fitWidth="22.0" layoutX="20.0" layoutY="5.0" onMouseClicked="#reloadHttpTree" pickOnBounds="true" preserveRatio="true" />
+                                <TextArea fx:id="httpNameText" layoutX="236.0" layoutY="-2.0" prefHeight="49.0" prefWidth="122.0" />
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+            </tabs>
+            <BorderPane.margin>
+                <Insets left="2.0" />
+            </BorderPane.margin>
+        </TabPane>
+    </center>
+
+</BorderPane>
