@@ -11,7 +11,7 @@ import javafx.stage.Stage
 class LerverHCApplication : Application() {
     override fun start(primaryStage: Stage) {
         //index
-        val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("httpTool.fxml"))
+        val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("index.fxml"))
         var scene = Scene(indexPane, 1500.0, 800.0)
         primaryStage.apply {
             title = "图形工具"

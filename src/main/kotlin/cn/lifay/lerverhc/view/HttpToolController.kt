@@ -15,6 +15,7 @@ import cn.lifay.lerverhc.AppStartup
 import cn.lifay.lerverhc.db.DbInfor
 import cn.lifay.lerverhc.hander.GlobeProps
 import cn.lifay.lerverhc.hander.HttpHander
+import cn.lifay.lerverhc.view.IndexController
 import javafx.application.Platform
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
@@ -53,15 +54,7 @@ import java.util.*
  **/
 class HttpToolController : BaseController(), Initializable {
 
-    @FXML
-    var rootPane = BorderPane()
-
-    @FXML
-    var httpTreeView = TreeView<HttpTool>()
-
-    @FXML
-    var reloadHttpTreeImg = ImageView()
-
+    var index : IndexController =
     @FXML
     var httpNameText = TextArea()
 
@@ -123,9 +116,6 @@ class HttpToolController : BaseController(), Initializable {
     var httpParentId: String = ""
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
-        //treeView初始化
-        reloadHttpTreeImg.image = Image(ResourceUtil.getStream("reload.png"))
-        initTreeView()
         //method
         selectMethod.items.addAll(Method.values().asList())
         selectMethod.value = Method.GET
@@ -161,105 +151,6 @@ class HttpToolController : BaseController(), Initializable {
     }
 
     /**
-     * 初始化树
-     */
-    private fun initTreeView() {
-        var rootTreeItem = TreeItem(HttpTool("0", "-1", "根节点", HttpType.NODE.name, "", ""))
-
-        //HttpTool("1","0","11111",HttpType.NODE.name,"","")
-        val httpTools = DbInfor.database.httpTools
-
-        for (httpTool in httpTools.filter { it.parentId eq "0" }) {
-            //child
-            addChild(rootTreeItem, httpTools, httpTool)
-
-        }
-
-
-        httpTreeView.apply {
-            root = rootTreeItem
-            isShowRoot = true
-            contextMenu = ContextMenu().apply {
-                //新增节点菜单
-                items.add(MenuItem("新增节点").apply {
-                    setOnAction {
-                        val item = httpTreeView.selectionModel?.selectedItem?.value
-                        //假如是NODE,判断是否有子节点
-                        if (HttpType.NODE.name != item?.type) {
-                            Alert(Alert.AlertType.ERROR, "非节点类型，无法添加").show()
-                            return@setOnAction
-                        }
-                        val textInputDialog = TextInputDialog().apply {
-                            title = "请输入节点名称"
-                        }
-                        val inputStr = textInputDialog.showAndWait().get()
-                        if (StrUtil.isNotBlank(inputStr)) {
-                            val count = DbInfor.database.httpTools.count {
-                                (it.parentId eq item.id) and (it.name eq inputStr)
-                            }
-                            if (count>0){
-                                Alert(Alert.AlertType.ERROR, "请勿重复添加同名词节点").show()
-                                return@setOnAction
-                            }
-                            DbInfor.database.insert(HttpTools){
-                                set(HttpTools.id,StrUtil.uuid())
-                                set(HttpTools.parentId,item.id)
-                                set(HttpTools.name,inputStr)
-                                set(HttpTools.type,HttpType.NODE.name)
-                            }
-                            reloadHttpTree(null)
-                        }
-                    }
-                }
-                )
-                //删除菜单
-                items.add(MenuItem("删除节点").apply {
-                    setOnAction {
-                        val item = httpTreeView.selectionModel?.selectedItem?.value
-                        //假如是NODE,判断是否有子节点
-                        val count = DbInfor.database.httpTools.count() {
-                            it.parentId eq item!!.id
-                        }
-                        if (count > 0) {
-                            val alert = Alert(Alert.AlertType.CONFIRMATION, "该节点下还有子节点,是否继续删除?")
-                            if (alert.showAndWait().get() == ButtonType.OK) {
-                                DbInfor.database.delete(HttpTools) { httpTool ->
-                                    httpTool.id eq item!!.id
-                                }
-                            }
-                        } else {
-                            //println(item!!.id)
-                            val alert = Alert(Alert.AlertType.CONFIRMATION, "是否删除?")
-                            if (alert.showAndWait().get() == ButtonType.OK) {
-                                DbInfor.database.delete(HttpTools) { httpTool ->
-                                    httpTool.id eq item!!.id
-                                }
-                            }
-                        }
-                    }
-                }
-                )
-            }
-            addEventHandler(MouseEvent.MOUSE_CLICKED) {
-                val item = this.selectionModel?.selectedItem?.value
-                if (it.clickCount == 2) {
-                    //双击
-                    if (HttpType.HTTP.name == item?.type) {
-                        loadHttpForm(item)
-                    }
-                } else if (it.clickCount == 1) {
-                    //单击
-                    if (HttpType.NODE.name == item?.type) {
-                        httpParentId = item.id
-                    }
-                }
-
-            }
-
-        }
-    }
-
-    /**
      * 加载http表单
      */
     private fun loadHttpForm(item: HttpTool?) {
@@ -284,38 +175,8 @@ class HttpToolController : BaseController(), Initializable {
         httpId = item.id
     }
 
-    private fun addChild(
-        rootTreeItem: TreeItem<HttpTool>,
-        httpTools: EntitySequence<HttpTool, HttpTools>,
-        httpTool: HttpTool
-    ) {
 
-        val treeItem = buildTreeItem(httpTool)
-        rootTreeItem.children.add(treeItem)
-        if (HttpType.NODE.name.equals(httpTool.type)) {
-            val childHttpTools = httpTools.filter { it.parentId eq httpTool.id!! }
-            for (childHttpTool in childHttpTools) {
-                addChild(treeItem, httpTools, childHttpTool)
-            }
-        }
 
-    }
-
-    private fun buildTreeItem(httpTool: HttpTool): TreeItem<HttpTool> {
-        val isHttp = httpTool.type.equals("HTTP")
-        var treeItem = TreeItem(
-            httpTool,
-            ImageView(Image(ResourceUtil.getStream(if (isHttp) "http.png" else "folder.png")))
-        )
-        return treeItem
-    }
-
-    /**
-     * 刷新http树
-     */
-    fun reloadHttpTree(mouseEvent: MouseEvent?) {
-        initTreeView()
-    }
 
     /**
      * 更新时间
@@ -510,5 +371,6 @@ class HttpToolController : BaseController(), Initializable {
         }
         propertiesManageStage.show()
     }
+
 
 }

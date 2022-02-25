@@ -22,8 +22,8 @@
             </menus>
         </MenuBar>
     </top>
-    <center>
-        <TabPane layoutX="29.0" layoutY="20.0" prefHeight="721.0" prefWidth="1392.0" tabClosingPolicy="UNAVAILABLE">
+        <center>
+        <TabPane fx:id="tabList" layoutX="29.0" layoutY="20.0" prefHeight="721.0" prefWidth="1392.0" tabClosingPolicy="ALL_TABS">
             <tabs>
                 <Tab text="Http工具">
                     <content>
@@ -36,6 +36,7 @@
                                     </font>
                                 </Label>
                                 <Button layoutX="1395.0" layoutY="4.0" mnemonicParsing="false" onAction="#saveHttp" prefHeight="23.0" prefWidth="52.0" style="-fx-background-color: #31ac5a;" text="保存" textFill="#f2eaea" />
+                                <Button layoutX="129.0" onAction="#addTab" layoutY="3.0" mnemonicParsing="false" text="tab" />
                                 <Button layoutX="149.0" layoutY="3.0" mnemonicParsing="false" text="另存为" />
                                 <ChoiceBox fx:id="selectMethod" layoutX="370.0" layoutY="3.0" prefHeight="45.0" prefWidth="55.0" />
                                 <TextArea fx:id="url" layoutX="425.0" layoutY="3.0" prefHeight="44.0" prefWidth="620.0" />

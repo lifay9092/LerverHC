@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<BorderPane fx:id="rootPane" xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            prefHeight="400.0" prefWidth="600.0"
+            fx:controller="cn.lifay.lerverhc.view.IndexController">
+
+    <top>
+        <MenuBar>
+            <menus>
+                <Menu text="管理项">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="属性管理"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+    <left>
+        <VBox alignment="CENTER">
+            <padding>
+                <Insets left="8.0" right="2.0" bottom="10.0"/>
+            </padding>
+            <HBox alignment="CENTER">
+                <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="15.0" prefWidth="83.0" text="Http树"
+                       textFill="#400404">
+                    <font>
+                        <Font size="14.0"/>
+                    </font>
+                </Label>
+                <ImageView fx:id="reloadHttpTreeImg" fitHeight="20.0" fitWidth="22.0" layoutX="20.0" layoutY="5.0"
+                           pickOnBounds="true" preserveRatio="true"/>
+            </HBox>
+
+            <TreeView VBox.vgrow="ALWAYS" fx:id="httpTreeView" prefHeight="634.0" prefWidth="305.0"/>
+        </VBox>
+    </left>
+    <center>
+        <TabPane fx:id="tabList" tabClosingPolicy="ALL_TABS">
+
+        </TabPane>
+    </center>
+</BorderPane>
