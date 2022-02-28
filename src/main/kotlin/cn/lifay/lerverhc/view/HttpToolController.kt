@@ -2,7 +2,6 @@ package view
 
 import cn.hutool.core.date.DateUtil
 import cn.hutool.core.io.FileUtil
-import cn.hutool.core.io.resource.ResourceUtil
 import cn.hutool.core.lang.UUID
 import cn.hutool.core.util.StrUtil
 import cn.hutool.http.ContentType
@@ -23,24 +22,16 @@ import javafx.fxml.FXMLLoader
 import javafx.fxml.Initializable
 import javafx.scene.Scene
 import javafx.scene.control.*
-import javafx.scene.image.Image
-import javafx.scene.image.ImageView
-import javafx.scene.input.MouseEvent
-import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Pane
 import javafx.stage.FileChooser
 import javafx.stage.Stage
 import model.HttpTool
 import model.HttpTools
-import model.HttpTools.httpTools
 import model.enum.HttpType
-import org.ktorm.dsl.*
-import org.ktorm.entity.EntitySequence
-import org.ktorm.entity.count
-import org.ktorm.entity.filter
+import org.ktorm.dsl.eq
+import org.ktorm.dsl.update
 import java.awt.Desktop
 import java.io.File
-import java.io.FileInputStream
 import java.net.URL
 import java.nio.charset.Charset
 import java.util.*
@@ -53,8 +44,12 @@ import java.util.*
  *@Date 2022/1/4 20:09
  **/
 class HttpToolController : BaseController(), Initializable {
+    //首页controller
+    private lateinit var index: IndexController
 
-    var index : IndexController =
+    /*http对象*/
+    private var httpTool: HttpTool? = null
+
     @FXML
     var httpNameText = TextArea()
 
@@ -111,9 +106,6 @@ class HttpToolController : BaseController(), Initializable {
     @FXML
     var checkResult = TextField()
 
-    /*临时http对象*/
-    var httpId: String = ""
-    var httpParentId: String = ""
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         //method
@@ -150,6 +142,13 @@ class HttpToolController : BaseController(), Initializable {
 
     }
 
+    fun initForm(indexController: IndexController, httpTool: HttpTool) {
+        this.index = indexController
+        this.httpTool = httpTool
+        loadHttpForm(httpTool)
+    }
+
+
     /**
      * 加载http表单
      */
@@ -168,15 +167,10 @@ class HttpToolController : BaseController(), Initializable {
         batchFileNameText.text = dataObj["batchFileName"] as String?
         batchDataFilePath.text = dataObj["batchDataFilePath"] as String?
 
-        httpParentId = item.parentId
         httpNameText.text = item.name
         bodyStr.text = item.body
 
-        httpId = item.id
     }
-
-
-
 
     /**
      * 更新时间
@@ -188,14 +182,15 @@ class HttpToolController : BaseController(), Initializable {
     /**
      * 定义基础请求类
      */
-    fun buildHttpRequest() : HttpRequest{
+    fun buildHttpRequest(): HttpRequest {
         var httpRequest = HttpUtil.createRequest(selectMethod.value, url.text)
         httpRequest.contentType(selectContentType.value.value)
         if (authorization.text.isNotEmpty()) {
-            httpRequest.header("authorization",authorization.text)
+            httpRequest.header("authorization", authorization.text)
         }
         return httpRequest
     }
+
     /**
      * 发送
      */
@@ -264,7 +259,8 @@ class HttpToolController : BaseController(), Initializable {
             initialDirectory = File(System.getProperty("user.dir"))
             extensionFilters.add(FileChooser.ExtensionFilter("JSON", "*.json"))
         }
-        val file = fileChooser.showOpenDialog(rootPane.scene.window)
+
+        val file = fileChooser.showOpenDialog(index.rootPane.scene.window)
         batchDataFilePath.text = file.absolutePath
     }
 
@@ -290,10 +286,7 @@ class HttpToolController : BaseController(), Initializable {
             Alert(Alert.AlertType.ERROR, "http名称不能为空", ButtonType.CLOSE).show()
             return
         }
-        if (StrUtil.isBlank(httpParentId)) {
-            Alert(Alert.AlertType.ERROR, "请选择http目录", ButtonType.CLOSE).show()
-            return
-        }
+
         var dataObj = JSONObject()
         dataObj["method"] = selectMethod.value.name
         dataObj["url"] = url.text
@@ -312,37 +305,26 @@ class HttpToolController : BaseController(), Initializable {
 //            body = bodyStr.text,
 //            datas = dataObj.toString(),
 //        )
-        if (StrUtil.isBlank(httpId)) {
-            val uuid = StrUtil.uuid()
-            DbInfor.database.insert(HttpTools) {
-                set(it.id, uuid)
-                set(it.name, httpNameText.text)
-                set(it.parentId, httpParentId)
-                set(it.type, HttpType.HTTP.name)
-                set(it.body, bodyStr.text)
-                set(it.datas, dataObj.toString())
+
+        DbInfor.database.update(HttpTools) {
+            set(it.name, httpNameText.text)
+            //set(it.parentId,httpParentId)
+            set(it.type, HttpType.HTTP.name)
+            set(it.body, bodyStr.text)
+            set(it.datas, dataObj.toString())
+            where {
+                it.id eq httpTool!!.id
             }
-            httpId = uuid
-            reloadHttpTree(null)
-        } else {
-            DbInfor.database.update(HttpTools) {
-                set(it.name, httpNameText.text)
-                //set(it.parentId,httpParentId)
-                set(it.type, HttpType.HTTP.name)
-                set(it.body, bodyStr.text)
-                set(it.datas, dataObj.toString())
-                where {
-                    it.id eq httpId
-                }
-            }
-            httpTreeView.selectionModel?.selectedItem?.value = HttpTool(
-                id = httpId,
-                name = httpNameText.text,
-                parentId = httpParentId,
-                type = HttpType.HTTP.name,
-                body = bodyStr.text,
-                datas = dataObj.toString(),
-            )
+
+            //TODO
+//            httpTreeView.selectionModel?.selectedItem?.value = HttpTool(
+//                id = httpId,
+//                name = httpNameText.text,
+//                parentId = httpParentId,
+//                type = HttpType.HTTP.name,
+//                body = bodyStr.text,
+//                datas = dataObj.toString(),
+//            )
         }
         //显示
 
@@ -353,7 +335,6 @@ class HttpToolController : BaseController(), Initializable {
      */
     fun openOutputFolder(actionEvent: ActionEvent) {
         Desktop.getDesktop().open(File(GlobeProps.getOutputFolderValue()));
-
     }
 
     /**

@@ -7,6 +7,7 @@ import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.fxml.Initializable
 import javafx.fxml.JavaFXBuilderFactory
+import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
@@ -26,6 +27,7 @@ import org.ktorm.entity.EntitySequence
 import org.ktorm.entity.count
 import org.ktorm.entity.filter
 import view.BaseController
+import view.HttpToolController
 import java.net.URL
 import java.util.*
 
@@ -75,44 +77,50 @@ class IndexController : BaseController(), Initializable {
             addChild(rootTreeItem, httpTools, httpTool)
 
         }
-
-
         httpTreeView.apply {
             root = rootTreeItem
             isShowRoot = true
             contextMenu = ContextMenu().apply {
-                //新增节点菜单
-                items.add(MenuItem("新增节点").apply {
-                    setOnAction {
-                        val item = httpTreeView.selectionModel?.selectedItem?.value
-                        //假如是NODE,判断是否有子节点
-                        if (HttpType.NODE.name != item?.type) {
-                            Alert(Alert.AlertType.ERROR, "非节点类型，无法添加").show()
-                            return@setOnAction
-                        }
-                        val textInputDialog = TextInputDialog().apply {
-                            title = "请输入节点名称"
-                        }
-                        val inputStr = textInputDialog.showAndWait().get()
-                        if (StrUtil.isNotBlank(inputStr)) {
-                            val count = DbInfor.database.httpTools.count {
-                                (it.parentId eq item.id) and (it.name eq inputStr)
-                            }
-                            if (count>0){
-                                Alert(Alert.AlertType.ERROR, "请勿重复添加同名词节点").show()
+                val item = httpTreeView.selectionModel?.selectedItem?.value
+                if (HttpType.HTTP.name != item?.type){
+                    //新增节点菜单
+                    items.add(MenuItem("新增节点").apply {
+                        setOnAction {
+                            //假如是NODE,判断是否有子节点
+                            if (HttpType.NODE.name != item?.type) {
+                                Alert(Alert.AlertType.ERROR, "非节点类型，无法添加").show()
                                 return@setOnAction
                             }
-                            DbInfor.database.insert(HttpTools){
-                                set(HttpTools.id, StrUtil.uuid())
-                                set(HttpTools.parentId,item.id)
-                                set(HttpTools.name,inputStr)
-                                set(HttpTools.type, HttpType.NODE.name)
+                            val textInputDialog = TextInputDialog().apply {
+                                title = "请输入节点名称"
                             }
-                            reloadHttpTree(null)
+                            textInputDialog.showAndWait().let {
+                                if (it.isPresent) {
+                                    val inputStr = it.get()
+                                    if (StrUtil.isNotBlank(inputStr)) {
+                                        val count = DbInfor.database.httpTools.count {
+                                            (it.parentId eq item.id) and (it.name eq inputStr)
+                                        }
+                                        if (count>0){
+                                            Alert(Alert.AlertType.ERROR, "请勿重复添加同名词节点").show()
+                                            return@setOnAction
+                                        }
+                                        DbInfor.database.insert(HttpTools){
+                                            set(HttpTools.id, StrUtil.uuid())
+                                            set(HttpTools.parentId,item.id)
+                                            set(HttpTools.name,inputStr)
+                                            set(HttpTools.type, HttpType.NODE.name)
+                                        }
+                                        reloadHttpTree(null)
+                                    }
+                                }
+                            }
+
                         }
                     }
+                    )
                 }
-                )
+
                 //删除菜单
                 items.add(MenuItem("删除节点").apply {
                     setOnAction {
@@ -146,7 +154,7 @@ class IndexController : BaseController(), Initializable {
                 if (it.clickCount == 2) {
                     //双击
                     if (HttpType.HTTP.name == item?.type) {
-                        loadHttpForm(item)
+                        addTabHttpForm(item)
                     }
                 } else if (it.clickCount == 1) {
                     //单击
@@ -161,12 +169,28 @@ class IndexController : BaseController(), Initializable {
     }
 
     /**
-     * 加载http表单界面
+     * 新增tab并加载http表单界面
      */
-    private fun loadHttpForm(httpTool: HttpTool,callback: Callback<IndexController,HttpTool>) {
-        tabList.tabs.add(Tab((httpTool.name)).apply {
-            content = FXMLLoader.load(ResourceUtil.getResource("tab.fxml"),null, JavaFXBuilderFactory()) { it.name }
-        })
+    private fun addTabHttpForm(httpTool: HttpTool) {
+        //判断是否已经打开，已打开则选择
+        for (t in tabList.tabs) {
+            if (t.id == httpTool.id) {
+                tabList.selectionModel.select(t)
+                return
+            }
+        }
+        //添加并打开新的
+        val fxmlLoader = FXMLLoader(ResourceUtil.getResource("httpTool.fxml"))
+        val load = fxmlLoader.load<Any>()
+        val httpToolController = fxmlLoader.getController<HttpToolController>()
+        httpToolController.initForm(this,httpTool)
+        val tab = Tab((httpTool.name)).apply {
+            id = httpTool.id
+            content = load as Node?
+        }
+        tabList.tabs.add(tab)
+        tabList.selectionModel.select(tab)
+
     }
 
 
