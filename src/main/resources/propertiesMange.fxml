@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<BorderPane fx:id="propertiesRootPane" fx:controller="cn.lifay.lerverhc.view.PropertiesController" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="468.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <left>
+      <AnchorPane prefHeight="468.0" prefWidth="558.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label layoutX="26.0" layoutY="14.0" text="输出目录：" />
+            <TextField fx:id="outputFolderText" layoutX="86.0" layoutY="10.0" prefHeight="23.0" prefWidth="326.0" />
+            <Button fx:id="selectOutputFolderBtn" onAction="#selectOutputFolder" layoutX="421.0" layoutY="10.0" mnemonicParsing="false" text="选择输出目录" />
+         </children>
+      </AnchorPane>
+   </left>
+</BorderPane>

@@ -6,25 +6,15 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane fx:id="rootPane" prefHeight="744.0" prefWidth="1170.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.HttpToolController">
-    <top>
-        <MenuBar>
-            <menus>
-                <Menu text="管理项">
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#propertiesManage" text="属性管理" />
-                    </items>
-                </Menu>
-            </menus>
-        </MenuBar>
-    </top>
+<BorderPane fx:id="rootPane" prefHeight="744.0" prefWidth="1170.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cn.lifay.lerverhc.view.HttpToolController">
     <center>
 
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="731.0" prefWidth="1249.0">
             <children>
                 <Button layoutX="1039.0" layoutY="63.0" mnemonicParsing="false" onAction="#saveHttp" prefHeight="28.0" prefWidth="52.0" style="-fx-background-color: #31ac5a;" text="保存" textFill="#f2eaea" />
-                <ChoiceBox fx:id="selectMethod" layoutX="148.0" layoutY="7.0" prefHeight="45.0" prefWidth="55.0" />
-                <TextArea fx:id="url" layoutX="203.0" layoutY="7.0" prefHeight="44.0" prefWidth="620.0" />
+                <ChoiceBox fx:id="selectAddr" layoutX="124.0" layoutY="3.0" prefHeight="23.0" prefWidth="100.0" />
+                <ChoiceBox fx:id="selectMethod" layoutX="231.0" layoutY="7.0" prefHeight="43.0" prefWidth="42.0" />
+                <TextArea fx:id="url" layoutX="272.0" layoutY="7.0" prefHeight="44.0" prefWidth="551.0" />
                 <Button alignment="CENTER" contentDisplay="CENTER" graphicTextGap="5.0" layoutX="842.0" layoutY="63.0" lineSpacing="11.0" mnemonicParsing="false" onAction="#sendHttp" prefHeight="28.0" prefWidth="66.0" style="-fx-background-color: #5151e5" text="发送" textFill="#fcf9f9" />
                 <ChoiceBox fx:id="selectContentType" layoutX="98.0" layoutY="62.0" prefHeight="23.0" prefWidth="139.0" />
                 <Label layoutX="14.0" layoutY="59.0" prefHeight="27.0" prefWidth="84.0" text="Content-Type:" />
@@ -48,7 +38,8 @@
                 <Label layoutX="680.0" layoutY="159.0" prefHeight="22.0" prefWidth="66.0" text="当前时间:" />
                 <Label fx:id="nowTimeLabel" layoutX="738.0" layoutY="159.0" prefHeight="22.0" prefWidth="154.0" />
                 <Button layoutX="956.0" layoutY="159.0" mnemonicParsing="false" onAction="#openOutputFolder" text="打开输出目录" />
-                <TextArea fx:id="httpNameText" layoutX="14.0" layoutY="2.0" prefHeight="49.0" prefWidth="122.0" />
+                <TextArea fx:id="httpNameText" layoutX="5.0" layoutY="2.0" prefHeight="49.0" prefWidth="117.0" />
+            <Label fx:id="addrValue" layoutX="124.0" layoutY="30.0" prefHeight="22.0" prefWidth="101.0" />
             </children>
         </AnchorPane>
 

@@ -6,6 +6,7 @@ import cn.hutool.http.Method
 data class HttpItemDTO(
     var id : String,
     var parentId : String,
+    var addrId : String,
     var name : String,
     var type : String,
     var body : String,

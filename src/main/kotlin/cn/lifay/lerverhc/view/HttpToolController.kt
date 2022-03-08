@@ -1,4 +1,4 @@
-package view
+package cn.lifay.lerverhc.view
 
 import cn.hutool.core.date.DateUtil
 import cn.hutool.core.io.FileUtil
@@ -10,26 +10,27 @@ import cn.hutool.http.HttpUtil
 import cn.hutool.http.Method
 import cn.hutool.json.JSONObject
 import cn.hutool.json.JSONUtil
-import cn.lifay.lerverhc.AppStartup
 import cn.lifay.lerverhc.db.DbInfor
+import cn.lifay.lerverhc.hander.ConfigUtil
 import cn.lifay.lerverhc.hander.GlobeProps
 import cn.lifay.lerverhc.hander.HttpHander
-import cn.lifay.lerverhc.view.IndexController
 import javafx.application.Platform
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
-import javafx.fxml.FXMLLoader
 import javafx.fxml.Initializable
-import javafx.scene.Scene
 import javafx.scene.control.*
-import javafx.scene.layout.Pane
 import javafx.stage.FileChooser
-import javafx.stage.Stage
+import model.HttpAddr
+import model.HttpAddrs
+import model.HttpAddrs.httpAddrs
 import model.HttpTool
 import model.HttpTools
 import model.enum.HttpType
 import org.ktorm.dsl.eq
+import org.ktorm.dsl.from
 import org.ktorm.dsl.update
+import org.ktorm.entity.find
+import org.ktorm.entity.toList
 import java.awt.Desktop
 import java.io.File
 import java.net.URL
@@ -53,6 +54,10 @@ class HttpToolController : BaseController(), Initializable {
     @FXML
     var httpNameText = TextArea()
 
+    @FXML
+    var selectAddr: ChoiceBox<HttpAddr> = ChoiceBox()
+    @FXML
+    var addrValue = Label()
     @FXML
     var selectMethod: ChoiceBox<Method> = ChoiceBox()
 
@@ -108,9 +113,12 @@ class HttpToolController : BaseController(), Initializable {
 
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
+
         //method
         selectMethod.items.addAll(Method.values().asList())
         selectMethod.value = Method.GET
+         //addr
+        selectAddr.items.addAll(DbInfor.database.httpAddrs.toList())
         //contentType
         selectContentType.items.addAll(ContentType.values().asList())
         selectContentType.value = ContentType.JSON
@@ -146,6 +154,7 @@ class HttpToolController : BaseController(), Initializable {
         this.index = indexController
         this.httpTool = httpTool
         loadHttpForm(httpTool)
+
     }
 
 
@@ -158,6 +167,8 @@ class HttpToolController : BaseController(), Initializable {
             return
         }
         val dataObj = JSONUtil.parseObj(item.datas)
+        selectAddr.value = DbInfor.database.httpAddrs.find { it.id eq  item.addrId }
+        addrValue.text = selectAddr.value.addr
         selectMethod.value = Method.valueOf(dataObj["method"] as String)
         url.text = dataObj["url"] as String
         checkBatch.isSelected = dataObj["isBatch"] as Boolean
@@ -309,6 +320,7 @@ class HttpToolController : BaseController(), Initializable {
         DbInfor.database.update(HttpTools) {
             set(it.name, httpNameText.text)
             //set(it.parentId,httpParentId)
+            set(it.addrId,selectAddr.value.id)
             set(it.type, HttpType.HTTP.name)
             set(it.body, bodyStr.text)
             set(it.datas, dataObj.toString())
@@ -334,23 +346,7 @@ class HttpToolController : BaseController(), Initializable {
      * 打开输出目录
      */
     fun openOutputFolder(actionEvent: ActionEvent) {
-        Desktop.getDesktop().open(File(GlobeProps.getOutputFolderValue()));
-    }
-
-    /**
-     * 属性管理菜单
-     */
-    fun propertiesManage(actionEvent: ActionEvent) {
-        //propertiesManage
-        var propertiesManageStage = Stage()
-        val indexPane = FXMLLoader.load<Pane>(AppStartup::class.java.getResource("propertiesMange.fxml"))
-        var scene = Scene(indexPane, 700.0, 500.0)
-        propertiesManageStage.apply {
-            title = "属性管理"
-            isResizable = false
-            setScene(scene)
-        }
-        propertiesManageStage.show()
+        Desktop.getDesktop().open(File(ConfigUtil.getOutputFolderValue()));
     }
 
 

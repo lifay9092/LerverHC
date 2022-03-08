@@ -11,6 +11,7 @@ import org.ktorm.schema.varchar
 data class HttpTool(
     var id: String,
     var parentId: String,
+    var addrId: String,
     var name: String,
     var type: String,
     var body: String,
@@ -24,6 +25,7 @@ data class HttpTool(
 object HttpTools : BaseTable<HttpTool>("HTTP_TOOL") {
     val id = varchar("id").primaryKey()
     var parentId = varchar("parent_id")
+    var addrId = varchar("addr_id")
     val name = varchar("name")
     val type = varchar("type")
     val body = varchar("body")
@@ -32,6 +34,7 @@ object HttpTools : BaseTable<HttpTool>("HTTP_TOOL") {
     override fun doCreateEntity(row: QueryRowSet, withReferences: Boolean) = HttpTool(
         id = row[id] ?: StrUtil.uuid(),
         parentId = row[parentId] ?: "-1",
+        addrId = row[addrId] ?: "",
         name = row[name]!!,
         type = row[type] ?: HttpType.NODE.name,
         body = row[body] ?: "",

@@ -1,4 +1,4 @@
-package view
+package cn.lifay.lerverhc.view
 
 import cn.hutool.core.util.ObjectUtil
 import javafx.scene.control.Alert
@@ -12,13 +12,14 @@ import javafx.scene.control.ButtonType
  **/
 open class BaseController {
 
-    fun errorAlert(msg : String){
-        Alert(Alert.AlertType.ERROR,msg, ButtonType.CLOSE).show()
+    fun errorAlert(msg: String) {
+        Alert(Alert.AlertType.ERROR, msg, ButtonType.CLOSE).show()
         error(msg)
     }
-    fun checkParam(value: Any,name: String?): Unit {
+
+    fun checkParam(value: Any, name: String?): Unit {
         if (ObjectUtil.isEmpty(value)) {
-            Alert(Alert.AlertType.ERROR,"${name}不能为空", ButtonType.CLOSE).show()
+            Alert(Alert.AlertType.ERROR, "${name}不能为空", ButtonType.CLOSE).show()
             error("${name}不能为空")
         }
     }
