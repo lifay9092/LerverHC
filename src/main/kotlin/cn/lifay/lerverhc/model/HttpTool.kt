@@ -17,6 +17,12 @@ data class HttpTool(
     var body: String,
     var datas: String,
 ){
+    fun isNode():Boolean{
+        return HttpType.NODE.name == type
+    }
+    fun isHttp():Boolean{
+        return HttpType.HTTP.name == type
+    }
     override fun toString(): String {
         return this.name
     }

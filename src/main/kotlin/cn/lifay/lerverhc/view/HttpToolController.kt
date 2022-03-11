@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.lang.UUID
 import cn.hutool.core.util.StrUtil
+import cn.hutool.core.util.URLUtil
 import cn.hutool.http.ContentType
 import cn.hutool.http.HttpRequest
 import cn.hutool.http.HttpUtil
@@ -21,17 +22,17 @@ import javafx.fxml.Initializable
 import javafx.scene.control.*
 import javafx.stage.FileChooser
 import model.HttpAddr
-import model.HttpAddrs
 import model.HttpAddrs.httpAddrs
 import model.HttpTool
 import model.HttpTools
 import model.enum.HttpType
 import org.ktorm.dsl.eq
-import org.ktorm.dsl.from
 import org.ktorm.dsl.update
 import org.ktorm.entity.find
 import org.ktorm.entity.toList
 import java.awt.Desktop
+import java.awt.Toolkit
+import java.awt.datatransfer.StringSelection
 import java.io.File
 import java.net.URL
 import java.nio.charset.Charset
@@ -45,6 +46,7 @@ import java.util.*
  *@Date 2022/1/4 20:09
  **/
 class HttpToolController : BaseController(), Initializable {
+
     //首页controller
     private lateinit var index: IndexController
 
@@ -56,8 +58,10 @@ class HttpToolController : BaseController(), Initializable {
 
     @FXML
     var selectAddr: ChoiceBox<HttpAddr> = ChoiceBox()
+
     @FXML
     var addrValue = Label()
+
     @FXML
     var selectMethod: ChoiceBox<Method> = ChoiceBox()
 
@@ -117,8 +121,13 @@ class HttpToolController : BaseController(), Initializable {
         //method
         selectMethod.items.addAll(Method.values().asList())
         selectMethod.value = Method.GET
-         //addr
-        selectAddr.items.addAll(DbInfor.database.httpAddrs.toList())
+        //addr
+        selectAddr.apply {
+            items.addAll(DbInfor.database.httpAddrs.toList())
+            this.valueProperty().addListener { observable, oldValue, newValue ->
+                addrValue.text = newValue.addr
+            }
+        }
         //contentType
         selectContentType.items.addAll(ContentType.values().asList())
         selectContentType.value = ContentType.JSON
@@ -167,7 +176,7 @@ class HttpToolController : BaseController(), Initializable {
             return
         }
         val dataObj = JSONUtil.parseObj(item.datas)
-        selectAddr.value = DbInfor.database.httpAddrs.find { it.id eq  item.addrId }
+        selectAddr.value = DbInfor.database.httpAddrs.find { it.id eq item.addrId }
         addrValue.text = selectAddr.value.addr
         selectMethod.value = Method.valueOf(dataObj["method"] as String)
         url.text = dataObj["url"] as String
@@ -320,7 +329,7 @@ class HttpToolController : BaseController(), Initializable {
         DbInfor.database.update(HttpTools) {
             set(it.name, httpNameText.text)
             //set(it.parentId,httpParentId)
-            set(it.addrId,selectAddr.value.id)
+            set(it.addrId, selectAddr.value.id)
             set(it.type, HttpType.HTTP.name)
             set(it.body, bodyStr.text)
             set(it.datas, dataObj.toString())
@@ -349,5 +358,30 @@ class HttpToolController : BaseController(), Initializable {
         Desktop.getDesktop().open(File(ConfigUtil.getOutputFolderValue()));
     }
 
+    fun viewUrl(actionEvent: ActionEvent) {
+        val fullUrl = getFullUrl()
+        val alert = Alert(
+            Alert.AlertType.INFORMATION,
+            fullUrl,
+            ButtonType("复制", ButtonBar.ButtonData.OK_DONE),
+            ButtonType.CLOSE
+        )
+        alert.showAndWait().apply {
+            if (this.get().text == "复制") {
+                // 获取系统剪贴板
+                var clipboard = Toolkit.getDefaultToolkit().systemClipboard
+                // 封装文本内容
+                var trans = StringSelection(fullUrl)
+                // 把文本内容设置到系统剪贴板
+                clipboard.setContents(trans, null)
+            }
+        }
+    }
+
+    fun getFullUrl(): String {
+        var host = URLUtil.normalize(selectAddr.value.addr)
+        var uri = if (url.text.startsWith("/")) url.text else "/${url.text}"
+        return host + uri
+    }
 
 }
