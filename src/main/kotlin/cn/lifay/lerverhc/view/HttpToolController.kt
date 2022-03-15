@@ -25,6 +25,7 @@ import model.HttpAddr
 import model.HttpAddrs.httpAddrs
 import model.HttpTool
 import model.HttpTools
+import model.HttpTools.httpTools
 import model.enum.HttpType
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.update
@@ -115,7 +116,6 @@ class HttpToolController : BaseController(), Initializable {
     @FXML
     var checkResult = TextField()
 
-
     override fun initialize(location: URL?, resources: ResourceBundle?) {
 
         //method
@@ -159,9 +159,9 @@ class HttpToolController : BaseController(), Initializable {
 
     }
 
-    fun initForm(indexController: IndexController, httpTool: HttpTool) {
+    fun initForm(indexController: IndexController, id: String) {
         this.index = indexController
-        this.httpTool = httpTool
+        this.httpTool = DbInfor.database.httpTools.find { it.id eq id }
         loadHttpForm(httpTool)
 
     }
@@ -203,7 +203,7 @@ class HttpToolController : BaseController(), Initializable {
      * 定义基础请求类
      */
     fun buildHttpRequest(): HttpRequest {
-        var httpRequest = HttpUtil.createRequest(selectMethod.value, url.text)
+        var httpRequest = HttpUtil.createRequest(selectMethod.value, getFullUrl())
         httpRequest.contentType(selectContentType.value.value)
         if (authorization.text.isNotEmpty()) {
             httpRequest.header("authorization", authorization.text)
@@ -215,6 +215,7 @@ class HttpToolController : BaseController(), Initializable {
      * 发送
      */
     fun sendHttp(actionEvent: ActionEvent) {
+        checkParam(selectAddr.value,"select服务地址")
         checkParam(url.text, "url")
         //定义基础请求类
         var httpRequest = buildHttpRequest()
@@ -226,19 +227,29 @@ class HttpToolController : BaseController(), Initializable {
                 Alert(Alert.AlertType.ERROR, "【批量模板文件名】不能为空", ButtonType.CLOSE).show()
                 return
             }
-            responseStr.text = HttpHander.batchSendHttp(
+            responseStr.text = parseJsonFmtStr(HttpHander.batchSendHttp(
                 httpRequest,
                 bodyStr.text,
                 batchDataFilePath.text,
                 batchFileNameText.text
-            )
+            ))
         } else {
             //单个
-            val httpResponse = HttpHander.singleSendHttp(httpRequest, bodyStr.text)
-            httpStatus.text = httpResponse!!.status.toString()
-            responseStr.text = httpResponse.body()
+            val httpResponse = HttpHander.singleSendHttp(getFullUrl(),selectMethod.value,selectContentType.value, bodyStr.text)
+            httpStatus.text = "200"
+            responseStr.text = parseJsonFmtStr(httpResponse)
         }
         uptNowTime()
+    }
+
+    /**
+     * 转换成json预览格式
+     */
+    private fun parseJsonFmtStr(jsonStr: String?): String? {
+        if (JSONUtil.isJson(jsonStr)) {
+            return JSONUtil.formatJsonStr(jsonStr)
+        }
+        return jsonStr
     }
 
     /**
@@ -261,11 +272,11 @@ class HttpToolController : BaseController(), Initializable {
                     HttpHander.batchSendHttp(httpRequest, bodyStr.text, batchDataFilePath.text, batchFileNameText.text)
             }
         } else {
-            val httpResponse = HttpHander.singleSendHttp(httpRequest, bodyStr.text)
-            httpStatus.text = httpResponse!!.status.toString()
-            responseStr.text = httpResponse.body()
+            val httpResponse = HttpHander.singleSendHttp(getFullUrl(),selectMethod.value,selectContentType.value, bodyStr.text)
+            httpStatus.text = "200"
+            responseStr.text = httpResponse
             val newFilePath = GlobeProps.getOutputFolderValue() + File.separator + UUID.fastUUID().toString() + ".json"
-            FileUtil.writeString(httpResponse.body(), newFilePath, Charset.forName("utf-8"))
+            FileUtil.writeString(httpResponse, newFilePath, Charset.forName("utf-8"))
         }
         uptNowTime()
     }
@@ -281,7 +292,7 @@ class HttpToolController : BaseController(), Initializable {
         }
 
         val file = fileChooser.showOpenDialog(index.rootPane.scene.window)
-        batchDataFilePath.text = file.absolutePath
+        batchDataFilePath.text = file?.absolutePath
     }
 
     fun checkId(actionEvent: ActionEvent) {

@@ -15,7 +15,7 @@
                 <ChoiceBox fx:id="selectAddr" layoutX="124.0" layoutY="3.0" prefHeight="23.0" prefWidth="172.0" />
                 <ChoiceBox fx:id="selectMethod" layoutX="305.0" layoutY="5.0" prefHeight="43.0" prefWidth="71.0" />
                 <TextArea fx:id="url" layoutX="378.0" layoutY="7.0" prefHeight="44.0" prefWidth="445.0" />
-                <Button alignment="CENTER" contentDisplay="CENTER" graphicTextGap="5.0" layoutX="842.0" layoutY="63.0" lineSpacing="11.0" mnemonicParsing="false" onAction="#sendHttp" prefHeight="20.0" prefWidth="66.0" style="-fx-background-color: #5151e5" text="发送" textFill="#fcf9f9" />
+                <Button alignment="CENTER" contentDisplay="CENTER" graphicTextGap="5.0" layoutX="832.0" layoutY="63.0" lineSpacing="11.0" mnemonicParsing="false" onAction="#sendHttp" prefHeight="23.0" prefWidth="65.0" style="-fx-background-color: #5151e5" text="发送" textFill="#fcf9f9" />
                 <ChoiceBox fx:id="selectContentType" layoutX="98.0" layoutY="62.0" prefHeight="23.0" prefWidth="139.0" />
                 <Label layoutX="14.0" layoutY="59.0" prefHeight="27.0" prefWidth="84.0" text="Content-Type:" />
                 <Label layoutX="243.0" layoutY="63.0" prefHeight="22.0" prefWidth="97.0" text="Authorization:" />
@@ -30,17 +30,17 @@
                 <Button fx:id="btnDataFile" layoutX="14.0" layoutY="210.0" mnemonicParsing="false" onAction="#selectDataFile" text="选择数据文件" />
                 <TextArea fx:id="batchDataFilePath" layoutX="112.0" layoutY="210.0" prefHeight="23.0" prefWidth="373.0" />
                 <CheckBox fx:id="checkAsync" layoutX="1043.0" layoutY="7.0" mnemonicParsing="false" text="异步" />
-                <Button  layoutX="14.0" layoutY="245.0" mnemonicParsing="false" onAction="#checkDataFile" text="检查数据" />
+                <Button layoutX="14.0" layoutY="245.0" mnemonicParsing="false" onAction="#checkDataFile" text="检查数据" />
                 <TextField fx:id="checkResult" editable="false" layoutX="89.0" layoutY="247.0" prefHeight="23.0" prefWidth="352.0" />
                 <Label fx:id="batchFileNameLabel" layoutX="832.0" layoutY="31.0" prefHeight="19.0" prefWidth="99.0" text="批量模板文件名：" />
                 <TextField fx:id="batchFileNameText" layoutX="956.0" layoutY="29.0" prefHeight="0.0" prefWidth="134.0" />
                 <Label fx:id="batchFileExtLabel" layoutX="1091.0" layoutY="31.0" prefHeight="19.0" prefWidth="68.0" text=".json" />
                 <Label layoutX="680.0" layoutY="159.0" prefHeight="22.0" prefWidth="66.0" text="当前时间:" />
                 <Label fx:id="nowTimeLabel" layoutX="738.0" layoutY="159.0" prefHeight="22.0" prefWidth="154.0" />
-                <Button  layoutX="956.0" layoutY="159.0" mnemonicParsing="false" onAction="#openOutputFolder" text="打开输出目录" />
+                <Button layoutX="956.0" layoutY="159.0" mnemonicParsing="false" onAction="#openOutputFolder" text="打开输出目录" />
                 <TextArea fx:id="httpNameText" layoutX="5.0" layoutY="2.0" prefHeight="49.0" prefWidth="117.0" />
-            <Label fx:id="addrValue" layoutX="124.0" layoutY="30.0" prefHeight="22.0" prefWidth="101.0" />
-            <Button layoutX="832.0" layoutY="4.0" mnemonicParsing="false" onAction="#viewUrl" text="查看URL" />
+            <Label fx:id="addrValue" layoutX="124.0" layoutY="30.0" prefHeight="22.0" prefWidth="178.0" />
+            <Button layoutX="832.0" layoutY="7.0" mnemonicParsing="false" onAction="#viewUrl" prefHeight="20.0" prefWidth="63.0" text="查看URL" />
             </children>
         </AnchorPane>
 

@@ -3,31 +3,22 @@ package cn.lifay.lerverhc.view
 import cn.hutool.core.io.resource.ResourceUtil
 import cn.hutool.core.util.StrUtil
 import cn.lifay.lerverhc.db.DbInfor
-import cn.lifay.lerverhc.hander.primary
-import com.dlsc.formsfx.model.structure.Field
-import com.dlsc.formsfx.model.structure.Form
-import com.dlsc.formsfx.model.structure.Group
-import com.dlsc.formsfx.view.renderer.FormRenderer
-import javafx.beans.property.SimpleStringProperty
-import javafx.beans.property.StringProperty
 import javafx.event.ActionEvent
+import javafx.event.EventType
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.fxml.Initializable
-import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
+import javafx.scene.input.DragEvent
 import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Pane
-import javafx.scene.layout.VBox
 import javafx.stage.Stage
-import model.HttpAddrs
-import model.HttpAddrs.httpAddrs
 import model.HttpTool
 import model.HttpTools
 import model.HttpTools.httpTools
@@ -39,7 +30,6 @@ import org.ktorm.dsl.insert
 import org.ktorm.entity.EntitySequence
 import org.ktorm.entity.count
 import org.ktorm.entity.filter
-import org.ktorm.entity.toList
 import java.net.URL
 import java.util.*
 
@@ -93,6 +83,12 @@ class IndexController : BaseController(), Initializable {
         httpTreeView.apply {
             root = rootTreeItem
             isShowRoot = true
+            setOnMouseDragReleased {
+                println("release")
+            }
+            setOnDragDone {
+                println("done...")
+            }
             //节点点击事件
             setOnMouseClicked {
 
@@ -194,7 +190,7 @@ class IndexController : BaseController(), Initializable {
         val fxmlLoader = FXMLLoader(ResourceUtil.getResource("httpTool.fxml"))
         val load = fxmlLoader.load<Any>()
         val httpToolController = fxmlLoader.getController<HttpToolController>()
-        httpToolController.initForm(this, httpTool)
+        httpToolController.initForm(this, httpTool.id)
         val tab = Tab((httpTool.name)).apply {
             id = httpTool.id
             content = load as Node?
@@ -210,6 +206,7 @@ class IndexController : BaseController(), Initializable {
     ) {
 
         val treeItem = buildTreeItem(httpTool)
+
         rootTreeItem.children.add(treeItem)
         if (httpTool.isNode()) {
             val childHttpTools = httpTools.filter { it.parentId eq httpTool.id!! }
@@ -217,7 +214,6 @@ class IndexController : BaseController(), Initializable {
                 addChild(treeItem, httpTools, childHttpTool)
             }
         }
-
     }
 
     private fun buildTreeItem(httpTool: HttpTool): TreeItem<HttpTool> {
@@ -240,7 +236,7 @@ class IndexController : BaseController(), Initializable {
     fun propertiesManage(actionEvent: ActionEvent) {
         //propertiesManage
         var propertiesManageStage = Stage()
-        val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("propertiesMange.fxml"))
+        val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("propertiesManage.fxml"))
         var scene = Scene(indexPane, 700.0, 500.0)
         propertiesManageStage.apply {
             title = "属性管理"
@@ -255,48 +251,14 @@ class IndexController : BaseController(), Initializable {
      */
     fun addrManage(actionEvent: ActionEvent) {
         var addrManageStage = Stage()
-        val name: StringProperty = SimpleStringProperty("111")
-        val addr: StringProperty = SimpleStringProperty("")
-
-        val addrForm = Form.of(
-            Group.of(
-                Field.ofStringType(name).label("名称").required(true),
-                Field.ofStringType(addr).label("地址").placeholder("127.0.0.1").required("This field can’t be empty")
-            )
-
-        ).title("新增地址")
-        var addrPane = Pane()
-        addrPane.children.add(VBox(FormRenderer(addrForm), Button("保存").apply {
-            setOnAction {
-                if (!addrForm.isValid) {
-                    return@setOnAction
-                }
-                //绑定属性刷新
-                addrForm.persist()
-                //判断名称重复
-                if (DbInfor.database.httpAddrs.count() { it.name eq name.value } > 0) {
-                    Alert(Alert.AlertType.ERROR, "名称[${name.value}]已存在!").show()
-                    return@setOnAction
-                }
-                //新增数据
-                DbInfor.database.insert(HttpAddrs) {
-                    set(HttpAddrs.id, UUID.randomUUID().toString())
-                    set(HttpAddrs.name, name.value)
-                    set(HttpAddrs.addr, addr.value)
-                }
-                //关闭窗口
-                addrManageStage.close()
-            }
-        }).apply { alignment = Pos.CENTER_RIGHT })
-
-        var scene = Scene(addrPane, 280.0, 200.0)
+        val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("addrManage.fxml"))
+        var scene = Scene(indexPane)
         addrManageStage.apply {
             title = "地址管理"
             isResizable = false
             setScene(scene)
         }
         addrManageStage.show()
-
 
     }
 }

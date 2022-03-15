@@ -2,10 +2,6 @@ package cn.lifay.lerverhc.view
 
 import cn.hutool.core.util.StrUtil
 import cn.lifay.lerverhc.hander.ConfigUtil
-import com.dlsc.formsfx.model.structure.Field
-import com.dlsc.formsfx.model.structure.Form
-import com.dlsc.formsfx.model.structure.Group
-import com.dlsc.formsfx.view.renderer.FormRenderer
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable

@@ -1,14 +1,15 @@
 package cn.lifay.lerverhc.hander
 
 import cn.hutool.core.io.FileUtil
+import cn.hutool.core.map.MapUtil
 import cn.hutool.core.util.ReUtil
 import cn.hutool.core.util.StrUtil
-import cn.hutool.http.HttpRequest
-import cn.hutool.http.HttpResponse
+import cn.hutool.http.*
 import cn.hutool.json.JSONObject
 import cn.hutool.json.JSONUtil
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonType
+import org.apache.commons.logging.LogFactory
 import java.io.File
 import java.nio.charset.Charset
 import java.util.regex.Pattern
@@ -21,6 +22,7 @@ import java.util.stream.Collectors
  *@Date 2022/1/5 17:45
  **/
 object HttpHander {
+    val logger = LogFactory.getLog(HttpHander::class.java)
 
     fun checkDataFile(bodyStr: String?, batchDataFilePath: String): String {
         //提取变量key ${}
@@ -68,9 +70,24 @@ object HttpHander {
     /**
      * 发送http请求
      */
-    fun singleSendHttp(httpRequest: HttpRequest?, bodyStr: String): HttpResponse? {
-        httpRequest!!.body(bodyStr)
-        return httpRequest.execute()
+    fun singleSendHttp(url: String?, method: Method, contentType: ContentType, bodyStr: String): String? {
+        //组装参数信息
+        when (method) {
+            Method.GET -> {
+                when (contentType) {
+                    ContentType.FORM_URLENCODED -> return if (bodyStr.isBlank()) HttpUtil.get(url) else HttpUtil.get(url,JSONUtil.parseObj(bodyStr))
+                }
+            }
+            Method.POST -> {
+                when (contentType) {
+                    ContentType.FORM_URLENCODED -> return if (bodyStr.isBlank()) HttpUtil.post(url,"") else HttpUtil.post(url,JSONUtil.parseObj(bodyStr))
+                    ContentType.MULTIPART -> return if (bodyStr.isBlank()) HttpUtil.post(url,"") else HttpUtil.post(url,JSONUtil.parseObj(bodyStr))
+                    ContentType.JSON -> return HttpUtil.post(url,bodyStr)
+                }
+            }
+        }
+        Alert(Alert.AlertType.ERROR,"不支持当前请求:[${method.name}] [${contentType.value}]").show()
+        return null
     }
 
     /**
