@@ -163,4 +163,13 @@ object HttpHander {
             return StrUtil.toString(jsonObject.getByPath(key))
         }
     }
+
+
+    fun getContentTypeByValue(consumes: List<String>?): String {
+        if (consumes == null) {
+            return ContentType.FORM_URLENCODED.name
+        }
+        return ContentType.values().first { it.value == consumes[0] }.name
+    }
+
 }

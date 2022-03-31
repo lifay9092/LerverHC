@@ -129,7 +129,7 @@ class HttpToolController : BaseController(), Initializable {
             }
         }
         //contentType
-        selectContentType.items.addAll(ContentType.values().asList())
+        selectContentType.items.addAll(listOf(ContentType.FORM_URLENCODED,ContentType.JSON,ContentType.MULTIPART))
         selectContentType.value = ContentType.JSON
         //批量选项监听
         checkBatch.selectedProperty().addListener { observable, oldValue, newValue ->
@@ -292,7 +292,8 @@ class HttpToolController : BaseController(), Initializable {
         }
 
         val file = fileChooser.showOpenDialog(index.rootPane.scene.window)
-        batchDataFilePath.text = file?.absolutePath
+        file?.let { batchDataFilePath.text = file?.absolutePath }
+
     }
 
     fun checkId(actionEvent: ActionEvent) {
@@ -317,7 +318,6 @@ class HttpToolController : BaseController(), Initializable {
             Alert(Alert.AlertType.ERROR, "http名称不能为空", ButtonType.CLOSE).show()
             return
         }
-
         var dataObj = JSONObject()
         dataObj["method"] = selectMethod.value.name
         dataObj["url"] = url.text
@@ -327,15 +327,6 @@ class HttpToolController : BaseController(), Initializable {
         dataObj["authorization"] = authorization.text
         dataObj["batchFileName"] = batchFileNameText.text
         dataObj["batchDataFilePath"] = batchDataFilePath.text
-
-//        val newItem = HttpTool(
-//            id = httpId,
-//            name = httpNameText.text,
-//            parentId = httpParentId,
-//            type = HttpType.HTTP.name,
-//            body = bodyStr.text,
-//            datas = dataObj.toString(),
-//        )
 
         DbInfor.database.update(HttpTools) {
             set(it.name, httpNameText.text)
@@ -347,16 +338,6 @@ class HttpToolController : BaseController(), Initializable {
             where {
                 it.id eq httpTool!!.id
             }
-
-            //TODO
-//            httpTreeView.selectionModel?.selectedItem?.value = HttpTool(
-//                id = httpId,
-//                name = httpNameText.text,
-//                parentId = httpParentId,
-//                type = HttpType.HTTP.name,
-//                body = bodyStr.text,
-//                datas = dataObj.toString(),
-//            )
         }
         //显示
 
@@ -366,7 +347,7 @@ class HttpToolController : BaseController(), Initializable {
      * 打开输出目录
      */
     fun openOutputFolder(actionEvent: ActionEvent) {
-        Desktop.getDesktop().open(File(ConfigUtil.getOutputFolderValue()));
+        Desktop.getDesktop().open(File(ConfigUtil.preferences.get(ConfigUtil.PROPERTIES_OUTPUT_FOLDER,System.getProperty("user.dir"))));
     }
 
     fun viewUrl(actionEvent: ActionEvent) {

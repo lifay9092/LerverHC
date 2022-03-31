@@ -133,32 +133,40 @@ class IndexController : BaseController(), Initializable {
                                 }
                             })
                         }
+                        if (selectItem!!.id != "0"){
+                            //删除菜单
+                            items.add(MenuItem("删除节点").apply {
+                                setOnAction {
+                                    //假如是NODE,判断是否有子节点
+                                    val count = DbInfor.database.httpTools.count() {
+                                        it.parentId eq selectItem!!.id
+                                    }
+                                    if (count > 0) {
+                                        val alert = Alert(Alert.AlertType.CONFIRMATION, "该节点下还有子节点,是否继续删除?")
+                                        if (alert.showAndWait().get() == ButtonType.OK) {
+                                            DbInfor.database.delete(HttpTools) { httpTool ->
+                                                httpTool.id eq selectItem!!.id
+                                            }
+                                        }
+                                    } else {
+                                        //println(item!!.id)
+                                        val alert = Alert(Alert.AlertType.CONFIRMATION, "是否删除?")
+                                        if (alert.showAndWait().get() == ButtonType.OK) {
+                                            DbInfor.database.delete(HttpTools) { httpTool ->
+                                                httpTool.id eq selectItem!!.id
+                                            }
+                                        }
+                                    }
+                                }
+                            })
+                            //移动到 菜单
+                            items.add(MenuItem("移动到").apply {
+                                setOnAction {
+                                    selectParentNode(selectItem.id)
+                                }
+                            })
+                        }
 
-                        //删除菜单
-                        items.add(MenuItem("删除节点").apply {
-                            setOnAction {
-                                //假如是NODE,判断是否有子节点
-                                val count = DbInfor.database.httpTools.count() {
-                                    it.parentId eq selectItem!!.id
-                                }
-                                if (count > 0) {
-                                    val alert = Alert(Alert.AlertType.CONFIRMATION, "该节点下还有子节点,是否继续删除?")
-                                    if (alert.showAndWait().get() == ButtonType.OK) {
-                                        DbInfor.database.delete(HttpTools) { httpTool ->
-                                            httpTool.id eq selectItem!!.id
-                                        }
-                                    }
-                                } else {
-                                    //println(item!!.id)
-                                    val alert = Alert(Alert.AlertType.CONFIRMATION, "是否删除?")
-                                    if (alert.showAndWait().get() == ButtonType.OK) {
-                                        DbInfor.database.delete(HttpTools) { httpTool ->
-                                            httpTool.id eq selectItem!!.id
-                                        }
-                                    }
-                                }
-                            }
-                        })
                     }
                 } else if (it.clickCount == 2) {
                     //双击
@@ -261,4 +269,39 @@ class IndexController : BaseController(), Initializable {
         addrManageStage.show()
 
     }
+
+    /**
+     * api管理菜单
+     */
+    fun apiManage(actionEvent: ActionEvent) {
+        var apiManageStage = Stage()
+        val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("apiManage.fxml"))
+        var scene = Scene(indexPane)
+        apiManageStage.apply {
+            title = "Api管理"
+            isResizable = false
+            setScene(scene)
+        }
+        apiManageStage.show()
+
+    }
+
+    /**
+     * 移动到节点的界面
+     */
+    fun selectParentNode(id : String) {
+        var selectParentStage = Stage()
+        val fxmlLoader = FXMLLoader(ResourceUtil.getResource("selectParent.fxml"))
+        val indexPane = fxmlLoader.load<Pane>()
+        val selectParentController = fxmlLoader.getController<SelectParentController>()
+        selectParentController.initForm(id) { initTreeView() }
+        var scene = Scene(indexPane)
+        selectParentStage.apply {
+            title = "选择新节点"
+            isResizable = false
+            setScene(scene)
+        }
+        selectParentStage.show()
+    }
+
 }

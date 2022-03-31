@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="apiRootPane" prefHeight="214.0" prefWidth="316.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cn.lifay.lerverhc.view.ApiController">
+   <children>
+      <ChoiceBox fx:id="selectAddrs" layoutX="73.0" layoutY="65.0" prefHeight="23.0" prefWidth="165.0" />
+      <Label layoutX="14.0" layoutY="69.0" text="在线地址：" />
+      <Button layoutX="246.0" layoutY="65.0" mnemonicParsing="false" onAction="#impFromAddr" prefHeight="23.0" prefWidth="56.0" text="导入" />
+      <Label layoutX="14.0" layoutY="104.0" text="本地文件：" />
+      <TextArea layoutX="74.0" layoutY="103.0" fx:id="filePath" prefHeight="57.0" prefWidth="165.0" />
+      <Button layoutX="246.0" layoutY="105.0" mnemonicParsing="false" onAction="#selectFile" prefHeight="15.0" prefWidth="56.0" text="选择" />
+      <Button layoutX="246.0" layoutY="133.0" mnemonicParsing="false" onAction="#impFromFile" prefHeight="23.0" prefWidth="56.0" text="导入" />
+
+   </children>
+</AnchorPane>

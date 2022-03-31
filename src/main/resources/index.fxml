@@ -19,6 +19,7 @@
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#propertiesManage" text="属性管理" />
                         <MenuItem mnemonicParsing="false" onAction="#addrManage" text="地址管理" />
+                        <MenuItem mnemonicParsing="false" onAction="#apiManage" text="Api管理" />
                     </items>
                 </Menu>
             </menus>
@@ -36,7 +37,7 @@
                         <Font size="14.0"/>
                     </font>
                 </Label>
-                <ImageView fx:id="reloadHttpTreeImg" fitHeight="20.0" fitWidth="22.0" layoutX="20.0" layoutY="5.0"
+                <ImageView fx:id="reloadHttpTreeImg" fitHeight="20.0" fitWidth="22.0" layoutX="20.0" layoutY="5.0" onMouseClicked="#reloadHttpTree"
                            pickOnBounds="true" preserveRatio="true"/>
             </HBox>
             <TreeView VBox.vgrow="ALWAYS" fx:id="httpTreeView" prefHeight="634.0" prefWidth="305.0"/>

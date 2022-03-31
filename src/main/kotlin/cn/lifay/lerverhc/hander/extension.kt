@@ -7,3 +7,4 @@ fun Button.primary(): Button {
     styleClass.setAll("btn","btn-danger")
     return this
 }
+

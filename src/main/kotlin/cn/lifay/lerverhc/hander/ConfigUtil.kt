@@ -9,7 +9,10 @@ object ConfigUtil {
 
     //配置项
     val preferences = Preferences.userRoot().node(PREFERENCES_KEY)
-
+    //属性管理-输出文件夹
+    const val PROPERTIES_OUTPUT_FOLDER = "PROPERTIES_OUTPUT_FOLDER"
+    //Api管理-json文件夹
+    const val API_JSON_FILE = "API_JSON_FILE"
     /**
      * 马上更新数据
      */
@@ -26,10 +29,4 @@ object ConfigUtil {
         outputStream.close()
     }
 
-    fun setOutputFolderValue(str : String){
-        preferences.put("OutputFolder",str)
-    }
-    fun getOutputFolderValue():String{
-        return preferences.get("OutputFolder",System.getProperty("user.dir"))
-    }
 }

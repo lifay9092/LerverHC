@@ -14,8 +14,8 @@ data class HttpTool(
     var addrId: String,
     var name: String,
     var type: String,
-    var body: String,
-    var datas: String,
+    var body: String,//请求参数串
+    var datas: String,//
 ){
     fun isNode():Boolean{
         return HttpType.NODE.name == type
