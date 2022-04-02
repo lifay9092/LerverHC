@@ -20,6 +20,7 @@ import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.*
+import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import model.HttpAddr
 import model.HttpAddrs.httpAddrs
@@ -76,7 +77,7 @@ class HttpToolController : BaseController(), Initializable {
     var selectContentType: ChoiceBox<ContentType> = ChoiceBox()
 
     @FXML
-    var authorization: TextField = TextField()
+    var authorization: TextField = TextField("")
 
     @FXML
     var bodyStr: TextArea = TextArea()
@@ -115,6 +116,8 @@ class HttpToolController : BaseController(), Initializable {
     /*检查结果*/
     @FXML
     var checkResult = TextField()
+
+    private var isDownFile : Boolean = false
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
 
@@ -190,6 +193,7 @@ class HttpToolController : BaseController(), Initializable {
         httpNameText.text = item.name
         bodyStr.text = item.body
 
+        isDownFile = dataObj["downFile"] as Boolean
     }
 
     /**
@@ -205,7 +209,7 @@ class HttpToolController : BaseController(), Initializable {
     fun buildHttpRequest(): HttpRequest {
         var httpRequest = HttpUtil.createRequest(selectMethod.value, getFullUrl())
         httpRequest.contentType(selectContentType.value.value)
-        if (authorization.text.isNotEmpty()) {
+        if (!authorization.text.isNullOrBlank()) {
             httpRequest.header("authorization", authorization.text)
         }
         return httpRequest
@@ -217,27 +221,47 @@ class HttpToolController : BaseController(), Initializable {
     fun sendHttp(actionEvent: ActionEvent) {
         checkParam(selectAddr.value,"select服务地址")
         checkParam(url.text, "url")
-        //定义基础请求类
-        var httpRequest = buildHttpRequest()
-
-        if (checkBatch.isSelected) {
-            //批量执行
-            //检查是否有指定文件名变量格式
-            if (StrUtil.isBlank(batchFileNameText.text)) {
-                Alert(Alert.AlertType.ERROR, "【批量模板文件名】不能为空", ButtonType.CLOSE).show()
-                return
+        //是否下载文件
+        if (isDownFile) {
+            //下载文件
+            val directoryChooser = DirectoryChooser().apply {
+                title = "选择输出目录"
+                initialDirectory =
+                    File(System.getProperty("user.dir"))
             }
-            responseStr.text = parseJsonFmtStr(HttpHander.batchSendHttp(
-                httpRequest,
-                bodyStr.text,
-                batchDataFilePath.text,
-                batchFileNameText.text
-            ))
-        } else {
-            //单个
-            val httpResponse = HttpHander.singleSendHttp(getFullUrl(),selectMethod.value,selectContentType.value, bodyStr.text)
-            httpStatus.text = "200"
-            responseStr.text = parseJsonFmtStr(httpResponse)
+            val directory = directoryChooser.showDialog(index.rootPane.scene.window)
+            directory?.let {
+                var fullUrl = getFullUrl() + "?"
+                val jsonObject = JSONUtil.parseObj(bodyStr.text)
+                for (key in jsonObject.keys) {
+                    fullUrl += "${key}=${jsonObject[key]}&"
+                }
+                HttpUtil.downloadFile(if (fullUrl.endsWith("&")) fullUrl.substring(0,fullUrl.length - 1) else fullUrl,directory)
+                ConfigUtil.preferences.put(ConfigUtil.PROPERTIES_OUTPUT_FOLDER,directory.absolutePath)
+            }
+        }else{
+            //定义基础请求类
+            var httpRequest = buildHttpRequest()
+
+            if (checkBatch.isSelected) {
+                //批量执行
+                //检查是否有指定文件名变量格式
+                if (StrUtil.isBlank(batchFileNameText.text)) {
+                    Alert(Alert.AlertType.ERROR, "【批量模板文件名】不能为空", ButtonType.CLOSE).show()
+                    return
+                }
+                responseStr.text = parseJsonFmtStr(HttpHander.batchSendHttp(
+                    httpRequest,
+                    bodyStr.text,
+                    batchDataFilePath.text,
+                    batchFileNameText.text
+                ))
+            } else {
+                //单个
+                val httpResponse = HttpHander.singleSendHttp(getFullUrl(),selectMethod.value,selectContentType.value, bodyStr.text)
+                httpStatus.text = "200"
+                responseStr.text = parseJsonFmtStr(httpResponse)
+            }
         }
         uptNowTime()
     }

@@ -1,9 +1,8 @@
 package cn.lifay.lerverhc.view
 
 import cn.hutool.core.io.FileUtil
-import cn.hutool.core.util.EnumUtil
 import cn.hutool.core.util.IdUtil
-import cn.hutool.http.ContentType
+import cn.hutool.core.util.ObjectUtil
 import cn.hutool.json.JSONObject
 import cn.hutool.json.JSONUtil
 import cn.lifay.lerverhc.db.DbInfor
@@ -11,10 +10,12 @@ import cn.lifay.lerverhc.hander.ConfigUtil
 import cn.lifay.lerverhc.hander.HttpHander
 import cn.lifay.lerverhc.model.ApiAddrModel
 import cn.lifay.lerverhc.model.ApiModel
+import javafx.application.Platform
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.Alert
+import javafx.scene.control.Button
 import javafx.scene.control.ChoiceBox
 import javafx.scene.control.TextArea
 import javafx.scene.layout.AnchorPane
@@ -26,13 +27,8 @@ import model.HttpTool
 import model.HttpTools
 import model.HttpTools.httpTools
 import model.enum.HttpType
-import org.ktorm.dsl.and
-import org.ktorm.dsl.delete
-import org.ktorm.dsl.eq
-import org.ktorm.dsl.insert
-import org.ktorm.entity.filter
+import org.ktorm.dsl.*
 import org.ktorm.entity.find
-import org.ktorm.entity.first
 import org.ktorm.entity.toList
 import java.io.File
 import java.net.URL
@@ -47,6 +43,15 @@ import java.util.*
  *@Date 2022/1/4 20:09
  **/
 class ApiController : BaseController(), Initializable {
+
+    @FXML
+    var impFromAddrBtn = Button()
+
+    @FXML
+    var selectFileBtn = Button()
+
+    @FXML
+    var impFromFileBtn = Button()
 
     @FXML
     var apiRootPane = AnchorPane()
@@ -84,19 +89,31 @@ class ApiController : BaseController(), Initializable {
         }
 
     }
-
+    private fun disableBtn(v : Boolean){
+        impFromAddrBtn.isDisable = v
+        impFromFileBtn.isDisable = v
+        selectFileBtn.isDisable = v
+    }
     fun impFromFile(actionEvent: ActionEvent) {
         if (filePath.text.isBlank()) {
             Alert(Alert.AlertType.ERROR, "文件不能为空").show()
             return
         }
         var apiModel = JSONUtil.toBean(FileUtil.readString(filePath.text, Charset.forName("utf-8")), ApiModel::class.java)
-
-        GlobalScope.launch { impHandle(apiModel) }
-
+        disableBtn(true)
+        val func : (Int) -> Unit = {
+            Platform.runLater {
+                //结束
+                disableBtn(false)
+                Alert(Alert.AlertType.INFORMATION,"导入成功:${it} 条").show()
+            }
+        }
+        GlobalScope.launch {
+            impHandle(apiModel,func)
+        }
     }
 
-    fun impHandle(apiModel: ApiModel?) {
+    fun impHandle(apiModel: ApiModel?, resultFunc: (Int) -> Unit) {
         val title = apiModel!!.info!!.title
         //addr
         /*一级目录 应用*/
@@ -137,6 +154,9 @@ class ApiController : BaseController(), Initializable {
                     dataObj["isBatch"] = false
                     dataObj["isSync"] = false
                     dataObj["contentType"] = HttpHander.getContentTypeByValue(httpDTO.consumes)
+                    dataObj["downFile"] =
+                        ObjectUtil.isNotNull(it.produces) && it.produces!!.contains("application/octet-stream")
+
                     //body
                     var bodyObj = JSONObject()
                     httpDTO.parameters?.let {
@@ -175,10 +195,14 @@ class ApiController : BaseController(), Initializable {
                 set(HttpTools.type, HttpType.NODE.name)
             }
             /*http*/
-            httpList.filter { it.parentId == tag.name }.forEach { http ->
-                DbInfor.database.insert(HttpTools) {
+            httpList.filter { it.parentId == tag.name }.forEach { it.parentId = secondDirId}
+            //.forEach { it.parentId = secondDirId }
+        }
+        DbInfor.database.batchInsert(HttpTools){
+            httpList.forEach { http ->
+                item {
                     set(HttpTools.id, http.id)
-                    set(HttpTools.parentId, secondDirId)
+                    set(HttpTools.parentId, http.parentId)
                     set(HttpTools.addrId, http.addrId)
                     set(HttpTools.name, http.name)
                     set(HttpTools.type, http.type)
@@ -186,9 +210,9 @@ class ApiController : BaseController(), Initializable {
                     set(HttpTools.datas, http.datas)
                 }
             }
+
         }
-        //结束
-        Alert(Alert.AlertType.INFORMATION,"导入成功:${httpList.size} 条").show()
+        resultFunc(httpList.size)
     }
 
 

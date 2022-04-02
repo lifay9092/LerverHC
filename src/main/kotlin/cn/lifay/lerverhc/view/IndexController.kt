@@ -2,9 +2,9 @@ package cn.lifay.lerverhc.view
 
 import cn.hutool.core.io.resource.ResourceUtil
 import cn.hutool.core.util.StrUtil
+import cn.hutool.json.JSONUtil
 import cn.lifay.lerverhc.db.DbInfor
 import javafx.event.ActionEvent
-import javafx.event.EventType
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.fxml.Initializable
@@ -13,9 +13,7 @@ import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
-import javafx.scene.input.DragEvent
 import javafx.scene.input.MouseButton
-import javafx.scene.input.MouseEvent
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Pane
 import javafx.stage.Stage
@@ -23,15 +21,12 @@ import model.HttpTool
 import model.HttpTools
 import model.HttpTools.httpTools
 import model.enum.HttpType
-import org.ktorm.dsl.and
-import org.ktorm.dsl.delete
-import org.ktorm.dsl.eq
-import org.ktorm.dsl.insert
-import org.ktorm.entity.EntitySequence
+import org.ktorm.dsl.*
 import org.ktorm.entity.count
-import org.ktorm.entity.filter
+import org.ktorm.entity.toList
 import java.net.URL
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 /**
@@ -52,6 +47,8 @@ class IndexController : BaseController(), Initializable {
 
     @FXML
     var reloadHttpTreeImg = ImageView()
+    @FXML
+    var keywordField = TextField()
 
     /*临时http对象*/
     var currentHttpId: String = ""
@@ -62,24 +59,33 @@ class IndexController : BaseController(), Initializable {
         /*图标渲染*/
         reloadHttpTreeImg.image = Image(ResourceUtil.getStream("reload.png"))
         /*初始化http树*/
-        initTreeView()
-
+        initTreeView("")
+        keywordField.textProperty().addListener { obs, ov, nv ->
+            if (nv != null) {
+                initTreeView(nv)
+            }
+        }
     }
 
     /**
      * 初始化树
      */
-    private fun initTreeView() {
+    private fun initTreeView(keyword : String) {
         var rootTreeItem = TreeItem(HttpTool("0", "-1", "", "根目录", HttpType.NODE.name, "", ""),ImageView(Image(ResourceUtil.getStream("folder.png"))))
-
         //HttpTool("1","0","11111",HttpType.NODE.name,"","")
-        val httpTools = DbInfor.database.httpTools
 
-        for (httpTool in httpTools.filter { it.parentId eq "0" }) {
+        var httpTools = DbInfor.database.httpTools.toList()
+        if (keyword.isNotBlank()) {
+            val nodeIds = getAllParentNodeIds(httpTools)
+            httpTools = httpTools.filter { it.type == HttpType.HTTP.name || nodeIds.contains(it.id) }.toList()
+
+            httpTools = httpTools.filter { it.name.contains(keyword) }.toList()
+        }
+        for (httpTool in httpTools.filter { it.parentId == "0" }) {
             //child
             addChild(rootTreeItem, httpTools, httpTool)
-
         }
+
         httpTreeView.apply {
             root = rootTreeItem
             isShowRoot = true
@@ -125,7 +131,7 @@ class IndexController : BaseController(), Initializable {
                                                     set(HttpTools.name, inputStr)
                                                     set(HttpTools.type, HttpType.NODE.name)
                                                 }
-                                                reloadHttpTree(null)
+                                                reloadHttpTree()
                                             }
                                         }
                                     }
@@ -183,6 +189,23 @@ class IndexController : BaseController(), Initializable {
         }
     }
 
+    private fun getAllParentNodeIds(httpTools: List<HttpTool>): List<String> {
+        var list = ArrayList<String>()
+        val httpList = httpTools.filter { it.type == HttpType.HTTP.name }.toList()
+        loopHandle(httpList,list)
+        return list
+    }
+
+    private fun loopHandle(httpLists: List<HttpTool>, list: ArrayList<String>) {
+        for (httpTool in httpLists) {
+            val id = getParentIdById(httpLists,httpTool.id)
+            list.add(id)
+        }
+    }
+
+    private fun getParentIdById(httpTools: List<HttpTool>,id : String):String{
+        return httpTools.first() { it.id == id }.parentId
+    }
     /**
      * 新增tab并加载http表单界面
      */
@@ -210,14 +233,12 @@ class IndexController : BaseController(), Initializable {
 
 
     private fun addChild(
-        rootTreeItem: TreeItem<HttpTool>, httpTools: EntitySequence<HttpTool, HttpTools>, httpTool: HttpTool
+        rootTreeItem: TreeItem<HttpTool>, httpTools: List<HttpTool>, httpTool: HttpTool
     ) {
-
         val treeItem = buildTreeItem(httpTool)
-
         rootTreeItem.children.add(treeItem)
         if (httpTool.isNode()) {
-            val childHttpTools = httpTools.filter { it.parentId eq httpTool.id!! }
+            val childHttpTools = httpTools.filter { it.parentId == httpTool.id!! }
             for (childHttpTool in childHttpTools) {
                 addChild(treeItem, httpTools, childHttpTool)
             }
@@ -226,16 +247,30 @@ class IndexController : BaseController(), Initializable {
 
     private fun buildTreeItem(httpTool: HttpTool): TreeItem<HttpTool> {
         val treeItem = TreeItem(
-            httpTool, ImageView(Image(ResourceUtil.getStream(if (httpTool.isHttp()) "http.png" else "folder.png")))
+            httpTool, ImageView(Image(ResourceUtil.getStream(getTreeItemImg(httpTool))))
         )
         return treeItem
+    }
+
+    private fun getTreeItemImg(httpTool: HttpTool): String {
+        if (!httpTool.isHttp()){
+            return "folder.png"
+        } else {
+            var jsonObject = JSONUtil.parseObj(httpTool.datas)
+            var method = jsonObject.getStr("method")
+            return when (method) {
+                "GET" -> "get.png"
+                "POST" -> "post.png"
+                else -> "http.png"
+            }
+        }
     }
 
     /**
      * 刷新http树
      */
-    fun reloadHttpTree(mouseEvent: MouseEvent?) {
-        initTreeView()
+    fun reloadHttpTree() {
+        initTreeView("")
     }
 
     /**
@@ -294,7 +329,7 @@ class IndexController : BaseController(), Initializable {
         val fxmlLoader = FXMLLoader(ResourceUtil.getResource("selectParent.fxml"))
         val indexPane = fxmlLoader.load<Pane>()
         val selectParentController = fxmlLoader.getController<SelectParentController>()
-        selectParentController.initForm(id) { initTreeView() }
+        selectParentController.initForm(id) { initTreeView("") }
         var scene = Scene(indexPane)
         selectParentStage.apply {
             title = "选择新节点"

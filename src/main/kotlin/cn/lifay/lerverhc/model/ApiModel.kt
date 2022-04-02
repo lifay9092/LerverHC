@@ -39,6 +39,7 @@ class ApiModel {
         var description: String? = null
         var operationId: String? = null
         var consumes: List<String>? = null
+        var produces: List<String>? = null
         var parameters: List<ParametersDTO>? = null
         var deprecated: Boolean? = null
     }
