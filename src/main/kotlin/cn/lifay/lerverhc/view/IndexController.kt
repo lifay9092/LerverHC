@@ -138,6 +138,24 @@ class IndexController : BaseController(), Initializable {
 
                                 }
                             })
+                            //导入API文档菜单
+                            items.add(MenuItem("导入API文档").apply {
+                                setOnAction {
+                                    var apiManageStage = Stage()
+                                    val fxmlLoader = FXMLLoader(ResourceUtil.getResource("apiManage.fxml"))
+                                    val indexPane = fxmlLoader.load<Pane>()
+                                    val apiController = fxmlLoader.getController<ApiController>()
+                                    apiController.initForm(selectItem.id)
+                                    var scene = Scene(indexPane)
+                                    apiManageStage.apply {
+                                        title = "Api管理"
+                                        isResizable = false
+                                        setScene(scene)
+                                    }
+                                    apiManageStage.show()
+
+                                }
+                            })
                         }
                         if (selectItem!!.id != "0"){
                             //删除菜单
@@ -309,15 +327,7 @@ class IndexController : BaseController(), Initializable {
      * api管理菜单
      */
     fun apiManage(actionEvent: ActionEvent) {
-        var apiManageStage = Stage()
-        val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("apiManage.fxml"))
-        var scene = Scene(indexPane)
-        apiManageStage.apply {
-            title = "Api管理"
-            isResizable = false
-            setScene(scene)
-        }
-        apiManageStage.show()
+
 
     }
 
