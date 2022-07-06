@@ -193,7 +193,7 @@ class HttpToolController : BaseController(), Initializable {
         httpNameText.text = item.name
         bodyStr.text = item.body
 
-        isDownFile = dataObj["downFile"] as Boolean
+        isDownFile = (dataObj["downFile"] ?: false) as Boolean
     }
 
     /**
