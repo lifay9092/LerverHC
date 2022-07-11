@@ -17,6 +17,7 @@ import cn.lifay.lerverhc.hander.GlobeProps
 import cn.lifay.lerverhc.hander.HttpHander
 import javafx.application.Platform
 import javafx.event.ActionEvent
+import javafx.event.EventType
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.*
@@ -116,6 +117,8 @@ class HttpToolController : BaseController(), Initializable {
     /*检查结果*/
     @FXML
     var checkResult = TextField()
+    @FXML
+    var jsonCheckText = Label()
 
     private var isDownFile : Boolean = false
 
@@ -126,6 +129,7 @@ class HttpToolController : BaseController(), Initializable {
         selectMethod.value = Method.GET
         //addr
         selectAddr.apply {
+            //items.add(HttpAddr(id = "custom", name = "自定义地址",""))
             items.addAll(DbInfor.database.httpAddrs.toList())
             this.valueProperty().addListener { observable, oldValue, newValue ->
                 addrValue.text = newValue.addr
@@ -137,12 +141,12 @@ class HttpToolController : BaseController(), Initializable {
         //批量选项监听
         checkBatch.selectedProperty().addListener { observable, oldValue, newValue ->
             if (!oldValue && newValue) {
-                //批量文件名
+                //显示 批量文件
                 batchFileNameLabel.isVisible = true
                 batchFileNameText.isVisible = true
                 batchFileExtLabel.isVisible = true
             } else {
-                //批量文件名
+                //隐藏 批量文件
                 batchFileNameLabel.isVisible = false
                 batchFileNameText.isVisible = false
                 batchFileExtLabel.isVisible = false
@@ -153,6 +157,15 @@ class HttpToolController : BaseController(), Initializable {
         bodyStr.text = "{\n" +
                 "    \"bureauCode\": \"\${bureauCode}\"\n" +
                 "}"
+        bodyStr.textProperty().addListener{ observable, oldValue, newValue ->
+            try {
+                JSONUtil.parseObj(newValue)
+                jsonCheckText.text = "json格式:true"
+            } catch (e: Exception) {
+                jsonCheckText.text = "json格式:false 错误:${e.message}"
+            }
+        }
+
         batchDataFilePath.text = "C:\\Users\\lifay9092\\Desktop\\temp\\测试批量数据.json"
 
         //批量文件名
@@ -180,7 +193,7 @@ class HttpToolController : BaseController(), Initializable {
         }
         val dataObj = JSONUtil.parseObj(item.datas)
         selectAddr.value = DbInfor.database.httpAddrs.find { it.id eq item.addrId }
-        addrValue.text = selectAddr.value.addr
+        addrValue.text =  if (selectAddr.value != null) selectAddr.value.addr else ""
         selectMethod.value = Method.valueOf(dataObj["method"] as String)
         url.text = dataObj["url"] as String
         checkBatch.isSelected = dataObj["isBatch"] as Boolean
@@ -395,9 +408,15 @@ class HttpToolController : BaseController(), Initializable {
     }
 
     fun getFullUrl(): String {
-        var host = URLUtil.normalize(selectAddr.value.addr)
-        var uri = if (url.text.startsWith("/")) url.text else "/${url.text}"
-        return host + uri
+        val httpAddr = selectAddr.value
+        if (httpAddr.isCustom()) {
+            return URLUtil.normalize(url.text)
+        }else{
+            var host = URLUtil.normalize(httpAddr.addr)
+            var uri = if (url.text.startsWith("/")) url.text else "/${url.text}"
+            return host + uri
+        }
+
     }
 
 }

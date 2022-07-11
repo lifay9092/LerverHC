@@ -9,6 +9,9 @@
   "name":"[[Z"
 },
 {
+  "name":"com.sun.glass.ui.Application"
+},
+{
   "name":"com.sun.glass.ui.CommonDialogs",
   "methods":[{"name":"createFileChooserResult","parameterTypes":["java.lang.String[]","com.sun.glass.ui.CommonDialogs$ExtensionFilter[]","int"] }]
 },

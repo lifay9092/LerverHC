@@ -16,6 +16,9 @@ data class HttpAddr(
     override fun toString(): String {
         return this.name
     }
+    fun isCustom():Boolean{
+        return "custom" == id
+    }
 }
 
 object HttpAddrs : BaseTable<HttpAddr>("HTTP_ADDR") {

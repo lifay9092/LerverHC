@@ -14,6 +14,12 @@
   ]
 },
 {
+  "name":"cn.lifay.lerverhc.view.ApiController",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"cn.lifay.lerverhc.view.BaseController",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true
@@ -35,6 +41,7 @@
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
     {"name":"addrManage","parameterTypes":["javafx.event.ActionEvent"] }, 
+    {"name":"apiManage","parameterTypes":["javafx.event.ActionEvent"] }, 
     {"name":"propertiesManage","parameterTypes":["javafx.event.ActionEvent"] }
   ]
 },
@@ -185,6 +192,7 @@
     {"name":"setId","parameterTypes":["java.lang.String"] }, 
     {"name":"setLayoutX","parameterTypes":["double"] }, 
     {"name":"setLayoutY","parameterTypes":["double"] }, 
+    {"name":"setOnMouseClicked","parameterTypes":["javafx.event.EventHandler"] }, 
     {"name":"setPickOnBounds","parameterTypes":["boolean"] }, 
     {"name":"setStyle","parameterTypes":["java.lang.String"] }
   ]
@@ -351,7 +359,8 @@
     {"name":"setCenter","parameterTypes":["javafx.scene.Node"] }, 
     {"name":"setLeft","parameterTypes":["javafx.scene.Node"] }, 
     {"name":"setTop","parameterTypes":["javafx.scene.Node"] }
-  ]
+  ],
+  "queriedMethods":[{"name":"getAlignment","parameterTypes":["javafx.scene.Node"] }]
 },
 {
   "name":"javafx.scene.layout.HBox",
