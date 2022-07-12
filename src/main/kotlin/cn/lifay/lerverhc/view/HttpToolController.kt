@@ -21,6 +21,8 @@ import javafx.event.EventType
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.*
+import javafx.scene.paint.Color
+import javafx.scene.paint.Paint
 import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import model.HttpAddr
@@ -160,8 +162,10 @@ class HttpToolController : BaseController(), Initializable {
         bodyStr.textProperty().addListener{ observable, oldValue, newValue ->
             try {
                 JSONUtil.parseObj(newValue)
+                jsonCheckText.textFill = Color.BLACK
                 jsonCheckText.text = "json格式:true"
             } catch (e: Exception) {
+                jsonCheckText.textFill = Color.RED
                 jsonCheckText.text = "json格式:false 错误:${e.message}"
             }
         }

@@ -1,9 +1,11 @@
 package cn.lifay.lerverhc.view
 
 import cn.hutool.core.io.resource.ResourceUtil
+import cn.hutool.core.util.IdUtil
 import cn.hutool.core.util.StrUtil
 import cn.hutool.json.JSONUtil
 import cn.lifay.lerverhc.db.DbInfor
+import javafx.collections.ObservableList
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
@@ -106,11 +108,6 @@ class IndexController : BaseController(), Initializable {
                             //新增目录菜单
                             items.add(MenuItem("新增目录").apply {
                                 setOnAction {
-                                    //假如是NODE,判断是否有子节点
-                                    if (selectItem.isHttp()) {
-                                        Alert(Alert.AlertType.ERROR, "非节点类型，无法添加").show()
-                                        return@setOnAction
-                                    }
                                     val textInputDialog = TextInputDialog().apply {
                                         title = "请输入节点名称"
                                     }
@@ -136,6 +133,38 @@ class IndexController : BaseController(), Initializable {
                                         }
                                     }
 
+                                }
+                            })
+                            //新增节点菜单
+                            items.add(MenuItem("新增节点").apply {
+                                setOnAction {
+                                    //新增一个临时节点
+                                    var tempHttpModel = HttpTool(id = IdUtil.fastUUID(), parentId = selectItem.id, name = "新建http", type = HttpType.HTTP.name,
+                                    addrId = "custom", body = """
+                                        {
+                                            
+                                        }
+                                    """.trimIndent(), datas = """
+                                        {
+                                            "method":"GET","isBatch":false,
+                                            "isSync":false,
+                                            "url":"http://localhost:80/temp",
+                                            "authorization":"",
+                                            "contentType":"FORM_URLENCODED"}
+                                    """.trimIndent())
+                                    //入库
+                                    DbInfor.database.insert(HttpTools){
+                                        set(HttpTools.id,tempHttpModel.id)
+                                        set(HttpTools.parentId,tempHttpModel.parentId)
+                                        set(HttpTools.name,tempHttpModel.name)
+                                        set(HttpTools.type,tempHttpModel.type)
+                                        set(HttpTools.addrId,tempHttpModel.addrId)
+                                        set(HttpTools.body,tempHttpModel.body)
+                                        set(HttpTools.datas,tempHttpModel.datas)
+                                    }
+                                    //加载
+                                    addTreeItemById(httpTreeView.root.children,tempHttpModel.parentId,tempHttpModel)
+                                    addTabHttpForm(tempHttpModel)
                                 }
                             })
                             //导入API文档菜单
@@ -179,6 +208,15 @@ class IndexController : BaseController(), Initializable {
                                             DbInfor.database.delete(HttpTools) { httpTool ->
                                                 httpTool.id eq selectItem!!.id
                                             }
+                                            //tab页
+                                            tabList.tabs.removeIf { i ->
+                                                i.id == selectItem.id
+                                            }
+                                            //树菜单
+                                            httpTreeView.apply {
+                                                removeTreeItemById(root.children,selectItem.id)
+                                                refresh()
+                                            }
                                         }
                                     }
                                 }
@@ -205,6 +243,38 @@ class IndexController : BaseController(), Initializable {
                 }
             }
         }
+    }
+
+    private fun removeTreeItemById(children : ObservableList<TreeItem<HttpTool>>,id: String) {
+        if (isExistTreeItemById(children,id)) {
+            children.removeIf{i ->
+                i.value.id == id
+            }
+            return
+        }
+        for (child in children) {
+            if (child.children != null){
+                removeTreeItemById(child.children,id)
+            }
+        }
+    }
+
+    private fun addTreeItemById(children : ObservableList<TreeItem<HttpTool>>,parentId: String,httpTool: HttpTool) {
+
+        for (child in children) {
+            if (child.value.id == parentId && child.children != null) {
+                val treeItem = buildTreeItem(httpTool)
+                child.children.add(treeItem)
+                return
+            }else if (child.children != null){
+                addTreeItemById(child.children,parentId,httpTool)
+            }
+        }
+    }
+
+    private fun isExistTreeItemById(children : ObservableList<TreeItem<HttpTool>>,id: String): Boolean {
+        return (children.find { it.value.id == id } != null)
+
     }
 
     private fun getAllParentNodeIds(httpTools: List<HttpTool>): List<String> {
