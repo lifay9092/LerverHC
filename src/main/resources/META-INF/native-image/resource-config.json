@@ -74,6 +74,13 @@
         "und", 
         "zh-CN"
       ]
+    }, 
+    {
+      "name":"sun.awt.resources.awt",
+      "classNames":[
+        "sun.awt.resources.awt", 
+        "sun.awt.resources.awt_zh_CN"
+      ]
     }
   ]
 }

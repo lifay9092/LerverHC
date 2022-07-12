@@ -308,6 +308,10 @@ class HttpToolController : BaseController(), Initializable {
                 Alert(Alert.AlertType.ERROR, "【批量模板文件名】不能为空", ButtonType.CLOSE).show()
                 return
             }
+            if (StrUtil.isBlank(batchDataFilePath.text)) {
+                Alert(Alert.AlertType.ERROR, "【数据文件】不能为空", ButtonType.CLOSE).show()
+                return
+            }
             Platform.runLater {
                 responseStr.text =
                     HttpHander.batchSendHttp(httpRequest, bodyStr.text, batchDataFilePath.text, batchFileNameText.text)

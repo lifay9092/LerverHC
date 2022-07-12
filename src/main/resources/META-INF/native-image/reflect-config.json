@@ -1,5 +1,11 @@
 [
 {
+  "name":"[B"
+},
+{
+  "name":"[C"
+},
+{
   "name":"cn.lifay.lerverhc.LerverHCApplication",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
@@ -31,7 +37,8 @@
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
     {"name":"saveHttp","parameterTypes":["javafx.event.ActionEvent"] }, 
-    {"name":"sendHttp","parameterTypes":["javafx.event.ActionEvent"] }
+    {"name":"sendHttp","parameterTypes":["javafx.event.ActionEvent"] }, 
+    {"name":"viewUrl","parameterTypes":["javafx.event.ActionEvent"] }
   ]
 },
 {
@@ -42,7 +49,8 @@
     {"name":"<init>","parameterTypes":[] }, 
     {"name":"addrManage","parameterTypes":["javafx.event.ActionEvent"] }, 
     {"name":"apiManage","parameterTypes":["javafx.event.ActionEvent"] }, 
-    {"name":"propertiesManage","parameterTypes":["javafx.event.ActionEvent"] }
+    {"name":"propertiesManage","parameterTypes":["javafx.event.ActionEvent"] }, 
+    {"name":"reloadHttpTree","parameterTypes":[] }
   ]
 },
 {
@@ -89,6 +97,10 @@
   ]
 },
 {
+  "name":"com.sun.prism.shader.DrawRoundRect_Color_Loader",
+  "methods":[{"name":"loadShader","parameterTypes":["com.sun.prism.ps.ShaderFactory","java.io.InputStream"] }]
+},
+{
   "name":"com.sun.prism.shader.FillPgram_Color_Loader",
   "methods":[{"name":"loadShader","parameterTypes":["com.sun.prism.ps.ShaderFactory","java.io.InputStream"] }]
 },
@@ -133,6 +145,15 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"java.awt.Image"
+},
+{
+  "name":"java.io.InputStream"
+},
+{
+  "name":"java.io.Reader"
+},
+{
   "name":"java.lang.Character",
   "methods":[{"name":"isIdeographic","parameterTypes":["int"] }]
 },
@@ -152,6 +173,9 @@
   "methods":[{"name":"getContextClassLoader","parameterTypes":[] }]
 },
 {
+  "name":"java.net.URL"
+},
+{
   "name":"java.nio.ByteBuffer",
   "methods":[{"name":"order","parameterTypes":["java.nio.ByteOrder"] }]
 },
@@ -160,7 +184,13 @@
   "methods":[{"name":"nativeOrder","parameterTypes":[] }]
 },
 {
+  "name":"java.nio.CharBuffer"
+},
+{
   "name":"java.security.SecureRandomParameters"
+},
+{
+  "name":"java.util.List"
 },
 {
   "name":"javafx.animation.KeyValue"
@@ -359,8 +389,7 @@
     {"name":"setCenter","parameterTypes":["javafx.scene.Node"] }, 
     {"name":"setLeft","parameterTypes":["javafx.scene.Node"] }, 
     {"name":"setTop","parameterTypes":["javafx.scene.Node"] }
-  ],
-  "queriedMethods":[{"name":"getAlignment","parameterTypes":["javafx.scene.Node"] }]
+  ]
 },
 {
   "name":"javafx.scene.layout.HBox",
@@ -519,6 +548,10 @@
 },
 {
   "name":"org.sqlite.JDBC"
+},
+{
+  "name":"sun.java2d.marlin.DMarlinRenderingEngine",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"sun.misc.Unsafe",

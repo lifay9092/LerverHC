@@ -147,6 +147,7 @@ object HttpHander {
                 return ""
             }
             //输出目录
+            ConfigUtil.preferences.get(ConfigUtil.PROPERTIES_OUTPUT_FOLDER
             val outputDir = GlobeProps.getOutputFolderValue() + File.separator
             //提取变量key ${}
             var bodyKeys = getVars(bodyStr)
