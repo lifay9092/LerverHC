@@ -15,6 +15,7 @@
   "queryAllDeclaredMethods":true,
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
+    {"name":"clearForm","parameterTypes":["javafx.event.ActionEvent"] }, 
     {"name":"delAdder","parameterTypes":["javafx.event.ActionEvent"] }, 
     {"name":"saveForm","parameterTypes":["javafx.event.ActionEvent"] }
   ]
@@ -36,8 +37,10 @@
   "queryAllDeclaredMethods":true,
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
+    {"name":"openOutputFolder","parameterTypes":["javafx.event.ActionEvent"] }, 
     {"name":"saveHttp","parameterTypes":["javafx.event.ActionEvent"] }, 
     {"name":"sendHttp","parameterTypes":["javafx.event.ActionEvent"] }, 
+    {"name":"sendHttpAndSave","parameterTypes":["javafx.event.ActionEvent"] }, 
     {"name":"viewUrl","parameterTypes":["javafx.event.ActionEvent"] }
   ]
 },
@@ -61,6 +64,11 @@
     {"name":"<init>","parameterTypes":[] }, 
     {"name":"selectOutputFolder","parameterTypes":["javafx.event.ActionEvent"] }
   ]
+},
+{
+  "name":"cn.lifay.lerverhc.view.SelectParentController",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"com.sun.glass.ui.Screen"
@@ -374,6 +382,9 @@
   ]
 },
 {
+  "name":"javafx.scene.input.Clipboard"
+},
+{
   "name":"javafx.scene.layout.AnchorPane",
   "queryAllDeclaredMethods":true,
   "queryAllPublicConstructors":true,
@@ -389,7 +400,8 @@
     {"name":"setCenter","parameterTypes":["javafx.scene.Node"] }, 
     {"name":"setLeft","parameterTypes":["javafx.scene.Node"] }, 
     {"name":"setTop","parameterTypes":["javafx.scene.Node"] }
-  ]
+  ],
+  "queriedMethods":[{"name":"getAlignment","parameterTypes":["javafx.scene.Node"] }]
 },
 {
   "name":"javafx.scene.layout.HBox",

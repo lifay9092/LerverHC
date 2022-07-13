@@ -47,6 +47,9 @@
       "pattern":"\\Qreload.png\\E"
     }, 
     {
+      "pattern":"\\QselectParent.fxml\\E"
+    }, 
+    {
       "pattern":"\\Qsqlite-jdbc.properties\\E"
     }
   ]},

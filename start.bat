@@ -1,3 +1,2 @@
-
-
-javaw -jar LerverHC.jar
+LerverHC.exe
+pause

@@ -13,16 +13,13 @@ import cn.hutool.json.JSONObject
 import cn.hutool.json.JSONUtil
 import cn.lifay.lerverhc.db.DbInfor
 import cn.lifay.lerverhc.hander.ConfigUtil
-import cn.lifay.lerverhc.hander.GlobeProps
 import cn.lifay.lerverhc.hander.HttpHander
 import javafx.application.Platform
 import javafx.event.ActionEvent
-import javafx.event.EventType
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.*
 import javafx.scene.paint.Color
-import javafx.scene.paint.Paint
 import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import model.HttpAddr
@@ -257,9 +254,6 @@ class HttpToolController : BaseController(), Initializable {
                 ConfigUtil.preferences.put(ConfigUtil.PROPERTIES_OUTPUT_FOLDER,directory.absolutePath)
             }
         }else{
-            //定义基础请求类
-            var httpRequest = buildHttpRequest()
-
             if (checkBatch.isSelected) {
                 //批量执行
                 //检查是否有指定文件名变量格式
@@ -268,7 +262,9 @@ class HttpToolController : BaseController(), Initializable {
                     return
                 }
                 responseStr.text = parseJsonFmtStr(HttpHander.batchSendHttp(
-                    httpRequest,
+                    getFullUrl(),
+                    selectMethod.value,
+                    selectContentType.value,
                     bodyStr.text,
                     batchDataFilePath.text,
                     batchFileNameText.text
@@ -298,9 +294,6 @@ class HttpToolController : BaseController(), Initializable {
      */
     fun sendHttpAndSave(actionEvent: ActionEvent) {
         checkParam(url.text, "url")
-        //定义基础请求类
-        var httpRequest = buildHttpRequest()
-
         //批量
         if (checkBatch.isSelected) {
             //检查是否有指定文件名变量格式
@@ -314,13 +307,19 @@ class HttpToolController : BaseController(), Initializable {
             }
             Platform.runLater {
                 responseStr.text =
-                    HttpHander.batchSendHttp(httpRequest, bodyStr.text, batchDataFilePath.text, batchFileNameText.text)
+                    HttpHander.batchSendHttp(
+                        getFullUrl(),
+                        selectMethod.value,
+                        selectContentType.value, bodyStr.text,
+                        batchDataFilePath.text, batchFileNameText.text)
             }
         } else {
             val httpResponse = HttpHander.singleSendHttp(getFullUrl(),selectMethod.value,selectContentType.value, bodyStr.text)
             httpStatus.text = "200"
             responseStr.text = httpResponse
-            val newFilePath = GlobeProps.getOutputFolderValue() + File.separator + UUID.fastUUID().toString() + ".json"
+            //输出目录
+            val outputDir = ConfigUtil.preferences.get(ConfigUtil.PROPERTIES_OUTPUT_FOLDER,System.getProperty("user.dir"))
+            val newFilePath = outputDir + File.separator + UUID.fastUUID().toString() + ".json"
             FileUtil.writeString(httpResponse, newFilePath, Charset.forName("utf-8"))
         }
         uptNowTime()
