@@ -73,7 +73,7 @@ class IndexController : BaseController(), Initializable {
      * 初始化树
      */
     private fun initTreeView(keyword : String) {
-        var rootTreeItem = TreeItem(HttpTool("0", "-1", "", "根目录", HttpType.NODE.name, "", ""),ImageView(Image(ResourceUtil.getStream("folder.png"))))
+        val rootTreeItem = TreeItem(HttpTool("0", "-1", "", "根目录", HttpType.NODE.name, "", ""),ImageView(Image(ResourceUtil.getStream("folder.png"))))
         //HttpTool("1","0","11111",HttpType.NODE.name,"","")
 
         var httpTools = DbInfor.database.httpTools.toList()
@@ -278,7 +278,7 @@ class IndexController : BaseController(), Initializable {
     }
 
     private fun getAllParentNodeIds(httpTools: List<HttpTool>): List<String> {
-        var list = ArrayList<String>()
+        val list = ArrayList<String>()
         val httpList = httpTools.filter { it.type == HttpType.HTTP.name }.toList()
         loopHandle(httpList,list)
         return list
@@ -344,8 +344,8 @@ class IndexController : BaseController(), Initializable {
         if (!httpTool.isHttp()){
             return "folder.png"
         } else {
-            var jsonObject = JSONUtil.parseObj(httpTool.datas)
-            var method = jsonObject.getStr("method")
+            val jsonObject = JSONUtil.parseObj(httpTool.datas)
+            val method = jsonObject.getStr("method")
             return when (method) {
                 "GET" -> "get.png"
                 "POST" -> "post.png"
@@ -366,9 +366,9 @@ class IndexController : BaseController(), Initializable {
      */
     fun propertiesManage(actionEvent: ActionEvent) {
         //propertiesManage
-        var propertiesManageStage = Stage()
+        val propertiesManageStage = Stage()
         val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("propertiesManage.fxml"))
-        var scene = Scene(indexPane, 700.0, 500.0)
+        val scene = Scene(indexPane, 700.0, 500.0)
         propertiesManageStage.apply {
             title = "属性管理"
             isResizable = false
@@ -381,9 +381,9 @@ class IndexController : BaseController(), Initializable {
      * 地址管理菜单
      */
     fun addrManage(actionEvent: ActionEvent) {
-        var addrManageStage = Stage()
+        val addrManageStage = Stage()
         val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("addrManage.fxml"))
-        var scene = Scene(indexPane)
+        val scene = Scene(indexPane)
         addrManageStage.apply {
             title = "地址管理"
             isResizable = false
@@ -410,7 +410,7 @@ class IndexController : BaseController(), Initializable {
         val indexPane = fxmlLoader.load<Pane>()
         val selectParentController = fxmlLoader.getController<SelectParentController>()
         selectParentController.initForm(id) { initTreeView("") }
-        var scene = Scene(indexPane)
+        val scene = Scene(indexPane)
         selectParentStage.apply {
             title = "选择新节点"
             isResizable = false
