@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="rootPane" prefHeight="909.0" prefWidth="1140.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cn.lifay.lerverhc.view.ConvertToJsonToolController">
+   <children>
+      <TextArea fx:id="dataSourceText" layoutX="23.0" layoutY="101.0" prefHeight="786.0" prefWidth="382.0" />
+      <TextArea fx:id="resultText" layoutX="683.0" layoutY="101.0" prefHeight="786.0" prefWidth="433.0" />
+      <TextArea fx:id="ruleText" layoutX="429.0" layoutY="101.0" prefHeight="200.0" prefWidth="231.0" />
+      <Label layoutX="171.0" layoutY="54.0" prefHeight="33.0" prefWidth="60.0" text="数据源">
+         <font>
+            <Font name="System Bold" size="20.0" />
+         </font>
+      </Label>
+      <Label fx:id="ruleLabel" layoutX="505.0" layoutY="54.0" prefHeight="33.0" text="转换规则" underline="true">
+         <font>
+            <Font name="System Bold" size="20.0" />
+         </font>
+      </Label>
+      <Label layoutX="852.0" layoutY="54.0" prefHeight="33.0" text="转换结果">
+         <font>
+            <Font name="System Bold" size="20.0" />
+         </font>
+      </Label>
+      <ImageView fx:id="importImg" fitHeight="27.0" fitWidth="42.0" layoutX="245.0" layoutY="56.0" pickOnBounds="true" preserveRatio="true" />
+      <ImageView fx:id="exportImg" fitHeight="27.0" fitWidth="42.0" layoutX="952.0" layoutY="56.0" pickOnBounds="true" preserveRatio="true" />
+      <ImageView fx:id="convertImg" fitHeight="27.0" fitWidth="42.0" layoutX="593.0" layoutY="56.0" pickOnBounds="true" preserveRatio="true" />
+   </children>
+</AnchorPane>

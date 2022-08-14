@@ -1,0 +1,14 @@
+module LerverHC {
+    requires hutool.core;
+    requires java.xml.crypto;
+    requires javafx.graphics;
+    requires javafx.fxml;
+    requires javafx.controls;
+    requires com.dlsc.formsfx;
+    requires ktorm.core;
+    requires kotlin.stdlib;
+    requires hutool.http;
+    requires hutool.json;
+    requires java.desktop;
+    requires java.prefs;
+}
