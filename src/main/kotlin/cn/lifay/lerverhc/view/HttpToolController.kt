@@ -13,13 +13,13 @@ import cn.hutool.json.JSONObject
 import cn.hutool.json.JSONUtil
 import cn.lifay.lerverhc.db.DbInfor
 import cn.lifay.lerverhc.hander.ConfigUtil
-import cn.lifay.lerverhc.hander.GlobeProps
 import cn.lifay.lerverhc.hander.HttpHander
 import javafx.application.Platform
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.*
+import javafx.scene.paint.Color
 import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import model.HttpAddr
@@ -116,6 +116,8 @@ class HttpToolController : BaseController(), Initializable {
     /*检查结果*/
     @FXML
     var checkResult = TextField()
+    @FXML
+    var jsonCheckText = Label()
 
     private var isDownFile : Boolean = false
 
@@ -126,6 +128,7 @@ class HttpToolController : BaseController(), Initializable {
         selectMethod.value = Method.GET
         //addr
         selectAddr.apply {
+            //items.add(HttpAddr(id = "custom", name = "自定义地址",""))
             items.addAll(DbInfor.database.httpAddrs.toList())
             this.valueProperty().addListener { observable, oldValue, newValue ->
                 addrValue.text = newValue.addr
@@ -137,12 +140,12 @@ class HttpToolController : BaseController(), Initializable {
         //批量选项监听
         checkBatch.selectedProperty().addListener { observable, oldValue, newValue ->
             if (!oldValue && newValue) {
-                //批量文件名
+                //显示 批量文件
                 batchFileNameLabel.isVisible = true
                 batchFileNameText.isVisible = true
                 batchFileExtLabel.isVisible = true
             } else {
-                //批量文件名
+                //隐藏 批量文件
                 batchFileNameLabel.isVisible = false
                 batchFileNameText.isVisible = false
                 batchFileExtLabel.isVisible = false
@@ -153,6 +156,17 @@ class HttpToolController : BaseController(), Initializable {
         bodyStr.text = "{\n" +
                 "    \"bureauCode\": \"\${bureauCode}\"\n" +
                 "}"
+        bodyStr.textProperty().addListener{ observable, oldValue, newValue ->
+            try {
+                JSONUtil.parseObj(newValue)
+                jsonCheckText.textFill = Color.BLACK
+                jsonCheckText.text = "json格式:true"
+            } catch (e: Exception) {
+                jsonCheckText.textFill = Color.RED
+                jsonCheckText.text = "json格式:false 错误:${e.message}"
+            }
+        }
+
         batchDataFilePath.text = "C:\\Users\\lifay9092\\Desktop\\temp\\测试批量数据.json"
 
         //批量文件名
@@ -180,7 +194,7 @@ class HttpToolController : BaseController(), Initializable {
         }
         val dataObj = JSONUtil.parseObj(item.datas)
         selectAddr.value = DbInfor.database.httpAddrs.find { it.id eq item.addrId }
-        addrValue.text = selectAddr.value.addr
+        addrValue.text =  if (selectAddr.value != null) selectAddr.value.addr else ""
         selectMethod.value = Method.valueOf(dataObj["method"] as String)
         url.text = dataObj["url"] as String
         checkBatch.isSelected = dataObj["isBatch"] as Boolean
@@ -193,7 +207,7 @@ class HttpToolController : BaseController(), Initializable {
         httpNameText.text = item.name
         bodyStr.text = item.body
 
-        isDownFile = dataObj["downFile"] as Boolean
+        isDownFile = (dataObj["downFile"] ?: false) as Boolean
     }
 
     /**
@@ -240,9 +254,6 @@ class HttpToolController : BaseController(), Initializable {
                 ConfigUtil.preferences.put(ConfigUtil.PROPERTIES_OUTPUT_FOLDER,directory.absolutePath)
             }
         }else{
-            //定义基础请求类
-            var httpRequest = buildHttpRequest()
-
             if (checkBatch.isSelected) {
                 //批量执行
                 //检查是否有指定文件名变量格式
@@ -251,7 +262,9 @@ class HttpToolController : BaseController(), Initializable {
                     return
                 }
                 responseStr.text = parseJsonFmtStr(HttpHander.batchSendHttp(
-                    httpRequest,
+                    getFullUrl(),
+                    selectMethod.value,
+                    selectContentType.value,
                     bodyStr.text,
                     batchDataFilePath.text,
                     batchFileNameText.text
@@ -281,9 +294,6 @@ class HttpToolController : BaseController(), Initializable {
      */
     fun sendHttpAndSave(actionEvent: ActionEvent) {
         checkParam(url.text, "url")
-        //定义基础请求类
-        var httpRequest = buildHttpRequest()
-
         //批量
         if (checkBatch.isSelected) {
             //检查是否有指定文件名变量格式
@@ -291,15 +301,25 @@ class HttpToolController : BaseController(), Initializable {
                 Alert(Alert.AlertType.ERROR, "【批量模板文件名】不能为空", ButtonType.CLOSE).show()
                 return
             }
+            if (StrUtil.isBlank(batchDataFilePath.text)) {
+                Alert(Alert.AlertType.ERROR, "【数据文件】不能为空", ButtonType.CLOSE).show()
+                return
+            }
             Platform.runLater {
                 responseStr.text =
-                    HttpHander.batchSendHttp(httpRequest, bodyStr.text, batchDataFilePath.text, batchFileNameText.text)
+                    HttpHander.batchSendHttp(
+                        getFullUrl(),
+                        selectMethod.value,
+                        selectContentType.value, bodyStr.text,
+                        batchDataFilePath.text, batchFileNameText.text)
             }
         } else {
             val httpResponse = HttpHander.singleSendHttp(getFullUrl(),selectMethod.value,selectContentType.value, bodyStr.text)
             httpStatus.text = "200"
             responseStr.text = httpResponse
-            val newFilePath = GlobeProps.getOutputFolderValue() + File.separator + UUID.fastUUID().toString() + ".json"
+            //输出目录
+            val outputDir = ConfigUtil.preferences.get(ConfigUtil.PROPERTIES_OUTPUT_FOLDER,System.getProperty("user.dir"))
+            val newFilePath = outputDir + File.separator + UUID.fastUUID().toString() + ".json"
             FileUtil.writeString(httpResponse, newFilePath, Charset.forName("utf-8"))
         }
         uptNowTime()
@@ -395,9 +415,15 @@ class HttpToolController : BaseController(), Initializable {
     }
 
     fun getFullUrl(): String {
-        var host = URLUtil.normalize(selectAddr.value.addr)
-        var uri = if (url.text.startsWith("/")) url.text else "/${url.text}"
-        return host + uri
+        val httpAddr = selectAddr.value
+        if (httpAddr.isCustom()) {
+            return URLUtil.normalize(url.text)
+        }else{
+            var host = URLUtil.normalize(httpAddr.addr)
+            var uri = if (url.text.startsWith("/")) url.text else "/${url.text}"
+            return host + uri
+        }
+
     }
 
 }

@@ -1,10 +1,12 @@
 package cn.lifay.lerverhc.hander
 
 import cn.hutool.core.io.FileUtil
-import cn.hutool.core.map.MapUtil
 import cn.hutool.core.util.ReUtil
 import cn.hutool.core.util.StrUtil
-import cn.hutool.http.*
+import cn.hutool.http.ContentType
+import cn.hutool.http.HttpRequest
+import cn.hutool.http.HttpUtil
+import cn.hutool.http.Method
 import cn.hutool.json.JSONObject
 import cn.hutool.json.JSONUtil
 import javafx.scene.control.Alert
@@ -72,32 +74,68 @@ object HttpHander {
      */
     fun singleSendHttp(url: String?, method: Method, contentType: ContentType, bodyStr: String): String? {
         //组装参数信息
-        when (method) {
-            Method.GET -> {
-                when (contentType) {
-                    ContentType.FORM_URLENCODED -> return if (bodyStr.isBlank()) HttpUtil.get(url) else HttpUtil.get(url,JSONUtil.parseObj(bodyStr))
+        try {
+            when (method) {
+                Method.GET -> {
+                    when (contentType) {
+                        ContentType.FORM_URLENCODED -> return if (bodyStr.isBlank()) HttpUtil.get(url) else HttpUtil.get(
+                            url,
+                            JSONUtil.parseObj(bodyStr)
+                        )
+                    }
+                }
+                Method.POST -> {
+                    when (contentType) {
+                        ContentType.FORM_URLENCODED -> return if (bodyStr.isBlank()) HttpUtil.post(
+                            url,
+                            ""
+                        ) else HttpUtil.post(url, JSONUtil.parseObj(bodyStr))
+                        ContentType.MULTIPART -> return if (bodyStr.isBlank()) HttpUtil.post(url, "") else post(
+                            url,
+                            bodyStr
+                        )
+                        ContentType.JSON -> return HttpUtil.post(url, bodyStr)
+                    }
                 }
             }
-            Method.POST -> {
-                when (contentType) {
-                    ContentType.FORM_URLENCODED -> return if (bodyStr.isBlank()) HttpUtil.post(url,"") else HttpUtil.post(url,JSONUtil.parseObj(bodyStr))
-                    ContentType.MULTIPART -> return if (bodyStr.isBlank()) HttpUtil.post(url,"") else HttpUtil.post(url,JSONUtil.parseObj(bodyStr))
-                    ContentType.JSON -> return HttpUtil.post(url,bodyStr)
-                }
-            }
+        } catch (e: Exception) {
+            Alert(Alert.AlertType.ERROR, "HTTP请求失败:${e.message}").show()
+            return null
         }
-        Alert(Alert.AlertType.ERROR,"不支持当前请求:[${method.name}] [${contentType.value}]").show()
+        Alert(Alert.AlertType.ERROR, "不支持当前请求:[${method.name}] [${contentType.value}]").show()
         return null
     }
 
+    private fun post(url: String?, bodyObjString: String?): String? {
+        //是否有文件
+        val bodyObj = JSONUtil.parseObj(bodyObjString)
+        for (key in bodyObj!!.keys) {
+            bodyObj[key]?.let {
+                if (it is String && it.startsWith("@")) {
+                    val newFilePath = it.substring(1)
+                    if (!FileUtil.exist(newFilePath)) {
+                        throw Exception("文件不存在:${newFilePath}")
+                    }
+                    bodyObj[key] = File(newFilePath)
+                }
+            }
+        }
+        //return HttpUtil.post(url, bodyObj)
+//        val map = HashMap<String,Any>()
+//        map["file"] = File("E:\\\\TEST\\\\swserver\\\\swserver.bat")
+        return HttpUtil.post(url, bodyObj)
+    }
+
     /**
-     * 批量发送http请求
+     * 批量发送http请求并保存
      */
     fun batchSendHttp(
-        httpRequest: HttpRequest?,
+        url:String,
+        method: Method,
+        contentType: ContentType,
         bodyStr: String?,
         batchDataFilePath: String,
-        batchFileNameStr: String
+        batchFileNameStr: String?
     ): String? {
         var count = 0
         try {/*解析模板和数据文件*/
@@ -111,10 +149,11 @@ object HttpHander {
                 return ""
             }
             //输出目录
-            val outputDir = GlobeProps.getOutputFolderValue() + File.separator
+            val outputDir = ConfigUtil.preferences.get(ConfigUtil.PROPERTIES_OUTPUT_FOLDER,System.getProperty("user.dir")) + File.separator
             //提取变量key ${}
-            var bodyKeys = getVars(bodyStr)
-            var fileNameKeys = getVars(batchFileNameStr)
+            val bodyKeys = getVars(bodyStr)
+            val fileNameKeys = getVars(batchFileNameStr)
+
             //遍历
             val jsonArray = JSONUtil.parseArray(readStr)
             for (index in jsonArray.indices) {
@@ -122,14 +161,14 @@ object HttpHander {
                 //替换模板变量
                 val realBodyStr = getRealReplaceStr(bodyStr, bodyKeys, jsonObject)
                 try {
-
-                    var httpResponsebody = httpRequest!!.body(realBodyStr).execute().body()
+                    val httpResponsebody = singleSendHttp(url,method,contentType,realBodyStr ?: "")
                     //println(httpRequest!!.body(realBodyStr).execute().body())
                     //输出文件名
                     val realFileNameStr = getRealReplaceStr(batchFileNameStr, fileNameKeys, jsonObject)
-                    var outputFilePath = "$outputDir$realFileNameStr.json"
+                    val outputFilePath = "$outputDir$realFileNameStr.json"
                     FileUtil.writeString(httpResponsebody, outputFilePath, Charset.forName("utf-8"))
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     return "执行失败,index[${index}],msg:${e.message}"
                 }
                 count++

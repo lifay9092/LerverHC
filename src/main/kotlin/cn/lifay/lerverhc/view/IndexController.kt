@@ -1,9 +1,11 @@
 package cn.lifay.lerverhc.view
 
 import cn.hutool.core.io.resource.ResourceUtil
+import cn.hutool.core.util.IdUtil
 import cn.hutool.core.util.StrUtil
 import cn.hutool.json.JSONUtil
 import cn.lifay.lerverhc.db.DbInfor
+import javafx.collections.ObservableList
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
@@ -71,7 +73,7 @@ class IndexController : BaseController(), Initializable {
      * 初始化树
      */
     private fun initTreeView(keyword : String) {
-        var rootTreeItem = TreeItem(HttpTool("0", "-1", "", "根目录", HttpType.NODE.name, "", ""),ImageView(Image(ResourceUtil.getStream("folder.png"))))
+        val rootTreeItem = TreeItem(HttpTool("0", "-1", "", "根目录", HttpType.NODE.name, "", ""),ImageView(Image(ResourceUtil.getStream("folder.png"))))
         //HttpTool("1","0","11111",HttpType.NODE.name,"","")
 
         var httpTools = DbInfor.database.httpTools.toList()
@@ -106,11 +108,6 @@ class IndexController : BaseController(), Initializable {
                             //新增目录菜单
                             items.add(MenuItem("新增目录").apply {
                                 setOnAction {
-                                    //假如是NODE,判断是否有子节点
-                                    if (selectItem.isHttp()) {
-                                        Alert(Alert.AlertType.ERROR, "非节点类型，无法添加").show()
-                                        return@setOnAction
-                                    }
                                     val textInputDialog = TextInputDialog().apply {
                                         title = "请输入节点名称"
                                     }
@@ -138,6 +135,56 @@ class IndexController : BaseController(), Initializable {
 
                                 }
                             })
+                            //新增节点菜单
+                            items.add(MenuItem("新增节点").apply {
+                                setOnAction {
+                                    //新增一个临时节点
+                                    var tempHttpModel = HttpTool(id = IdUtil.fastUUID(), parentId = selectItem.id, name = "新建http", type = HttpType.HTTP.name,
+                                    addrId = "custom", body = """
+                                        {
+                                            
+                                        }
+                                    """.trimIndent(), datas = """
+                                        {
+                                            "method":"GET","isBatch":false,
+                                            "isSync":false,
+                                            "url":"http://localhost:80/temp",
+                                            "authorization":"",
+                                            "contentType":"FORM_URLENCODED"}
+                                    """.trimIndent())
+                                    //入库
+                                    DbInfor.database.insert(HttpTools){
+                                        set(HttpTools.id,tempHttpModel.id)
+                                        set(HttpTools.parentId,tempHttpModel.parentId)
+                                        set(HttpTools.name,tempHttpModel.name)
+                                        set(HttpTools.type,tempHttpModel.type)
+                                        set(HttpTools.addrId,tempHttpModel.addrId)
+                                        set(HttpTools.body,tempHttpModel.body)
+                                        set(HttpTools.datas,tempHttpModel.datas)
+                                    }
+                                    //加载
+                                    addTreeItemById(httpTreeView.root.children,tempHttpModel.parentId,tempHttpModel)
+                                    addTabHttpForm(tempHttpModel)
+                                }
+                            })
+                            //导入API文档菜单
+                            items.add(MenuItem("导入API文档").apply {
+                                setOnAction {
+                                    var apiManageStage = Stage()
+                                    val fxmlLoader = FXMLLoader(ResourceUtil.getResource("apiManage.fxml"))
+                                    val indexPane = fxmlLoader.load<Pane>()
+                                    val apiController = fxmlLoader.getController<ApiController>()
+                                    apiController.initForm(selectItem.id)
+                                    var scene = Scene(indexPane)
+                                    apiManageStage.apply {
+                                        title = "Api管理"
+                                        isResizable = false
+                                        setScene(scene)
+                                    }
+                                    apiManageStage.show()
+
+                                }
+                            })
                         }
                         if (selectItem!!.id != "0"){
                             //删除菜单
@@ -160,6 +207,15 @@ class IndexController : BaseController(), Initializable {
                                         if (alert.showAndWait().get() == ButtonType.OK) {
                                             DbInfor.database.delete(HttpTools) { httpTool ->
                                                 httpTool.id eq selectItem!!.id
+                                            }
+                                            //tab页
+                                            tabList.tabs.removeIf { i ->
+                                                i.id == selectItem.id
+                                            }
+                                            //树菜单
+                                            httpTreeView.apply {
+                                                removeTreeItemById(root.children,selectItem.id)
+                                                refresh()
                                             }
                                         }
                                     }
@@ -189,8 +245,40 @@ class IndexController : BaseController(), Initializable {
         }
     }
 
+    private fun removeTreeItemById(children : ObservableList<TreeItem<HttpTool>>,id: String) {
+        if (isExistTreeItemById(children,id)) {
+            children.removeIf{i ->
+                i.value.id == id
+            }
+            return
+        }
+        for (child in children) {
+            if (child.children != null){
+                removeTreeItemById(child.children,id)
+            }
+        }
+    }
+
+    private fun addTreeItemById(children : ObservableList<TreeItem<HttpTool>>,parentId: String,httpTool: HttpTool) {
+
+        for (child in children) {
+            if (child.value.id == parentId && child.children != null) {
+                val treeItem = buildTreeItem(httpTool)
+                child.children.add(treeItem)
+                return
+            }else if (child.children != null){
+                addTreeItemById(child.children,parentId,httpTool)
+            }
+        }
+    }
+
+    private fun isExistTreeItemById(children : ObservableList<TreeItem<HttpTool>>,id: String): Boolean {
+        return (children.find { it.value.id == id } != null)
+
+    }
+
     private fun getAllParentNodeIds(httpTools: List<HttpTool>): List<String> {
-        var list = ArrayList<String>()
+        val list = ArrayList<String>()
         val httpList = httpTools.filter { it.type == HttpType.HTTP.name }.toList()
         loopHandle(httpList,list)
         return list
@@ -256,8 +344,8 @@ class IndexController : BaseController(), Initializable {
         if (!httpTool.isHttp()){
             return "folder.png"
         } else {
-            var jsonObject = JSONUtil.parseObj(httpTool.datas)
-            var method = jsonObject.getStr("method")
+            val jsonObject = JSONUtil.parseObj(httpTool.datas)
+            val method = jsonObject.getStr("method")
             return when (method) {
                 "GET" -> "get.png"
                 "POST" -> "post.png"
@@ -278,9 +366,9 @@ class IndexController : BaseController(), Initializable {
      */
     fun propertiesManage(actionEvent: ActionEvent) {
         //propertiesManage
-        var propertiesManageStage = Stage()
+        val propertiesManageStage = Stage()
         val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("propertiesManage.fxml"))
-        var scene = Scene(indexPane, 700.0, 500.0)
+        val scene = Scene(indexPane, 700.0, 500.0)
         propertiesManageStage.apply {
             title = "属性管理"
             isResizable = false
@@ -293,9 +381,9 @@ class IndexController : BaseController(), Initializable {
      * 地址管理菜单
      */
     fun addrManage(actionEvent: ActionEvent) {
-        var addrManageStage = Stage()
+        val addrManageStage = Stage()
         val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("addrManage.fxml"))
-        var scene = Scene(indexPane)
+        val scene = Scene(indexPane)
         addrManageStage.apply {
             title = "地址管理"
             isResizable = false
@@ -309,15 +397,7 @@ class IndexController : BaseController(), Initializable {
      * api管理菜单
      */
     fun apiManage(actionEvent: ActionEvent) {
-        var apiManageStage = Stage()
-        val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("apiManage.fxml"))
-        var scene = Scene(indexPane)
-        apiManageStage.apply {
-            title = "Api管理"
-            isResizable = false
-            setScene(scene)
-        }
-        apiManageStage.show()
+
 
     }
 
@@ -330,7 +410,7 @@ class IndexController : BaseController(), Initializable {
         val indexPane = fxmlLoader.load<Pane>()
         val selectParentController = fxmlLoader.getController<SelectParentController>()
         selectParentController.initForm(id) { initTreeView("") }
-        var scene = Scene(indexPane)
+        val scene = Scene(indexPane)
         selectParentStage.apply {
             title = "选择新节点"
             isResizable = false

@@ -14,7 +14,13 @@
       "pattern":"\\QaddrManage.fxml\\E"
     }, 
     {
+      "pattern":"\\QapiManage.fxml\\E"
+    }, 
+    {
       "pattern":"\\Qfolder.png\\E"
+    }, 
+    {
+      "pattern":"\\Qget.png\\E"
     }, 
     {
       "pattern":"\\Qhttp.png\\E"
@@ -32,10 +38,16 @@
       "pattern":"\\Qorg/sqlite/native/Windows/x86_64/sqlitejdbc.dll\\E"
     }, 
     {
+      "pattern":"\\Qpost.png\\E"
+    }, 
+    {
       "pattern":"\\QpropertiesManage.fxml\\E"
     }, 
     {
       "pattern":"\\Qreload.png\\E"
+    }, 
+    {
+      "pattern":"\\QselectParent.fxml\\E"
     }, 
     {
       "pattern":"\\Qsqlite-jdbc.properties\\E"
@@ -61,8 +73,16 @@
     {
       "name":"com/sun/javafx/scene/control/skin/resources/controls",
       "locales":[
+        "", 
         "und", 
         "zh-CN"
+      ]
+    }, 
+    {
+      "name":"sun.awt.resources.awt",
+      "classNames":[
+        "sun.awt.resources.awt", 
+        "sun.awt.resources.awt_zh_CN"
       ]
     }
   ]

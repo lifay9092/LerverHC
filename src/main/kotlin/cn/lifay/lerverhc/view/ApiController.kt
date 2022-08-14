@@ -3,6 +3,7 @@ package cn.lifay.lerverhc.view
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.IdUtil
 import cn.hutool.core.util.ObjectUtil
+import cn.hutool.http.HttpUtil
 import cn.hutool.json.JSONObject
 import cn.hutool.json.JSONUtil
 import cn.lifay.lerverhc.db.DbInfor
@@ -63,14 +64,40 @@ class ApiController : BaseController(), Initializable {
     @FXML
     var filePath = TextArea()
 
+    lateinit var nodeId : String
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         selectAddrs.items.addAll(listOf(ApiAddrModel("20", ""), ApiAddrModel("12", "")))
         filePath.text = ConfigUtil.preferences.get(ConfigUtil.API_JSON_FILE, "")
 
     }
 
-    fun impFromAddr(actionEvent: ActionEvent) {
+    fun initForm(nodeId: String) {
+        this.nodeId = nodeId
+    }
 
+    fun impFromAddr(actionEvent: ActionEvent) {
+        if (selectAddrs.selectionModel.isEmpty) {
+            Alert(Alert.AlertType.ERROR, "文件不能为空").show()
+            return
+        }
+        var apiModel = try {
+            val str = HttpUtil.get(selectAddrs.selectionModel.selectedItem.addr)
+            JSONUtil.toBean(str,ApiModel::class.java)
+        } catch (e: Exception) {
+            Alert(Alert.AlertType.ERROR,"api接口请求失败:${e}").show()
+            return
+        }
+        disableBtn(true)
+        val func : (Int) -> Unit = {
+            Platform.runLater {
+                //结束
+                disableBtn(false)
+                Alert(Alert.AlertType.INFORMATION,"导入成功:${it} 条").show()
+            }
+        }
+        GlobalScope.launch {
+            impHandle(apiModel,func)
+        }
     }
 
     fun selectFile(actionEvent: ActionEvent) {
@@ -114,17 +141,19 @@ class ApiController : BaseController(), Initializable {
     }
 
     fun impHandle(apiModel: ApiModel?, resultFunc: (Int) -> Unit) {
+        /*判断父节点*/
+        val panId = nodeId ?: "0"
         val title = apiModel!!.info!!.title
         //addr
         /*一级目录 应用*/
-        val firstDir = DbInfor.database.httpTools.find { (it.parentId eq "0") and (it.name eq title!!) }
+        val firstDir = DbInfor.database.httpTools.find { (it.parentId eq panId) and (it.name eq title!!) }
         //val firstDir = firstDirQ.first()
         var firstDirId: String
         if (firstDir == null) {
             firstDirId = IdUtil.fastSimpleUUID()
             DbInfor.database.insert(HttpTools) {
                 set(HttpTools.id, firstDirId)
-                set(HttpTools.parentId, "0")
+                set(HttpTools.parentId, panId)
                 set(HttpTools.name, title)
                 set(HttpTools.type, HttpType.NODE.name)
             }
