@@ -35,6 +35,9 @@
       "pattern":"\\Qindex.fxml\\E"
     }, 
     {
+      "pattern":"\\Qorg/kordamp/bootstrapfx/bootstrapfx.css\\E"
+    }, 
+    {
       "pattern":"\\Qorg/sqlite/native/Windows/x86_64/sqlitejdbc.dll\\E"
     }, 
     {

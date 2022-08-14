@@ -15,8 +15,8 @@
       <TextField fx:id="addrId" layoutX="14.0" layoutY="65.0" prefHeight="23.0" prefWidth="27.0" />
       <TextField fx:id="addrName" layoutX="88.0" layoutY="110.0" prefHeight="23.0" prefWidth="194.0" />
       <TextField fx:id="addrValue" layoutX="88.0" layoutY="157.0" prefHeight="23.0" prefWidth="194.0" />
-      <Button layoutX="244.0" layoutY="65.0" mnemonicParsing="false" onAction="#delAdder" text="删除" />
-      <Button layoutX="211.0" layoutY="224.0" mnemonicParsing="false" onAction="#saveForm" prefHeight="23.0" prefWidth="56.0" text="保存" />
-      <Button layoutX="144.0" layoutY="224.0" mnemonicParsing="false" onAction="#clearForm" prefHeight="23.0" prefWidth="50.0" text="清理" />
+      <Button styleClass="btn-danger" layoutX="244.0" layoutY="65.0" mnemonicParsing="false" onAction="#delAdder" text="删除" />
+      <Button styleClass="btn-primary" layoutX="211.0" layoutY="224.0" mnemonicParsing="false" onAction="#saveForm" prefHeight="23.0" prefWidth="56.0" text="保存" />
+      <Button styleClass="btn-warning"  layoutX="144.0" layoutY="224.0" mnemonicParsing="false" onAction="#clearForm" prefHeight="23.0" prefWidth="50.0" text="清理" />
    </children>
 </AnchorPane>

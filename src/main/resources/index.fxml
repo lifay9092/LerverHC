@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="rootPane" prefHeight="616.0" prefWidth="903.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cn.lifay.lerverhc.view.IndexController">
+<BorderPane prefHeight="616.0" prefWidth="903.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cn.lifay.lerverhc.view.IndexController">
 
     <top>
         <MenuBar>
@@ -23,6 +23,11 @@
                         <MenuItem mnemonicParsing="false" onAction="#propertiesManage" text="属性管理" />
                         <MenuItem mnemonicParsing="false" onAction="#addrManage" text="地址管理" />
                         <MenuItem mnemonicParsing="false" onAction="#apiManage" text="Api管理" />
+                    </items>
+                </Menu>
+                <Menu text="辅助工具">
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#convertToJsonTool" text="数据转换json" />
                     </items>
                 </Menu>
             </menus>

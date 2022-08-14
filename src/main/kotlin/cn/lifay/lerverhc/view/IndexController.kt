@@ -4,6 +4,8 @@ import cn.hutool.core.io.resource.ResourceUtil
 import cn.hutool.core.util.IdUtil
 import cn.hutool.core.util.StrUtil
 import cn.hutool.json.JSONUtil
+import cn.lifay.lerverhc.bindEscKey
+import cn.lifay.lerverhc.bootstrap
 import cn.lifay.lerverhc.db.DbInfor
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
@@ -175,7 +177,7 @@ class IndexController : BaseController(), Initializable {
                                     val indexPane = fxmlLoader.load<Pane>()
                                     val apiController = fxmlLoader.getController<ApiController>()
                                     apiController.initForm(selectItem.id)
-                                    var scene = Scene(indexPane)
+                                    var scene = Scene(indexPane).bootstrap()
                                     apiManageStage.apply {
                                         title = "Api管理"
                                         isResizable = false
@@ -366,9 +368,9 @@ class IndexController : BaseController(), Initializable {
      */
     fun propertiesManage(actionEvent: ActionEvent) {
         //propertiesManage
-        val propertiesManageStage = Stage()
+        val propertiesManageStage = Stage().bindEscKey()
         val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("propertiesManage.fxml"))
-        val scene = Scene(indexPane, 700.0, 500.0)
+        val scene = Scene(indexPane, 700.0, 500.0).bootstrap()
         propertiesManageStage.apply {
             title = "属性管理"
             isResizable = false
@@ -381,16 +383,15 @@ class IndexController : BaseController(), Initializable {
      * 地址管理菜单
      */
     fun addrManage(actionEvent: ActionEvent) {
-        val addrManageStage = Stage()
+        val addrManageStage = Stage().bindEscKey()
         val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("addrManage.fxml"))
-        val scene = Scene(indexPane)
+        val scene = Scene(indexPane).bootstrap()
         addrManageStage.apply {
             title = "地址管理"
             isResizable = false
             setScene(scene)
         }
         addrManageStage.show()
-
     }
 
     /**
@@ -405,18 +406,33 @@ class IndexController : BaseController(), Initializable {
      * 移动到节点的界面
      */
     fun selectParentNode(id : String) {
-        var selectParentStage = Stage()
+        var selectParentStage = Stage().bindEscKey()
         val fxmlLoader = FXMLLoader(ResourceUtil.getResource("selectParent.fxml"))
         val indexPane = fxmlLoader.load<Pane>()
         val selectParentController = fxmlLoader.getController<SelectParentController>()
         selectParentController.initForm(id) { initTreeView("") }
-        val scene = Scene(indexPane)
+        val scene = Scene(indexPane).bootstrap()
         selectParentStage.apply {
             title = "选择新节点"
             isResizable = false
             setScene(scene)
         }
         selectParentStage.show()
+    }
+
+    /**
+     * 转换json
+     */
+    fun convertToJsonTool(actionEvent: ActionEvent) {
+        val convertToJsonToolStage = Stage().bindEscKey()
+        val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("convertToJsonTool.fxml"))
+        val scene = Scene(indexPane).bootstrap()
+        convertToJsonToolStage.apply {
+            title = "转换JSON"
+            isResizable = false
+            setScene(scene)
+        }
+        convertToJsonToolStage.show()
     }
 
 }

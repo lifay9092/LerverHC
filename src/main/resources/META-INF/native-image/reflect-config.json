@@ -37,6 +37,7 @@
   "queryAllDeclaredMethods":true,
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
+    {"name":"checkDataFile","parameterTypes":["javafx.event.ActionEvent"] }, 
     {"name":"openOutputFolder","parameterTypes":["javafx.event.ActionEvent"] }, 
     {"name":"saveHttp","parameterTypes":["javafx.event.ActionEvent"] }, 
     {"name":"sendHttp","parameterTypes":["javafx.event.ActionEvent"] }, 
@@ -103,6 +104,10 @@
     {"name":"getFontFactory","parameterTypes":[] }, 
     {"name":"getPipeline","parameterTypes":[] }
   ]
+},
+{
+  "name":"com.sun.prism.shader.DrawPgram_Color_Loader",
+  "methods":[{"name":"loadShader","parameterTypes":["com.sun.prism.ps.ShaderFactory","java.io.InputStream"] }]
 },
 {
   "name":"com.sun.prism.shader.DrawRoundRect_Color_Loader",
@@ -227,6 +232,7 @@
   "queryAllDeclaredMethods":true,
   "methods":[
     {"name":"getId","parameterTypes":[] }, 
+    {"name":"getStyleClass","parameterTypes":[] }, 
     {"name":"setId","parameterTypes":["java.lang.String"] }, 
     {"name":"setLayoutX","parameterTypes":["double"] }, 
     {"name":"setLayoutY","parameterTypes":["double"] }, 
