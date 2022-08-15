@@ -1,6 +1,7 @@
 package cn.lifay.lerverhc
 
 import cn.hutool.core.io.resource.ResourceUtil
+import cn.lifay.lerverhc.hander.bootstrap
 import javafx.application.Application
 import javafx.application.Platform
 import javafx.fxml.FXMLLoader

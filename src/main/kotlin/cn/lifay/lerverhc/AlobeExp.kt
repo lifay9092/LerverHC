@@ -8,17 +8,3 @@ import javafx.stage.Stage
 import org.kordamp.bootstrapfx.BootstrapFX
 
 
-fun Scene.bootstrap(): Scene {
-    stylesheets.add(BootstrapFX.bootstrapFXStylesheet())
-    return this
-}
-
-
-fun Stage.bindEscKey():Stage{
-    addEventHandler(KeyEvent.KEY_PRESSED){
-        if (it.code == KeyCode.ESCAPE) {
-            close()
-        }
-    }
-    return this
-}
