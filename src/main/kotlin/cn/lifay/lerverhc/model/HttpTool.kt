@@ -16,13 +16,15 @@ data class HttpTool(
     var type: String,
     var body: String,//请求参数串
     var datas: String,//
-){
-    fun isNode():Boolean{
+) {
+    fun isNode(): Boolean {
         return HttpType.NODE.name == type
     }
-    fun isHttp():Boolean{
+
+    fun isHttp(): Boolean {
         return HttpType.HTTP.name == type
     }
+
     override fun toString(): String {
         return this.name
     }
@@ -46,7 +48,8 @@ object HttpTools : BaseTable<HttpTool>("HTTP_TOOL") {
         body = row[body] ?: "",
         datas = row[datas] ?: "",
 
-    )
+        )
+
     val Database.httpTools get() = this.sequenceOf(HttpTools)
 
 }

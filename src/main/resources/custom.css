@@ -1,0 +1,13 @@
+
+.button{
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.table-row-cell:empty {
+    -fx-background-color: #dadad3;
+}
+
+.table-row-cell:empty .table-cell {
+    -fx-border-width: 0px;
+}

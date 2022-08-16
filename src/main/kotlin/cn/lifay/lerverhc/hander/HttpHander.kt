@@ -3,12 +3,10 @@ package cn.lifay.lerverhc.hander
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.ReUtil
 import cn.hutool.core.util.StrUtil
-import cn.hutool.http.ContentType
-import cn.hutool.http.HttpRequest
-import cn.hutool.http.HttpUtil
-import cn.hutool.http.Method
+import cn.hutool.http.*
 import cn.hutool.json.JSONObject
 import cn.hutool.json.JSONUtil
+import cn.lifay.lerverhc.model.Header
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonType
 import org.apache.commons.logging.LogFactory
@@ -27,6 +25,10 @@ object HttpHander {
     val logger = LogFactory.getLog(HttpHander::class.java)
 
     fun checkDataFile(bodyStr: String?, batchDataFilePath: String): String {
+        if (!FileUtil.exist(batchDataFilePath)) {
+            Alert(Alert.AlertType.ERROR, "文件不存在:$batchDataFilePath").show()
+            return ""
+        }
         //提取变量key ${}
         var keys = getVars(bodyStr)
         //循环批量数据文件
@@ -72,38 +74,41 @@ object HttpHander {
     /**
      * 发送http请求
      */
-    fun singleSendHttp(url: String?, method: Method, contentType: ContentType, bodyStr: String): String? {
+    fun singleSendHttp(
+        url: String?,
+        method: Method,
+        contentType: ContentType,
+        headers: List<Header>,
+        bodyStr: String
+    ): HttpResponse? {
         //组装参数信息
         try {
-            when (method) {
-                Method.GET -> {
-                    when (contentType) {
-                        ContentType.FORM_URLENCODED -> return if (bodyStr.isBlank()) HttpUtil.get(url) else HttpUtil.get(
-                            url,
-                            JSONUtil.parseObj(bodyStr)
-                        )
-                    }
-                }
-                Method.POST -> {
-                    when (contentType) {
-                        ContentType.FORM_URLENCODED -> return if (bodyStr.isBlank()) HttpUtil.post(
-                            url,
-                            ""
-                        ) else HttpUtil.post(url, JSONUtil.parseObj(bodyStr))
-                        ContentType.MULTIPART -> return if (bodyStr.isBlank()) HttpUtil.post(url, "") else post(
-                            url,
-                            bodyStr
-                        )
-                        ContentType.JSON -> return HttpUtil.post(url, bodyStr)
-                    }
-                }
+            val httpRequest = buildHttpRequest(url, method, contentType, headers)
+            if (Method.POST == method && ContentType.JSON == contentType && bodyStr.isNotBlank()) {
+                httpRequest.body(bodyStr)
+            } else if (bodyStr.isNotBlank()) {
+                httpRequest.form(JSONUtil.parseObj(bodyStr))
             }
+            return httpRequest.execute()
         } catch (e: Exception) {
             Alert(Alert.AlertType.ERROR, "HTTP请求失败:${e.message}").show()
             return null
         }
         Alert(Alert.AlertType.ERROR, "不支持当前请求:[${method.name}] [${contentType.value}]").show()
         return null
+    }
+
+    /**
+     * 定义基础请求类
+     */
+    fun buildHttpRequest(url: String?, method: Method, contentType: ContentType, headers: List<Header>): HttpRequest {
+        val httpRequest = HttpUtil.createRequest(method, url)
+        httpRequest.contentType(contentType.value)
+        for (header in headers) {
+            httpRequest.header(header.key, header.value)
+        }
+
+        return httpRequest
     }
 
     private fun post(url: String?, bodyObjString: String?): String? {
@@ -130,9 +135,10 @@ object HttpHander {
      * 批量发送http请求并保存
      */
     fun batchSendHttp(
-        url:String,
+        url: String,
         method: Method,
         contentType: ContentType,
+        headers: List<Header>,
         bodyStr: String?,
         batchDataFilePath: String,
         batchFileNameStr: String?
@@ -149,7 +155,10 @@ object HttpHander {
                 return ""
             }
             //输出目录
-            val outputDir = ConfigUtil.preferences.get(ConfigUtil.PROPERTIES_OUTPUT_FOLDER,System.getProperty("user.dir")) + File.separator
+            val outputDir = ConfigUtil.preferences.get(
+                ConfigUtil.PROPERTIES_OUTPUT_FOLDER,
+                System.getProperty("user.dir")
+            ) + File.separator
             //提取变量key ${}
             val bodyKeys = getVars(bodyStr)
             val fileNameKeys = getVars(batchFileNameStr)
@@ -161,12 +170,12 @@ object HttpHander {
                 //替换模板变量
                 val realBodyStr = getRealReplaceStr(bodyStr, bodyKeys, jsonObject)
                 try {
-                    val httpResponsebody = singleSendHttp(url,method,contentType,realBodyStr ?: "")
+                    val httpResponsebody = singleSendHttp(url, method, contentType, headers, realBodyStr ?: "")
                     //println(httpRequest!!.body(realBodyStr).execute().body())
                     //输出文件名
                     val realFileNameStr = getRealReplaceStr(batchFileNameStr, fileNameKeys, jsonObject)
                     val outputFilePath = "$outputDir$realFileNameStr.json"
-                    FileUtil.writeString(httpResponsebody, outputFilePath, Charset.forName("utf-8"))
+                    FileUtil.writeString(httpResponsebody?.body(), outputFilePath, Charset.forName("utf-8"))
                 } catch (e: Exception) {
                     e.printStackTrace()
                     return "执行失败,index[${index}],msg:${e.message}"
@@ -209,6 +218,17 @@ object HttpHander {
             return ContentType.FORM_URLENCODED.name
         }
         return ContentType.values().first { it.value == consumes[0] }.name
+    }
+
+    fun downFile(url: String, directory: File) {
+        val response = HttpUtil.createGet(url, true)
+            .timeout(-1)
+            .executeAsync()
+        if (response.isOk) {
+            response.writeBodyForFile(directory, null)
+        } else {
+            throw HttpException("Server response error with status code: [${response.status}]")
+        }
     }
 
 }

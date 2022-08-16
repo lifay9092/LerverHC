@@ -32,13 +32,17 @@ class AddrController : BaseController(), Initializable {
 
     @FXML
     var addrRootPane = AnchorPane()
+
     //form
     @FXML
     var selectAddrs = ChoiceBox<HttpAddr>()
+
     @FXML
     var addrId = TextField()
+
     @FXML
     var addrName = TextField()
+
     @FXML
     var addrValue = TextField()
 
@@ -57,7 +61,7 @@ class AddrController : BaseController(), Initializable {
     }
 
     fun delAdder(actionEvent: ActionEvent) {
-        checkParam(addrId.text,"请选择旧数据")
+        checkParam(addrId.text, "请选择旧数据")
         val showAndWait = Alert(Alert.AlertType.CONFIRMATION, "确认删除吗？", ButtonType.YES).showAndWait()
         showAndWait.ifPresent {
             DbInfor.database.httpAddrs.removeIf { it.id eq addrId.text }
@@ -67,8 +71,8 @@ class AddrController : BaseController(), Initializable {
     }
 
     fun saveForm(actionEvent: ActionEvent) {
-        checkParam(addrName.text,"名称")
-        checkParam(addrValue.text,"地址")
+        checkParam(addrName.text, "名称")
+        checkParam(addrValue.text, "地址")
 
 
         if (addrId.text.isBlank()) {
@@ -82,7 +86,7 @@ class AddrController : BaseController(), Initializable {
                 set(HttpAddrs.name, addrName.text)
                 set(HttpAddrs.addr, addrValue.text)
             }
-        }else{
+        } else {
             DbInfor.database.update(HttpAddrs) {
                 set(it.id, addrId.text)
                 set(it.name, addrName.text)
@@ -92,11 +96,13 @@ class AddrController : BaseController(), Initializable {
         }
         refresh()
     }
-    fun refresh(){
+
+    fun refresh() {
         selectAddrs.items.setAll(DbInfor.database.httpAddrs.toList())
         selectAddrs.selectionModel.clearSelection()
         clearForm(null)
     }
+
     fun clearForm(actionEvent: ActionEvent?) {
         addrId.text = ""
         addrName.text = ""

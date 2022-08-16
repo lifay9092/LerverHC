@@ -5,12 +5,9 @@ import cn.lifay.lerverhc.hander.ConfigUtil
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
-import javafx.scene.Scene
 import javafx.scene.control.TextField
 import javafx.scene.layout.BorderPane
-import javafx.scene.layout.Pane
 import javafx.stage.DirectoryChooser
-import javafx.stage.Stage
 import java.io.File
 import java.net.URL
 import java.util.*
@@ -32,7 +29,8 @@ class PropertiesController : BaseController(), Initializable {
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
 
-        outputFolderText.text = ConfigUtil.preferences.get(ConfigUtil.PROPERTIES_OUTPUT_FOLDER,System.getProperty("user.dir"))
+        outputFolderText.text =
+            ConfigUtil.preferences.get(ConfigUtil.PROPERTIES_OUTPUT_FOLDER, System.getProperty("user.dir"))
     }
 
     /**
@@ -46,7 +44,7 @@ class PropertiesController : BaseController(), Initializable {
         }
         val file = directoryChooser.showDialog(propertiesRootPane.scene.window)
         outputFolderText.text = file?.absolutePath
-        file?.absolutePath?.let { ConfigUtil.preferences.put(ConfigUtil.PROPERTIES_OUTPUT_FOLDER,it) }
+        file?.absolutePath?.let { ConfigUtil.preferences.put(ConfigUtil.PROPERTIES_OUTPUT_FOLDER, it) }
     }
 
 

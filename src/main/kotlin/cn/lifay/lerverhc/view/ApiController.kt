@@ -64,7 +64,7 @@ class ApiController : BaseController(), Initializable {
     @FXML
     var filePath = TextArea()
 
-    lateinit var nodeId : String
+    lateinit var nodeId: String
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         selectAddrs.items.addAll(listOf(ApiAddrModel("20", ""), ApiAddrModel("12", "")))
         filePath.text = ConfigUtil.preferences.get(ConfigUtil.API_JSON_FILE, "")
@@ -82,21 +82,21 @@ class ApiController : BaseController(), Initializable {
         }
         var apiModel = try {
             val str = HttpUtil.get(selectAddrs.selectionModel.selectedItem.addr)
-            JSONUtil.toBean(str,ApiModel::class.java)
+            JSONUtil.toBean(str, ApiModel::class.java)
         } catch (e: Exception) {
-            Alert(Alert.AlertType.ERROR,"api接口请求失败:${e}").show()
+            Alert(Alert.AlertType.ERROR, "api接口请求失败:${e}").show()
             return
         }
         disableBtn(true)
-        val func : (Int) -> Unit = {
+        val func: (Int) -> Unit = {
             Platform.runLater {
                 //结束
                 disableBtn(false)
-                Alert(Alert.AlertType.INFORMATION,"导入成功:${it} 条").show()
+                Alert(Alert.AlertType.INFORMATION, "导入成功:${it} 条").show()
             }
         }
         GlobalScope.launch {
-            impHandle(apiModel,func)
+            impHandle(apiModel, func)
         }
     }
 
@@ -116,27 +116,30 @@ class ApiController : BaseController(), Initializable {
         }
 
     }
-    private fun disableBtn(v : Boolean){
+
+    private fun disableBtn(v: Boolean) {
         impFromAddrBtn.isDisable = v
         impFromFileBtn.isDisable = v
         selectFileBtn.isDisable = v
     }
+
     fun impFromFile(actionEvent: ActionEvent) {
         if (filePath.text.isBlank()) {
             Alert(Alert.AlertType.ERROR, "文件不能为空").show()
             return
         }
-        var apiModel = JSONUtil.toBean(FileUtil.readString(filePath.text, Charset.forName("utf-8")), ApiModel::class.java)
+        var apiModel =
+            JSONUtil.toBean(FileUtil.readString(filePath.text, Charset.forName("utf-8")), ApiModel::class.java)
         disableBtn(true)
-        val func : (Int) -> Unit = {
+        val func: (Int) -> Unit = {
             Platform.runLater {
                 //结束
                 disableBtn(false)
-                Alert(Alert.AlertType.INFORMATION,"导入成功:${it} 条").show()
+                Alert(Alert.AlertType.INFORMATION, "导入成功:${it} 条").show()
             }
         }
         GlobalScope.launch {
-            impHandle(apiModel,func)
+            impHandle(apiModel, func)
         }
     }
 
@@ -224,10 +227,10 @@ class ApiController : BaseController(), Initializable {
                 set(HttpTools.type, HttpType.NODE.name)
             }
             /*http*/
-            httpList.filter { it.parentId == tag.name }.forEach { it.parentId = secondDirId}
+            httpList.filter { it.parentId == tag.name }.forEach { it.parentId = secondDirId }
             //.forEach { it.parentId = secondDirId }
         }
-        DbInfor.database.batchInsert(HttpTools){
+        DbInfor.database.batchInsert(HttpTools) {
             httpList.forEach { http ->
                 item {
                     set(HttpTools.id, http.id)

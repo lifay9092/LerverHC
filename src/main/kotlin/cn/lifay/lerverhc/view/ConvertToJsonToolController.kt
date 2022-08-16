@@ -4,7 +4,6 @@ import cn.hutool.core.date.DatePattern
 import cn.hutool.core.date.DateUtil
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.io.resource.ResourceUtil
-import cn.hutool.core.util.ReUtil
 import cn.hutool.json.JSONUtil
 import cn.lifay.lerverhc.hander.convert.IConvert
 import cn.lifay.lerverhc.hander.convert.JsonConvert
@@ -22,29 +21,33 @@ import javafx.scene.image.ImageView
 import javafx.scene.layout.AnchorPane
 import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
-import javafx.util.Duration
 import java.io.File
 import java.net.URL
 import java.util.*
-import java.util.regex.Pattern
-import java.util.stream.Collectors
 
 class ConvertToJsonToolController : Initializable {
 
     @FXML
     lateinit var rootPane: AnchorPane
+
     @FXML
     var ruleLabel = Label()
+
     @FXML
     lateinit var exportImg: ImageView
+
     @FXML
     lateinit var importImg: ImageView
+
     @FXML
     lateinit var convertImg: ImageView
+
     @FXML
     lateinit var ruleText: TextArea
+
     @FXML
     lateinit var resultText: TextArea
+
     @FXML
     lateinit var dataSourceText: TextArea
 
@@ -72,13 +75,19 @@ class ConvertToJsonToolController : Initializable {
                 }
                 val file = directoryChooser.showDialog(rootPane.scene.window)
                 file?.let {
-                    FileUtil.writeUtf8String(resultText.text,file.absolutePath + File.separator + "转换结果-${DateUtil.format(Date(),
-                    DatePattern.PURE_DATETIME_FORMATTER)}.json")
-                    Alert(Alert.AlertType.INFORMATION,"保存成功!").show()
+                    FileUtil.writeUtf8String(
+                        resultText.text, file.absolutePath + File.separator + "转换结果-${
+                            DateUtil.format(
+                                Date(),
+                                DatePattern.PURE_DATETIME_FORMATTER
+                            )
+                        }.json"
+                    )
+                    Alert(Alert.AlertType.INFORMATION, "保存成功!").show()
                 }
             }
         }
-        Tooltip.install(exportImg,Tooltip("导出数据").quickly())
+        Tooltip.install(exportImg, Tooltip("导出数据").quickly())
 
         convertImg.apply {
             image = Image(ResourceUtil.getStream("convert.png"))
@@ -86,28 +95,30 @@ class ConvertToJsonToolController : Initializable {
                 convertAction()
             }
         }
-        Tooltip.install(convertImg,Tooltip("转换").quickly())
+        Tooltip.install(convertImg, Tooltip("转换").quickly())
 
-        ruleLabel.tooltip = Tooltip("""
+        ruleLabel.tooltip = Tooltip(
+            """
             【txt格式】
             每行变量命名为:${'$'}{1},${'$'}{2},${'$'}{3}...
             【json格式】
             变量名为:${'$'}{key1},${'$'}{key2},${'$'}{key3}
-        """.trimIndent()).quickly()
+        """.trimIndent()
+        ).quickly()
 
     }
 
     private fun convertAction() {
         if (dataSourceText.text.isBlank()) {
-            Alert(Alert.AlertType.ERROR,"数据源不能为空!").show()
+            Alert(Alert.AlertType.ERROR, "数据源不能为空!").show()
             return
         }
         if (ruleText.text.isBlank()) {
-            Alert(Alert.AlertType.ERROR,"转换规则不能为空!").show()
+            Alert(Alert.AlertType.ERROR, "转换规则不能为空!").show()
             return
         }
         if (!JSONUtil.isJson(ruleText.text)) {
-            Alert(Alert.AlertType.ERROR,"转换规则必须遵循JSON格式!").show()
+            Alert(Alert.AlertType.ERROR, "转换规则必须遵循JSON格式!").show()
             return
         }
         val convert = getConvert()
@@ -115,13 +126,17 @@ class ConvertToJsonToolController : Initializable {
             resultText.text = convert.convert()
         } catch (e: Exception) {
             e.printStackTrace()
-            Alert(Alert.AlertType.ERROR,"转换失败:${e.message}").show()
+            Alert(Alert.AlertType.ERROR, "转换失败:${e.message}").show()
         }
     }
+
     private fun getConvert(): IConvert {
         //判断数据源类型:txt json?
         val isTxtType = !JSONUtil.isJson(dataSourceText.text)
-        return if (isTxtType) TxtConvert(dataSourceText.text,ruleText.text) else JsonConvert(dataSourceText.text,ruleText.text)
+        return if (isTxtType) TxtConvert(dataSourceText.text, ruleText.text) else JsonConvert(
+            dataSourceText.text,
+            ruleText.text
+        )
     }
 
     fun txtSample(actionEvent: ActionEvent) {
@@ -136,6 +151,7 @@ class ConvertToJsonToolController : Initializable {
             }
         """.trimIndent()
     }
+
     fun jsonSample(actionEvent: ActionEvent) {
         dataSourceText.text = """
             [

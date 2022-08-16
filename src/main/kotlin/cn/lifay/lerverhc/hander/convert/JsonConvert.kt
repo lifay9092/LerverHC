@@ -10,7 +10,7 @@ import cn.hutool.json.JSONUtil
  *@Author lifay
  *@Date 2022/8/15 11:03
  **/
-class JsonConvert(sourceStr:String,ruleStr: String) : IConvert(sourceStr,ruleStr) {
+class JsonConvert(sourceStr: String, ruleStr: String) : IConvert(sourceStr, ruleStr) {
 
     override fun convert(): String {
         val datas = JSONArray()
@@ -22,15 +22,15 @@ class JsonConvert(sourceStr:String,ruleStr: String) : IConvert(sourceStr,ruleStr
         for (i in array.indices) {
             val obj = array[i] as JSONObject
             if (varsSize != obj.size) {
-                throw Exception("数量不一致:规则 [$varsSize] 条,第${i+1}行数据 [${obj.size}] 条")
+                throw Exception("数量不一致:规则 [$varsSize] 条,第${i + 1}行数据 [${obj.size}] 条")
             }
             //合并
             var tempStr = ruleStr
             for (v in vars) {
                 if (!obj.containsKey(v)) {
-                    throw Exception("缺失属性值:第${i+1}行数据 属性名:[$v]")
+                    throw Exception("缺失属性值:第${i + 1}行数据 属性名:[$v]")
                 }
-                tempStr = tempStr.replace("${'$'}{${v}}",obj.getStr(v))
+                tempStr = tempStr.replace("${'$'}{${v}}", obj.getStr(v))
             }
             datas.add(JSONUtil.parseObj(tempStr))
         }

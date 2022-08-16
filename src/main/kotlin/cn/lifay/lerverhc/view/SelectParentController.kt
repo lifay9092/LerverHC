@@ -35,10 +35,10 @@ class SelectParentController : BaseController(), Initializable {
     @FXML
     var parentTreeView = TreeView<HttpTool>()
 
-    lateinit var sourceId : String
-    lateinit var refreshFunc : ()-> Unit
+    lateinit var sourceId: String
+    lateinit var refreshFunc: () -> Unit
 
-    fun initForm(id: String,refresh:()-> Unit) {
+    fun initForm(id: String, refresh: () -> Unit) {
         this.sourceId = id
         this.refreshFunc = refresh
     }
@@ -61,8 +61,8 @@ class SelectParentController : BaseController(), Initializable {
                 val selectId = this.selectionModel?.selectedItem?.value?.id
                 if (selectId != "0" && event.clickCount == 2) {
                     println("${sourceId}选中了${selectId}")
-                    DbInfor.database.update(HttpTools){
-                        set(HttpTools.parentId,selectId)
+                    DbInfor.database.update(HttpTools) {
+                        set(HttpTools.parentId, selectId)
                         where { HttpTools.id eq sourceId }
                     }
                     refreshFunc()

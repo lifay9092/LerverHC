@@ -8,9 +8,9 @@ class ApiModel {
     var basePath: String? = null
     var tags: List<TagsDTO>? = null
     var paths: LinkedHashMap<String, Map<String, HttpDTO>>? = null
+        get
+        set
 
-    get
-    set
     /*-----------/info------------*/
     class InfoDTO {
         var description: String? = null
@@ -19,6 +19,7 @@ class ApiModel {
         var termsOfService: String? = null
         var contact: ContactDTO? = null
     }
+
     class ContactDTO {
         var name: String? = null
         var url: String? = null
@@ -43,6 +44,7 @@ class ApiModel {
         var parameters: List<ParametersDTO>? = null
         var deprecated: Boolean? = null
     }
+
     class ParametersDTO {
         var name: String? = null
         var `in`: String? = null

@@ -10,6 +10,7 @@ class HttpModel {
 
     /*目录信息*/
     var info: InfoDTO? = null
+
     /*元素列表*/
     var item: List<ItemDTO>? = null
 
@@ -22,8 +23,10 @@ class HttpModel {
     class ItemDTO {
         /*名称*/
         var name: String? = null
+
         /*元素列表*/
         var item: List<ItemDTO>? = null
+
         /*请求信息*/
         var request: RequestDTO? = null
 

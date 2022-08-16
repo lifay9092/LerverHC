@@ -27,6 +27,8 @@ mvn gluonfx:build --settings D:\apache-maven-3.2.5\conf\settings-git.xml -Dmaven
 
 mvn gluonfx:runagent --settings D:\apache-maven-3.2.5\conf\settings-git.xml -Dmaven.repo.local=D:\apache-maven-3.2.5\git
 
+mvn gluonfx:package --settings D:\apache-maven-3.2.5\conf\settings-git.xml -Dmaven.repo.local=D:\apache-maven-3.2.5\git
+
 
 pause&exit
 :End

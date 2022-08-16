@@ -25,12 +25,14 @@ import model.HttpTool
 import model.HttpTools
 import model.HttpTools.httpTools
 import model.enum.HttpType
-import org.ktorm.dsl.*
+import org.ktorm.dsl.and
+import org.ktorm.dsl.delete
+import org.ktorm.dsl.eq
+import org.ktorm.dsl.insert
 import org.ktorm.entity.count
 import org.ktorm.entity.toList
 import java.net.URL
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 /**
@@ -51,6 +53,7 @@ class IndexController : BaseController(), Initializable {
 
     @FXML
     var reloadHttpTreeImg = ImageView()
+
     @FXML
     var keywordField = TextField()
 
@@ -74,8 +77,11 @@ class IndexController : BaseController(), Initializable {
     /**
      * 初始化树
      */
-    private fun initTreeView(keyword : String) {
-        val rootTreeItem = TreeItem(HttpTool("0", "-1", "", "根目录", HttpType.NODE.name, "", ""),ImageView(Image(ResourceUtil.getStream("folder.png"))))
+    private fun initTreeView(keyword: String) {
+        val rootTreeItem = TreeItem(
+            HttpTool("0", "-1", "", "根目录", HttpType.NODE.name, "", ""),
+            ImageView(Image(ResourceUtil.getStream("folder.png")))
+        )
         //HttpTool("1","0","11111",HttpType.NODE.name,"","")
 
         var httpTools = DbInfor.database.httpTools.toList()
@@ -141,31 +147,38 @@ class IndexController : BaseController(), Initializable {
                             items.add(MenuItem("新增节点").apply {
                                 setOnAction {
                                     //新增一个临时节点
-                                    var tempHttpModel = HttpTool(id = IdUtil.fastUUID(), parentId = selectItem.id, name = "新建http", type = HttpType.HTTP.name,
-                                    addrId = "custom", body = """
+                                    var tempHttpModel = HttpTool(
+                                        id = IdUtil.fastUUID(),
+                                        parentId = selectItem.id,
+                                        name = "新建http",
+                                        type = HttpType.HTTP.name,
+                                        addrId = "custom",
+                                        body = """
                                         {
                                             
                                         }
-                                    """.trimIndent(), datas = """
+                                    """.trimIndent(),
+                                        datas = """
                                         {
                                             "method":"GET","isBatch":false,
                                             "isSync":false,
                                             "url":"http://localhost:80/temp",
                                             "authorization":"",
                                             "contentType":"FORM_URLENCODED"}
-                                    """.trimIndent())
+                                    """.trimIndent()
+                                    )
                                     //入库
-                                    DbInfor.database.insert(HttpTools){
-                                        set(HttpTools.id,tempHttpModel.id)
-                                        set(HttpTools.parentId,tempHttpModel.parentId)
-                                        set(HttpTools.name,tempHttpModel.name)
-                                        set(HttpTools.type,tempHttpModel.type)
-                                        set(HttpTools.addrId,tempHttpModel.addrId)
-                                        set(HttpTools.body,tempHttpModel.body)
-                                        set(HttpTools.datas,tempHttpModel.datas)
+                                    DbInfor.database.insert(HttpTools) {
+                                        set(HttpTools.id, tempHttpModel.id)
+                                        set(HttpTools.parentId, tempHttpModel.parentId)
+                                        set(HttpTools.name, tempHttpModel.name)
+                                        set(HttpTools.type, tempHttpModel.type)
+                                        set(HttpTools.addrId, tempHttpModel.addrId)
+                                        set(HttpTools.body, tempHttpModel.body)
+                                        set(HttpTools.datas, tempHttpModel.datas)
                                     }
                                     //加载
-                                    addTreeItemById(httpTreeView.root.children,tempHttpModel.parentId,tempHttpModel)
+                                    addTreeItemById(httpTreeView.root.children, tempHttpModel.parentId, tempHttpModel)
                                     addTabHttpForm(tempHttpModel)
                                 }
                             })
@@ -188,7 +201,7 @@ class IndexController : BaseController(), Initializable {
                                 }
                             })
                         }
-                        if (selectItem!!.id != "0"){
+                        if (selectItem!!.id != "0") {
                             //删除菜单
                             items.add(MenuItem("删除节点").apply {
                                 setOnAction {
@@ -216,7 +229,7 @@ class IndexController : BaseController(), Initializable {
                                             }
                                             //树菜单
                                             httpTreeView.apply {
-                                                removeTreeItemById(root.children,selectItem.id)
+                                                removeTreeItemById(root.children, selectItem.id)
                                                 refresh()
                                             }
                                         }
@@ -247,34 +260,34 @@ class IndexController : BaseController(), Initializable {
         }
     }
 
-    private fun removeTreeItemById(children : ObservableList<TreeItem<HttpTool>>,id: String) {
-        if (isExistTreeItemById(children,id)) {
-            children.removeIf{i ->
+    private fun removeTreeItemById(children: ObservableList<TreeItem<HttpTool>>, id: String) {
+        if (isExistTreeItemById(children, id)) {
+            children.removeIf { i ->
                 i.value.id == id
             }
             return
         }
         for (child in children) {
-            if (child.children != null){
-                removeTreeItemById(child.children,id)
+            if (child.children != null) {
+                removeTreeItemById(child.children, id)
             }
         }
     }
 
-    private fun addTreeItemById(children : ObservableList<TreeItem<HttpTool>>,parentId: String,httpTool: HttpTool) {
+    private fun addTreeItemById(children: ObservableList<TreeItem<HttpTool>>, parentId: String, httpTool: HttpTool) {
 
         for (child in children) {
             if (child.value.id == parentId && child.children != null) {
                 val treeItem = buildTreeItem(httpTool)
                 child.children.add(treeItem)
                 return
-            }else if (child.children != null){
-                addTreeItemById(child.children,parentId,httpTool)
+            } else if (child.children != null) {
+                addTreeItemById(child.children, parentId, httpTool)
             }
         }
     }
 
-    private fun isExistTreeItemById(children : ObservableList<TreeItem<HttpTool>>,id: String): Boolean {
+    private fun isExistTreeItemById(children: ObservableList<TreeItem<HttpTool>>, id: String): Boolean {
         return (children.find { it.value.id == id } != null)
 
     }
@@ -282,20 +295,21 @@ class IndexController : BaseController(), Initializable {
     private fun getAllParentNodeIds(httpTools: List<HttpTool>): List<String> {
         val list = ArrayList<String>()
         val httpList = httpTools.filter { it.type == HttpType.HTTP.name }.toList()
-        loopHandle(httpList,list)
+        loopHandle(httpList, list)
         return list
     }
 
     private fun loopHandle(httpLists: List<HttpTool>, list: ArrayList<String>) {
         for (httpTool in httpLists) {
-            val id = getParentIdById(httpLists,httpTool.id)
+            val id = getParentIdById(httpLists, httpTool.id)
             list.add(id)
         }
     }
 
-    private fun getParentIdById(httpTools: List<HttpTool>,id : String):String{
+    private fun getParentIdById(httpTools: List<HttpTool>, id: String): String {
         return httpTools.first() { it.id == id }.parentId
     }
+
     /**
      * 新增tab并加载http表单界面
      */
@@ -343,7 +357,7 @@ class IndexController : BaseController(), Initializable {
     }
 
     private fun getTreeItemImg(httpTool: HttpTool): String {
-        if (!httpTool.isHttp()){
+        if (!httpTool.isHttp()) {
             return "folder.png"
         } else {
             val jsonObject = JSONUtil.parseObj(httpTool.datas)
@@ -405,7 +419,7 @@ class IndexController : BaseController(), Initializable {
     /**
      * 移动到节点的界面
      */
-    fun selectParentNode(id : String) {
+    fun selectParentNode(id: String) {
         var selectParentStage = Stage().bindEscKey()
         val fxmlLoader = FXMLLoader(ResourceUtil.getResource("selectParent.fxml"))
         val indexPane = fxmlLoader.load<Pane>()

@@ -1,7 +1,6 @@
 package model
 
 import cn.hutool.core.util.StrUtil
-import model.enum.HttpType
 import org.ktorm.database.Database
 import org.ktorm.dsl.QueryRowSet
 import org.ktorm.entity.sequenceOf
@@ -12,11 +11,12 @@ data class HttpAddr(
     var id: String,
     var name: String,
     var addr: String,
-){
+) {
     override fun toString(): String {
         return this.name
     }
-    fun isCustom():Boolean{
+
+    fun isCustom(): Boolean {
         return "custom" == id
     }
 }
@@ -32,6 +32,7 @@ object HttpAddrs : BaseTable<HttpAddr>("HTTP_ADDR") {
         name = row[name]!!,
         addr = row[addr] ?: "",
     )
+
     val Database.httpAddrs get() = this.sequenceOf(HttpAddrs)
 
 }

@@ -12,13 +12,13 @@ import java.util.stream.Collectors;
  *@Author lifay
  *@Date 2022/8/15 10:56
  **/
-public abstract class IConvert{
+public abstract class IConvert {
 
     protected String sourceStr;
 
     protected String ruleStr;
 
-    public IConvert(String sourceStr,String ruleStr) {
+    public IConvert(String sourceStr, String ruleStr) {
         this.sourceStr = sourceStr;
         this.ruleStr = ruleStr;
     }

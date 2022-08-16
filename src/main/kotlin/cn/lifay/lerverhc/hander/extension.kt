@@ -1,7 +1,6 @@
 package cn.lifay.lerverhc.hander
 
 import javafx.scene.Scene
-import javafx.scene.control.Button
 import javafx.scene.control.Tooltip
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
@@ -17,7 +16,7 @@ fun Scene.bootstrap(): Scene {
 
 
 fun Stage.bindEscKey(): Stage {
-    addEventHandler(KeyEvent.KEY_PRESSED){
+    addEventHandler(KeyEvent.KEY_PRESSED) {
         if (it.code == KeyCode.ESCAPE) {
             close()
         }
@@ -25,7 +24,7 @@ fun Stage.bindEscKey(): Stage {
     return this
 }
 
-fun Tooltip.quickly():Tooltip{
+fun Tooltip.quickly(): Tooltip {
     showDelay = Duration(50.0)
     showDuration = Duration(4000.0)
     return this

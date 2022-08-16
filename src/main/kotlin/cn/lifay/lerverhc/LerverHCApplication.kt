@@ -10,7 +10,6 @@ import javafx.scene.image.Image
 import javafx.scene.layout.Pane
 import javafx.stage.Stage
 import org.kordamp.bootstrapfx.BootstrapFX
-import java.security.interfaces.RSAKey
 
 class LerverHCApplication : Application() {
     override fun start(primaryStage: Stage) {
@@ -19,9 +18,12 @@ class LerverHCApplication : Application() {
         indexPane.styleClass.add("panel-primary")
         var scene = Scene(indexPane, 1500.0, 800.0).bootstrap()
         scene.stylesheets.add(BootstrapFX.bootstrapFXStylesheet())
-
+        scene.stylesheets.add(
+            ResourceUtil.getResource("custom.css")
+                .toExternalForm()
+        )
         primaryStage.apply {
-            title = "图形工具"
+            title = "LerverHC工具"
             isResizable = false
             getIcons().add(Image(ResourceUtil.getStream("icon.png")))
             setScene(scene)

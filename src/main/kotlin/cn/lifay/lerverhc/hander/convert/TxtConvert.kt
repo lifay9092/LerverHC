@@ -9,7 +9,7 @@ import cn.hutool.json.JSONUtil
  *@Author lifay
  *@Date 2022/8/15 11:03
  **/
-class TxtConvert(sourceStr:String,ruleStr: String) : IConvert(sourceStr,ruleStr) {
+class TxtConvert(sourceStr: String, ruleStr: String) : IConvert(sourceStr, ruleStr) {
 
     override fun convert(): String {
         val datas = JSONArray()
@@ -25,12 +25,12 @@ class TxtConvert(sourceStr:String,ruleStr: String) : IConvert(sourceStr,ruleStr)
             }
             val strings = line.trim().split(" ")
             if (varsSize != strings.size) {
-                throw Exception("数量不一致:规则 [$varsSize] 条,第${i+1}行数据 [${strings.size}] 条")
+                throw Exception("数量不一致:规则 [$varsSize] 条,第${i + 1}行数据 [${strings.size}] 条")
             }
             //合并
             var tempStr = ruleStr
             for (v in vars) {
-                tempStr = tempStr.replace("${'$'}{${v}}",strings[v.toInt() - 1])
+                tempStr = tempStr.replace("${'$'}{${v}}", strings[v.toInt() - 1])
             }
             datas.add(JSONUtil.parseObj(tempStr))
         }
