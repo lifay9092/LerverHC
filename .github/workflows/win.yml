@@ -24,13 +24,12 @@ jobs:
       - name: Make staging directory
         run: mkdir staging
 
-      - name: Gluon Build and Package
-        run: mvn -Pdesktop gluonfx:build gluonfx:package
+      - name: Gluon Build
+        run: mvn -Pdesktop gluonfx:build
 
       - name: Copy native bundles to staging
         run: |
           cp -r target/gluonfx/x86_64-windows/HelloGluon.exe staging
-          cp -r target/gluonfx/x86_64-windows/HelloGluon-1.0.msi staging
           cp -r db staging
       - name: Upload
         uses: lifay9092/upload-artifact@main
