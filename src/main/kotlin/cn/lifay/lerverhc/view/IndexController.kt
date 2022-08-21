@@ -20,6 +20,7 @@ import javafx.scene.image.ImageView
 import javafx.scene.input.MouseButton
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Pane
+import javafx.stage.Modality
 import javafx.stage.Stage
 import model.HttpTool
 import model.HttpTools
@@ -383,6 +384,7 @@ class IndexController : BaseController(), Initializable {
     fun propertiesManage(actionEvent: ActionEvent) {
         //propertiesManage
         val propertiesManageStage = Stage().bindEscKey()
+        propertiesManageStage.initModality(Modality.WINDOW_MODAL)
         val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("propertiesManage.fxml"))
         val scene = Scene(indexPane, 700.0, 500.0).bootstrap()
         propertiesManageStage.apply {
@@ -398,6 +400,7 @@ class IndexController : BaseController(), Initializable {
      */
     fun addrManage(actionEvent: ActionEvent) {
         val addrManageStage = Stage().bindEscKey()
+        addrManageStage.initModality(Modality.WINDOW_MODAL)
         val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("addrManage.fxml"))
         val scene = Scene(indexPane).bootstrap()
         addrManageStage.apply {
@@ -439,6 +442,7 @@ class IndexController : BaseController(), Initializable {
      */
     fun convertToJsonTool(actionEvent: ActionEvent) {
         val convertToJsonToolStage = Stage().bindEscKey()
+        convertToJsonToolStage.initModality(Modality.APPLICATION_MODAL)
         val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("convertToJsonTool.fxml"))
         val scene = Scene(indexPane).bootstrap()
         convertToJsonToolStage.apply {

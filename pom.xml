@@ -24,7 +24,7 @@
         <!-- Gluon/JavaFX -->
         <javafx.version>17.0.1</javafx.version>
         <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
-        <gluonfx.maven.plugin.version>1.0.12</gluonfx.maven.plugin.version>
+        <gluonfx.maven.plugin.version>1.0.15</gluonfx.maven.plugin.version>
         <gluonfx.target>host</gluonfx.target>
         <main.class>cn.lifay.lerverhc.AppStartup</main.class>
     </properties>
@@ -114,6 +114,10 @@
                 <configuration>
                     <target>${gluonfx.target}</target>
                     <mainClass>${main.class}</mainClass>
+                    <releaseConfiguration>
+                        <description>请求客户端</description>
+                        <vendor>lifay</vendor>
+                    </releaseConfiguration>
                 </configuration>
             </plugin>
             <plugin>
