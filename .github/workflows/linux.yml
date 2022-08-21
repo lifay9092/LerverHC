@@ -26,7 +26,7 @@ jobs:
         run: mvn -Pdesktop gluonfx:build gluonfx:package
 
       - name: Copy native image to staging
-        run:
+        run: |
           cp -r target/gluonfx/x86_64-linux/LerverHC* staging
           cp -r db staging
 
