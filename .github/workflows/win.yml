@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: lifay9092/checkout@v2
+      - uses: lifay9092/checkout@main
 
       - name: Add msbuild to PATH
         uses: lifay9092/setup-msbuild@master
