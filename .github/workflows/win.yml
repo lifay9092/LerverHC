@@ -1,0 +1,39 @@
+name: Windows
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: lifay9092/checkout@v2
+
+      - name: Add msbuild to PATH
+        uses: lifay9092/setup-msbuild@master
+
+      - name: Visual Studio shell
+        uses: lifay9092/vs-shell@master
+
+      - name: Setup Gluon's GraalVM
+        uses: lifay9092/setup-graalvm@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Make staging directory
+        run: mkdir staging
+
+      - name: Gluon Build and Package
+        run: mvn -Pdesktop gluonfx:build gluonfx:package
+
+      - name: Copy native bundles to staging
+        run: |
+          cp -r target/gluonfx/x86_64-windows/HelloGluon.exe staging
+          cp -r target/gluonfx/x86_64-windows/HelloGluon-1.0.msi staging
+          cp -r db staging
+      - name: Upload
+        uses: lifay9092/upload-artifact@main
+        with:
+          name: Package
+          path: staging
