@@ -8,10 +8,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: lifay9092/checkout@v2
 
       - name: Setup Gluon's GraalVM
-        uses: gluonhq/setup-graalvm@master
+        uses: lifay9092/setup-graalvm@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -23,7 +23,7 @@ jobs:
         run: mkdir staging
 
       - name: Gluon License
-        uses: gluonhq/gluon-build-license@v1
+        uses: lifay9092/gluon-build-license@v1
         with:
           gluon-license: ${{ secrets.GLUON_LICENSE }}
 
@@ -34,7 +34,7 @@ jobs:
         run: cp -r target/gluonfx/x86_64-linux/LerverHC* staging
 
       - name: Upload
-        uses: actions/upload-artifact@v2
+        uses: lifay9092/upload-artifact@v2
         with:
           name: Package
           path: staging
