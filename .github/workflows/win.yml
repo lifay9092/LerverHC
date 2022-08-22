@@ -8,16 +8,16 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: lifay9092/checkout@main
+      - uses: actions/checkout@v2
 
       - name: Add msbuild to PATH
-        uses: lifay9092/setup-msbuild@master
+        uses: microsoft/setup-msbuild@v1.0.2
 
       - name: Visual Studio shell
-        uses: lifay9092/vs-shell@master
+        uses: egor-tensin/vs-shell@v1
 
       - name: Setup Gluon's GraalVM
-        uses: lifay9092/setup-graalvm@master
+        uses: gluonhq/setup-graalvm@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -31,8 +31,9 @@ jobs:
         run: |
           cp -r target/gluonfx/x86_64-windows/LerverHC.exe staging
           cp -r db staging
+
       - name: Upload
-        uses: lifay9092/upload-artifact@main
+        uses: actions/upload-artifact@v2
         with:
           name: Package
           path: staging

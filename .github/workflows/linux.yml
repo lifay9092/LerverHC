@@ -6,9 +6,9 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-      - uses: lifay9092/checkout@main
+      - uses: actions/checkout@v2
 
       - name: Setup Gluon's GraalVM
         uses: lifay9092/setup-graalvm@master
@@ -31,7 +31,7 @@ jobs:
           cp -r db staging
 
       - name: Upload
-        uses: lifay9092/upload-artifact@main
+        uses: actions/upload-artifact@v2
         with:
           name: Package
           path: staging
