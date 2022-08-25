@@ -1,7 +1,7 @@
-package model
+package cn.lifay.lerverhc.model
 
 import cn.hutool.core.util.StrUtil
-import model.enum.HttpType
+import cn.lifay.lerverhc.model.enum.HttpType
 import org.ktorm.database.Database
 import org.ktorm.dsl.QueryRowSet
 import org.ktorm.entity.sequenceOf
