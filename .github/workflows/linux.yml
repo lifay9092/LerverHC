@@ -11,8 +11,11 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Setup Gluon's GraalVM
-        uses: lifay9092/setup-graalvm@master
+        uses: graalvm/setup-graalvm@v1
         env:
+          version: '22.1.0'
+          java-version: '17'
+          components: 'native-image'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install libraries
