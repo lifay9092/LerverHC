@@ -12,7 +12,7 @@ jobs:
 
       - name: Setup Gluon's GraalVM
         uses: graalvm/setup-graalvm@main
-        env:
+        with:
           version: '22.1.0'
           java-version: '17'
           components: 'native-image'
