@@ -32,7 +32,7 @@ import model.HttpAddrs.httpAddrs
 import cn.lifay.lerverhc.model.HttpTool
 import cn.lifay.lerverhc.model.HttpTools
 import cn.lifay.lerverhc.model.HttpTools.httpTools
-import cn.lifay.lerverhc.model.enum.HttpType
+import cn.lifay.lerverhc.model.enums.HttpType
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.update
 import org.ktorm.entity.find

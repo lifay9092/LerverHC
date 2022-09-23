@@ -1,4 +1,4 @@
-package cn.lifay.lerverhc.model.enum
+package cn.lifay.lerverhc.model.enums
 
 /**
  *@ClassName HttpType
