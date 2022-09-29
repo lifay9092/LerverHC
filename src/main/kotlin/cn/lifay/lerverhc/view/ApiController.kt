@@ -28,10 +28,13 @@ import cn.lifay.lerverhc.model.HttpTool
 import cn.lifay.lerverhc.model.HttpTools
 import cn.lifay.lerverhc.model.HttpTools.httpTools
 import cn.lifay.lerverhc.model.enums.HttpType
+import kotlinx.coroutines.async
+import model.HttpAddr
 import org.ktorm.dsl.*
 import org.ktorm.entity.find
 import org.ktorm.entity.toList
 import java.io.File
+import java.lang.RuntimeException
 import java.net.URL
 import java.nio.charset.Charset
 import java.util.*
@@ -44,6 +47,9 @@ import java.util.*
  *@Date 2022/1/4 20:09
  **/
 class ApiController : BaseController(), Initializable {
+
+    @FXML
+    var onLineAddr = TextArea()
 
     @FXML
     var impFromAddrBtn = Button()
@@ -59,44 +65,68 @@ class ApiController : BaseController(), Initializable {
 
     //form
     @FXML
-    var selectAddrs = ChoiceBox<ApiAddrModel>()
+    var selectAddrs = ChoiceBox<HttpAddr>()
 
     @FXML
     var filePath = TextArea()
 
     lateinit var nodeId: String
     override fun initialize(location: URL?, resources: ResourceBundle?) {
-        selectAddrs.items.addAll(listOf(ApiAddrModel("20", ""), ApiAddrModel("12", "")))
+        selectAddrs.apply {
+            items.addAll(DbInfor.database.httpAddrs.toList())
+            valueProperty().addListener{ observable, oldValue, newValue ->
+                onLineAddr.text = toApiAddr(newValue.addr)
+            }
+        }
         filePath.text = ConfigUtil.preferences.get(ConfigUtil.API_JSON_FILE, "")
 
+    }
+
+    private fun toApiAddr(addr: String): String {
+        return "${addr}/v2/api-docs"
     }
 
     fun initForm(nodeId: String) {
         this.nodeId = nodeId
     }
 
+    /**
+     * 从在线地址导入
+     * @author 李方宇
+     */
     fun impFromAddr(actionEvent: ActionEvent) {
-        if (selectAddrs.selectionModel.isEmpty) {
-            Alert(Alert.AlertType.ERROR, "文件不能为空").show()
-            return
-        }
-        var apiModel = try {
-            val str = HttpUtil.get(selectAddrs.selectionModel.selectedItem.addr)
-            JSONUtil.toBean(str, ApiModel::class.java)
-        } catch (e: Exception) {
-            Alert(Alert.AlertType.ERROR, "api接口请求失败:${e}").show()
-            return
-        }
-        disableBtn(true)
-        val func: (Int) -> Unit = {
-            Platform.runLater {
-                //结束
-                disableBtn(false)
-                Alert(Alert.AlertType.INFORMATION, "导入成功:${it} 条").show()
+        try {
+            if (selectAddrs.selectionModel.isEmpty) {
+                Alert(Alert.AlertType.ERROR, "文件不能为空").show()
+                return
             }
-        }
-        GlobalScope.launch {
-            impHandle(apiModel, func)
+            disableBtn()
+            GlobalScope.launch {
+                try {
+                    val async = async {
+                        try {
+                            val str = HttpUtil.get(toApiAddr(selectAddrs.selectionModel.selectedItem.addr))
+                            return@async JSONUtil.toBean(str, ApiModel::class.java)
+                        } catch (e: Exception) {
+                            Alert(Alert.AlertType.ERROR, "api接口请求失败:${e}").show()
+                            return@async null
+                        }
+                    }
+                    impHandle(async.await()){
+                        Platform.runLater {
+                            //结束
+                            Alert(Alert.AlertType.INFORMATION, "导入成功:${it} 条").show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    throw RuntimeException("在线导入api失败:${e.message}")
+                }  finally {
+                    showBtn()
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Alert(Alert.AlertType.ERROR,e.message).show()
         }
     }
 
@@ -117,29 +147,49 @@ class ApiController : BaseController(), Initializable {
 
     }
 
-    private fun disableBtn(v: Boolean) {
-        impFromAddrBtn.isDisable = v
-        impFromFileBtn.isDisable = v
-        selectFileBtn.isDisable = v
+    private fun disableBtn() {
+        impFromAddrBtn.isDisable = true
+        impFromFileBtn.isDisable = true
+        selectFileBtn.isDisable = true
     }
 
+    private fun showBtn() {
+        impFromAddrBtn.isDisable = false
+        impFromFileBtn.isDisable = false
+        selectFileBtn.isDisable = false
+    }
+
+    /**
+     * 从文件导入
+     * @author 李方宇
+    */
     fun impFromFile(actionEvent: ActionEvent) {
-        if (filePath.text.isBlank()) {
-            Alert(Alert.AlertType.ERROR, "文件不能为空").show()
-            return
-        }
-        var apiModel =
-            JSONUtil.toBean(FileUtil.readString(filePath.text, Charset.forName("utf-8")), ApiModel::class.java)
-        disableBtn(true)
-        val func: (Int) -> Unit = {
-            Platform.runLater {
-                //结束
-                disableBtn(false)
-                Alert(Alert.AlertType.INFORMATION, "导入成功:${it} 条").show()
+        try {
+            if (filePath.text.isBlank()) {
+                Alert(Alert.AlertType.ERROR, "文件不能为空").show()
+                return
             }
-        }
-        GlobalScope.launch {
-            impHandle(apiModel, func)
+
+            disableBtn()
+
+            GlobalScope.launch {
+                try {
+                    val apiModel =
+                        JSONUtil.toBean(FileUtil.readString(filePath.text, Charset.forName("utf-8")), ApiModel::class.java)
+                    impHandle(apiModel){
+                        Platform.runLater {
+                            //结束
+                            Alert(Alert.AlertType.INFORMATION, "导入成功:${it} 条").show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    throw RuntimeException("文件导入api失败:${e.message}")
+                }  finally {
+                    showBtn()
+                }
+            }
+        } catch (e: Exception) {
+            Alert(Alert.AlertType.ERROR, e.message).show()
         }
     }
 
@@ -177,7 +227,7 @@ class ApiController : BaseController(), Initializable {
 
                 httpList.add(httpDTO.let {
                     //addr
-                    val httpAddr = httpAddrs.filter { it.addr == apiModel.host }.first()
+                    val httpAddr = httpAddrs.first { httpAddr -> httpAddr.addr.contains(apiModel.host!!) }
                     val addId = httpAddr.id ?: "c98574f3-6115-40a2-bf9d-8847c42e6d4d"
                     //datas
                     var dataObj = JSONObject()
