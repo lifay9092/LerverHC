@@ -22,7 +22,6 @@
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#propertiesManage" text="属性管理" />
                         <MenuItem mnemonicParsing="false" onAction="#addrManage" text="地址管理" />
-                        <MenuItem mnemonicParsing="false" onAction="#apiManage" text="Api管理" />
                     </items>
                 </Menu>
                 <Menu text="辅助工具">
