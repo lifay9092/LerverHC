@@ -250,6 +250,8 @@ class IndexController : BaseController(), Initializable {
                     //双击
                     if (selectItem?.isHttp() == true) {
                         addTabHttpForm(selectItem)
+                    }else{
+                        selectionModel.selectedItem.isExpanded = true
                     }
                 } else if (it.clickCount == 1) {
                     //单击
