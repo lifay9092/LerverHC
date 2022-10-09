@@ -28,6 +28,8 @@ import cn.lifay.lerverhc.model.HttpTool
 import cn.lifay.lerverhc.model.HttpTools
 import cn.lifay.lerverhc.model.HttpTools.httpTools
 import cn.lifay.lerverhc.model.enums.HttpType
+import cn.lifay.ui.LoadingUI
+import javafx.stage.Stage
 import kotlinx.coroutines.async
 import model.HttpAddr
 import org.ktorm.dsl.*
@@ -49,6 +51,9 @@ import java.util.*
 class ApiController : BaseController(), Initializable {
 
     @FXML
+    var apiRootPane = AnchorPane()
+
+    @FXML
     var onLineAddr = TextArea()
 
     @FXML
@@ -59,9 +64,6 @@ class ApiController : BaseController(), Initializable {
 
     @FXML
     var impFromFileBtn = Button()
-
-    @FXML
-    var apiRootPane = AnchorPane()
 
     //form
     @FXML
@@ -100,9 +102,11 @@ class ApiController : BaseController(), Initializable {
                 Alert(Alert.AlertType.ERROR, "文件不能为空").show()
                 return
             }
-            disableBtn()
+            val loading = LoadingUI(apiRootPane.scene.window as Stage)
             GlobalScope.launch {
                 try {
+                    disableBtn()
+                    loading.show()
                     val async = async {
                         try {
                             val str = HttpUtil.get(toApiAddr(selectAddrs.selectionModel.selectedItem.addr))
@@ -121,6 +125,7 @@ class ApiController : BaseController(), Initializable {
                 } catch (e: Exception) {
                     throw RuntimeException("在线导入api失败:${e.message}")
                 }  finally {
+                    loading.closeStage()
                     showBtn()
                 }
             }
@@ -183,6 +188,7 @@ class ApiController : BaseController(), Initializable {
                         }
                     }
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     throw RuntimeException("文件导入api失败:${e.message}")
                 }  finally {
                     showBtn()

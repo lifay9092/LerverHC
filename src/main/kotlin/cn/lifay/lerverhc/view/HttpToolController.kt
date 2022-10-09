@@ -233,7 +233,9 @@ class HttpToolController : BaseController(), Initializable {
         batchDataFilePath.text = dataObj["batchDataFilePath"] as String?
 
         httpNameText.text = item.name
-        bodyStr.text = item.body
+        item.body.let {
+            bodyStr.text = JSONUtil.formatJsonStr(it)
+        }
 
         isDownFile = (dataObj["downFile"] ?: false) as Boolean
 

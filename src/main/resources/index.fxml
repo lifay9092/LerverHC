@@ -29,6 +29,12 @@
                         <MenuItem mnemonicParsing="false" onAction="#convertToJsonTool" text="数据转换json" />
                     </items>
                 </Menu>
+                <Menu mnemonicParsing="false" text="主题">
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#whiteTheme" text="白色"/>
+                        <MenuItem mnemonicParsing="false" onAction="#darkTheme" text="黑色"/>
+                    </items>
+                </Menu>
             </menus>
         </MenuBar>
     </top>

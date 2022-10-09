@@ -10,7 +10,7 @@ import org.kordamp.bootstrapfx.BootstrapFX
 
 
 fun Scene.bootstrap(): Scene {
-    stylesheets.add(BootstrapFX.bootstrapFXStylesheet())
+    //stylesheets.add(BootstrapFX.bootstrapFXStylesheet())
     return this
 }
 

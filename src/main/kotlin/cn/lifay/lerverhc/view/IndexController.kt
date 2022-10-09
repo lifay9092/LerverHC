@@ -26,6 +26,8 @@ import cn.lifay.lerverhc.model.HttpTool
 import cn.lifay.lerverhc.model.HttpTools
 import cn.lifay.lerverhc.model.HttpTools.httpTools
 import cn.lifay.lerverhc.model.enums.HttpType
+import cn.lifay.ui.GlobeTheme
+import javafx.application.Application
 import org.ktorm.dsl.and
 import org.ktorm.dsl.delete
 import org.ktorm.dsl.eq
@@ -453,6 +455,16 @@ class IndexController : BaseController(), Initializable {
             setScene(scene)
         }
         convertToJsonToolStage.show()
+    }
+
+    fun whiteTheme(actionEvent: ActionEvent) {
+        GlobeTheme.setWhite()
+      //  Application.setUserAgentStylesheet(Application.STYLESHEET_MODENA)
+    }
+
+    fun darkTheme(actionEvent: ActionEvent) {
+        GlobeTheme.setDark()
+       // Application.setUserAgentStylesheet(Application.STYLESHEET_CASPIAN)
     }
 
 }

@@ -15,13 +15,13 @@ class LerverHCApplication : Application() {
     override fun start(primaryStage: Stage) {
         //index
         val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("index.fxml"))
-        indexPane.styleClass.add("panel-primary")
+        //indexPane.styleClass.add("panel-primary")
         var scene = Scene(indexPane, 1500.0, 800.0).bootstrap()
-        scene.stylesheets.add(BootstrapFX.bootstrapFXStylesheet())
-        scene.stylesheets.add(
-            ResourceUtil.getResource("custom.css")
-                .toExternalForm()
-        )
+//        scene.stylesheets.add(BootstrapFX.bootstrapFXStylesheet())
+//        scene.stylesheets.add(
+//            ResourceUtil.getResource("custom.css")
+//                .toExternalForm()
+//        )
         primaryStage.apply {
             title = "LerverHC工具"
             isResizable = false
