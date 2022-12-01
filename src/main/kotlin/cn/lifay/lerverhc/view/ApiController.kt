@@ -9,8 +9,12 @@ import cn.hutool.json.JSONUtil
 import cn.lifay.lerverhc.db.DbInfor
 import cn.lifay.lerverhc.hander.ConfigUtil
 import cn.lifay.lerverhc.hander.HttpHander
-import cn.lifay.lerverhc.model.ApiAddrModel
 import cn.lifay.lerverhc.model.ApiModel
+import cn.lifay.lerverhc.model.HttpTool
+import cn.lifay.lerverhc.model.HttpTools
+import cn.lifay.lerverhc.model.HttpTools.httpTools
+import cn.lifay.lerverhc.model.enums.HttpType
+import cn.lifay.ui.LoadingUI
 import javafx.application.Platform
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
@@ -21,22 +25,16 @@ import javafx.scene.control.ChoiceBox
 import javafx.scene.control.TextArea
 import javafx.scene.layout.AnchorPane
 import javafx.stage.FileChooser
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import model.HttpAddrs.httpAddrs
-import cn.lifay.lerverhc.model.HttpTool
-import cn.lifay.lerverhc.model.HttpTools
-import cn.lifay.lerverhc.model.HttpTools.httpTools
-import cn.lifay.lerverhc.model.enums.HttpType
-import cn.lifay.ui.LoadingUI
 import javafx.stage.Stage
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import model.HttpAddr
+import model.HttpAddrs.httpAddrs
 import org.ktorm.dsl.*
 import org.ktorm.entity.find
 import org.ktorm.entity.toList
 import java.io.File
-import java.lang.RuntimeException
 import java.net.URL
 import java.nio.charset.Charset
 import java.util.*
@@ -76,7 +74,7 @@ class ApiController : BaseController(), Initializable {
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         selectAddrs.apply {
             items.addAll(DbInfor.database.httpAddrs.toList())
-            valueProperty().addListener{ observable, oldValue, newValue ->
+            valueProperty().addListener { observable, oldValue, newValue ->
                 onLineAddr.text = toApiAddr(newValue.addr)
             }
         }
@@ -112,26 +110,30 @@ class ApiController : BaseController(), Initializable {
                             val str = HttpUtil.get(toApiAddr(selectAddrs.selectionModel.selectedItem.addr))
                             return@async JSONUtil.toBean(str, ApiModel::class.java)
                         } catch (e: Exception) {
-                            Alert(Alert.AlertType.ERROR, "api接口请求失败:${e}").show()
+                            e.printStackTrace()
+                            Platform.runLater {
+                                Alert(Alert.AlertType.ERROR, "api接口请求失败:${e}").show()
+                            }
                             return@async null
                         }
                     }
-                    impHandle(async.await()){
+                    impHandle(async.await()) {
                         Platform.runLater {
                             //结束
                             Alert(Alert.AlertType.INFORMATION, "导入成功:${it} 条").show()
                         }
                     }
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     throw RuntimeException("在线导入api失败:${e.message}")
-                }  finally {
+                } finally {
                     loading.closeStage()
                     showBtn()
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            Alert(Alert.AlertType.ERROR,e.message).show()
+            Alert(Alert.AlertType.ERROR, e.message).show()
         }
     }
 
@@ -167,7 +169,7 @@ class ApiController : BaseController(), Initializable {
     /**
      * 从文件导入
      * @author 李方宇
-    */
+     */
     fun impFromFile(actionEvent: ActionEvent) {
         try {
             if (filePath.text.isBlank()) {
@@ -180,8 +182,11 @@ class ApiController : BaseController(), Initializable {
             GlobalScope.launch {
                 try {
                     val apiModel =
-                        JSONUtil.toBean(FileUtil.readString(filePath.text, Charset.forName("utf-8")), ApiModel::class.java)
-                    impHandle(apiModel){
+                        JSONUtil.toBean(
+                            FileUtil.readString(filePath.text, Charset.forName("utf-8")),
+                            ApiModel::class.java
+                        )
+                    impHandle(apiModel) {
                         Platform.runLater {
                             //结束
                             Alert(Alert.AlertType.INFORMATION, "导入成功:${it} 条").show()
@@ -190,7 +195,7 @@ class ApiController : BaseController(), Initializable {
                 } catch (e: Exception) {
                     e.printStackTrace()
                     throw RuntimeException("文件导入api失败:${e.message}")
-                }  finally {
+                } finally {
                     showBtn()
                 }
             }
