@@ -3,6 +3,7 @@ package cn.lifay.lerverhc.view
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.IdUtil
 import cn.hutool.core.util.ObjectUtil
+import cn.hutool.http.ContentType
 import cn.hutool.http.HttpUtil
 import cn.hutool.json.JSONObject
 import cn.hutool.json.JSONUtil
@@ -75,15 +76,19 @@ class ApiController : BaseController(), Initializable {
         selectAddrs.apply {
             items.addAll(DbInfor.database.httpAddrs.toList())
             valueProperty().addListener { observable, oldValue, newValue ->
-                onLineAddr.text = toApiAddr(newValue.addr)
+                onLineAddr.text = toApiAddr(newValue.addr, "")
             }
         }
         filePath.text = ConfigUtil.preferences.get(ConfigUtil.API_JSON_FILE, "")
 
     }
 
-    private fun toApiAddr(addr: String): String {
-        return "${addr}/v2/api-docs"
+    private fun toSwaggerAddr(addr: String): String {
+        return "${addr}/swagger-resources"
+    }
+
+    private fun toApiAddr(addr: String, url: String): String {
+        return addr + url
     }
 
     fun initForm(nodeId: String) {
@@ -107,7 +112,19 @@ class ApiController : BaseController(), Initializable {
                     loading.show()
                     val async = async {
                         try {
-                            val str = HttpUtil.get(toApiAddr(selectAddrs.selectionModel.selectedItem.addr))
+                            //获取分组
+                            val resourceStr = HttpUtil.get(toSwaggerAddr(selectAddrs.selectionModel.selectedItem.addr))
+                            if (!JSONUtil.isJson(resourceStr)) {
+                                Platform.runLater { Alert(Alert.AlertType.ERROR, "api接口请求失败:${resourceStr}").show() }
+                                return@async null
+                            }
+                            val resourceObj = JSONUtil.parseArray(resourceStr)[0] as JSONObject
+                            val apiDocUrl = resourceObj.getStr("url")
+                            val str = HttpUtil.get(toApiAddr(selectAddrs.selectionModel.selectedItem.addr, apiDocUrl))
+                            if (!JSONUtil.isJson(str)) {
+                                Platform.runLater { Alert(Alert.AlertType.ERROR, "api接口请求失败:${str}").show() }
+                                return@async null
+                            }
                             return@async JSONUtil.toBean(str, ApiModel::class.java)
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -252,7 +269,16 @@ class ApiController : BaseController(), Initializable {
 
                     //body
                     var bodyObj = JSONObject()
+                    var b = false
                     httpDTO.parameters?.let {
+                        //特殊处理 contentType
+                        if (!b && httpDTO.parameters!!.isNotEmpty() && dataObj["contentType"] == ContentType.JSON.name) {
+                            val p = httpDTO.parameters!![0]
+                            if ("query" == p.`in`) {
+                                dataObj["contentType"] = ContentType.FORM_URLENCODED.name
+                            }
+                            b = true
+                        }
                         for (param in httpDTO.parameters!!) {
                             when (param.type) {
                                 "string" -> {

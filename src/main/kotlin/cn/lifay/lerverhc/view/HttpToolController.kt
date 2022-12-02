@@ -1,8 +1,9 @@
 package cn.lifay.lerverhc.view
 
+import cn.hutool.core.date.DatePattern
 import cn.hutool.core.date.DateUtil
+import cn.hutool.core.date.TimeInterval
 import cn.hutool.core.io.FileUtil
-import cn.hutool.core.lang.UUID
 import cn.hutool.core.util.StrUtil
 import cn.hutool.core.util.URLUtil
 import cn.hutool.http.ContentType
@@ -15,6 +16,11 @@ import cn.lifay.lerverhc.db.DbInfor
 import cn.lifay.lerverhc.hander.ConfigUtil
 import cn.lifay.lerverhc.hander.HttpHander
 import cn.lifay.lerverhc.model.Header
+import cn.lifay.lerverhc.model.HttpTool
+import cn.lifay.lerverhc.model.HttpTools
+import cn.lifay.lerverhc.model.HttpTools.httpTools
+import cn.lifay.lerverhc.model.enums.HttpType
+import cn.lifay.ui.LoadingUI
 import javafx.application.Platform
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
@@ -22,17 +28,15 @@ import javafx.fxml.Initializable
 import javafx.scene.control.*
 import javafx.scene.control.cell.PropertyValueFactory
 import javafx.scene.control.cell.TextFieldTableCell
+import javafx.scene.layout.BorderPane
 import javafx.scene.paint.Color
 import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
+import javafx.stage.Stage
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import model.HttpAddr
 import model.HttpAddrs.httpAddrs
-import cn.lifay.lerverhc.model.HttpTool
-import cn.lifay.lerverhc.model.HttpTools
-import cn.lifay.lerverhc.model.HttpTools.httpTools
-import cn.lifay.lerverhc.model.enums.HttpType
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.update
 import org.ktorm.entity.find
@@ -54,12 +58,14 @@ import java.util.*
  **/
 class HttpToolController : BaseController(), Initializable {
 
-
     //首页controller
     private lateinit var index: IndexController
 
     /*http对象*/
     private var httpTool: HttpTool? = null
+
+    @FXML
+    lateinit var rootPane: BorderPane
 
     @FXML
     var httpNameText = TextArea()
@@ -103,6 +109,9 @@ class HttpToolController : BaseController(), Initializable {
     var nowTimeLabel: Label = Label()
 
     @FXML
+    var useTimeLabel: Label = Label()
+
+    @FXML
     var checkBatch: CheckBox = CheckBox()
 
     @FXML
@@ -110,6 +119,9 @@ class HttpToolController : BaseController(), Initializable {
 
     @FXML
     val btnDataFile: Button = Button()
+
+//    @FXML
+//    var saveBtn: Button = Button("保存",ImageView(Image(ResourceUtil.getStream("save.png"))))
 
     /*批量*/
     @FXML
@@ -134,7 +146,6 @@ class HttpToolController : BaseController(), Initializable {
     private var isDownFile: Boolean = false
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
-
         //method
         selectMethod.items.addAll(Method.values().asList())
         selectMethod.value = Method.GET
@@ -275,6 +286,7 @@ class HttpToolController : BaseController(), Initializable {
     fun sendHttp(actionEvent: ActionEvent) {
         checkParam(selectAddr.value, "select服务地址")
         checkParam(url.text, "url")
+        val timer = DateUtil.timer()
         //是否下载文件
         if (isDownFile) {
             //下载文件
@@ -285,7 +297,7 @@ class HttpToolController : BaseController(), Initializable {
             }
             val directory = directoryChooser.showDialog(index.rootPane.scene.window)
             directory?.let {
-                GlobalScope.launch {
+                asyncDo {
                     var fullUrl = getFullUrl() + "?"
                     val jsonObject = JSONUtil.parseObj(bodyStr.text)
                     for (key in jsonObject.keys) {
@@ -309,7 +321,7 @@ class HttpToolController : BaseController(), Initializable {
                     Alert(Alert.AlertType.ERROR, "【批量模板文件名】不能为空", ButtonType.CLOSE).show()
                     return
                 }
-                GlobalScope.launch {
+                asyncDo {
                     val result = parseJsonFmtStr(
                         HttpHander.batchSendHttp(
                             getFullUrl(),
@@ -327,7 +339,7 @@ class HttpToolController : BaseController(), Initializable {
                 }
             } else {
                 //单个
-                GlobalScope.launch {
+                asyncDo {
                     val httpResponse =
                         HttpHander.singleSendHttp(
                             getFullUrl(),
@@ -348,6 +360,7 @@ class HttpToolController : BaseController(), Initializable {
             }
         }
         uptNowTime()
+        useTimeLabel.text = "${timer.interval()} 毫秒"
     }
 
     /**
@@ -376,7 +389,8 @@ class HttpToolController : BaseController(), Initializable {
                 Alert(Alert.AlertType.ERROR, "【数据文件】不能为空", ButtonType.CLOSE).show()
                 return
             }
-            GlobalScope.launch {
+            asyncDo {
+                val timer = DateUtil.timer()
                 val result = HttpHander.batchSendHttp(
                     getFullUrl(),
                     selectMethod.value,
@@ -385,10 +399,12 @@ class HttpToolController : BaseController(), Initializable {
                 )
                 Platform.runLater {
                     responseStr.text = result
+                    uptUseTime(timer)
                 }
             }
         } else {
-            GlobalScope.launch {
+            asyncDo {
+                val timer = DateUtil.timer()
                 val httpResponse =
                     HttpHander.singleSendHttp(
                         getFullUrl(),
@@ -400,15 +416,28 @@ class HttpToolController : BaseController(), Initializable {
                 Platform.runLater {
                     httpStatus.text = "200"
                     responseStr.text = httpResponse?.body()
+                    uptUseTime(timer)
                 }
                 //输出目录
                 val outputDir =
-                    ConfigUtil.preferences.get(ConfigUtil.PROPERTIES_OUTPUT_FOLDER, System.getProperty("user.dir"))
-                val newFilePath = outputDir + File.separator + UUID.fastUUID().toString() + ".json"
+                    ConfigUtil.preferences.get(
+                        ConfigUtil.PROPERTIES_OUTPUT_FOLDER,
+                        System.getProperty("user.dir")
+                    ) + File.separator + "result"
+                val fileName =
+                    selectAddr.selectionModel.selectedItem.name + "_" + httpNameText.text + File.separator + DateUtil.format(
+                        Date(),
+                        DatePattern.PURE_DATETIME_FORMATTER
+                    ) + ".json"
+                val newFilePath = outputDir + File.separator + fileName
                 FileUtil.writeString(httpResponse?.body(), newFilePath, Charset.forName("utf-8"))
             }
         }
         uptNowTime()
+    }
+
+    private fun uptUseTime(timer: TimeInterval) {
+        useTimeLabel.text = "${timer.interval()} 毫秒"
     }
 
     /**
@@ -529,4 +558,17 @@ class HttpToolController : BaseController(), Initializable {
         }
     }
 
+    fun asyncDo(f: () -> Unit) {
+        val loadingUI = LoadingUI(rootPane.scene.window as Stage)
+        GlobalScope.launch {
+            loadingUI.show()
+            try {
+                f()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                loadingUI.closeStage()
+            }
+        }
+    }
 }

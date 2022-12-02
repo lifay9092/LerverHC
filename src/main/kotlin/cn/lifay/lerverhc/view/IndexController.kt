@@ -4,9 +4,16 @@ import cn.hutool.core.io.resource.ResourceUtil
 import cn.hutool.core.util.IdUtil
 import cn.hutool.core.util.StrUtil
 import cn.hutool.json.JSONUtil
+import cn.lifay.lerverhc.BusiService
 import cn.lifay.lerverhc.db.DbInfor
 import cn.lifay.lerverhc.hander.bindEscKey
 import cn.lifay.lerverhc.hander.bootstrap
+import cn.lifay.lerverhc.model.HttpTool
+import cn.lifay.lerverhc.model.HttpTools
+import cn.lifay.lerverhc.model.HttpTools.httpTools
+import cn.lifay.lerverhc.model.enums.HttpType
+import cn.lifay.ui.GlobeTheme
+import cn.lifay.ui.LoadingUI
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
@@ -22,14 +29,9 @@ import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Pane
 import javafx.stage.Modality
 import javafx.stage.Stage
-import cn.lifay.lerverhc.model.HttpTool
-import cn.lifay.lerverhc.model.HttpTools
-import cn.lifay.lerverhc.model.HttpTools.httpTools
-import cn.lifay.lerverhc.model.enums.HttpType
-import cn.lifay.ui.GlobeTheme
-import javafx.application.Application
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.ktorm.dsl.and
-import org.ktorm.dsl.delete
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.insert
 import org.ktorm.entity.count
@@ -215,17 +217,32 @@ class IndexController : BaseController(), Initializable {
                                     if (count > 0) {
                                         val alert = Alert(Alert.AlertType.CONFIRMATION, "该节点下还有子节点,是否继续删除?")
                                         if (alert.showAndWait().get() == ButtonType.OK) {
-                                            DbInfor.database.delete(HttpTools) { httpTool ->
-                                                httpTool.id eq selectItem!!.id
+                                            //递归删除
+                                            val loadingUI = LoadingUI(rootPane.scene.window as Stage)
+                                            GlobalScope.launch {
+                                                try {
+                                                    loadingUI.show()
+                                                    BusiService.deleteHttpTool(
+                                                        selectionModel.selectedItem.parent.children,
+                                                        selectionModel.selectedItem
+                                                    )
+                                                } catch (e: Exception) {
+                                                    e.printStackTrace()
+                                                } finally {
+                                                    loadingUI.closeStage()
+                                                }
+
                                             }
+
                                         }
                                     } else {
                                         //println(item!!.id)
                                         val alert = Alert(Alert.AlertType.CONFIRMATION, "是否删除?")
                                         if (alert.showAndWait().get() == ButtonType.OK) {
-                                            DbInfor.database.delete(HttpTools) { httpTool ->
-                                                httpTool.id eq selectItem!!.id
-                                            }
+                                            BusiService.deleteHttpTool(
+                                                selectionModel.selectedItem.parent.children,
+                                                selectionModel.selectedItem
+                                            )
                                             //tab页
                                             tabList.tabs.removeIf { i ->
                                                 i.id == selectItem.id
@@ -233,7 +250,7 @@ class IndexController : BaseController(), Initializable {
                                             //树菜单
                                             httpTreeView.apply {
                                                 removeTreeItemById(root.children, selectItem.id)
-                                                refresh()
+                                                //refresh()
                                             }
                                         }
                                     }
@@ -252,8 +269,8 @@ class IndexController : BaseController(), Initializable {
                     //双击
                     if (selectItem?.isHttp() == true) {
                         addTabHttpForm(selectItem)
-                    }else{
-                        selectionModel.selectedItem.isExpanded = true
+                    } else {
+                        selectionModel.selectedItem?.let { si -> si.isExpanded = true }
                     }
                 } else if (it.clickCount == 1) {
                     //单击
@@ -459,12 +476,12 @@ class IndexController : BaseController(), Initializable {
 
     fun whiteTheme(actionEvent: ActionEvent) {
         GlobeTheme.setWhite()
-      //  Application.setUserAgentStylesheet(Application.STYLESHEET_MODENA)
+        //  Application.setUserAgentStylesheet(Application.STYLESHEET_MODENA)
     }
 
     fun darkTheme(actionEvent: ActionEvent) {
         GlobeTheme.setDark()
-       // Application.setUserAgentStylesheet(Application.STYLESHEET_CASPIAN)
+        // Application.setUserAgentStylesheet(Application.STYLESHEET_CASPIAN)
     }
 
 }

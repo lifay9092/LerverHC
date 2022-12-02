@@ -6,7 +6,6 @@ import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.stage.Stage
 import javafx.util.Duration
-import org.kordamp.bootstrapfx.BootstrapFX
 
 
 fun Scene.bootstrap(): Scene {
