@@ -16,7 +16,9 @@
                     </text>
                     <graphic>
                         <ImageView>
-                            <Image url="save.png"/>
+                            <image>
+                                <Image url="save.png"/>
+                            </image>
                         </ImageView>
                     </graphic>
                 </Button>
@@ -25,13 +27,14 @@
                 <TextArea fx:id="url" layoutX="378.0" layoutY="7.0" prefHeight="44.0" prefWidth="445.0"/>
                 <Button alignment="CENTER" contentDisplay="CENTER" graphicTextGap="5.0" layoutX="832.0" layoutY="63.0"
                         lineSpacing="11.0" mnemonicParsing="false" onAction="#sendHttp" prefHeight="34.0"
-                        prefWidth="114.0" style="-fx-font-weight: bold;" styleClass="btn-success" text="发送"/>
+                        prefWidth="120.0" style="-fx-text-fill:WHITE;-fx-background-color:#5264AE;-fx-font-size:14px;"
+                        text="发送"/>
                 <ChoiceBox fx:id="selectContentType" layoutX="591.0" layoutY="64.0" prefHeight="23.0"
                            prefWidth="197.0"/>
                 <Label layoutX="507.0" layoutY="61.0" prefHeight="27.0" prefWidth="84.0" text="Content-Type:"/>
                 <Button layoutX="832.0" layoutY="104.0" mnemonicParsing="false" onAction="#sendHttpAndSave"
-                        prefHeight="34.0" prefWidth="114.0" style=" -fx-font-weight: bold;" styleClass="btn-info"
-                        text="发送并导出结果"/>
+                        prefHeight="34.0" prefWidth="120.0"
+                        style="-fx-text-fill:WHITE;-fx-background-color:#5264AE;-fx-font-size:14px;" text="发送并导出结果"/>
                 <TextArea fx:id="bodyStr" layoutX="16.0" layoutY="341.0" prefHeight="373.0" prefWidth="471.0"
                           wrapText="true"/>
                 <Label alignment="CENTER" layoutX="443.0" layoutY="315.0" prefHeight="25.0" prefWidth="53.0" text="参数"
@@ -42,12 +45,13 @@
                 <Label fx:id="httpStatus" layoutX="555.0" layoutY="160.0" prefHeight="22.0" prefWidth="87.0"/>
                 <CheckBox fx:id="checkBatch" layoutX="956.0" layoutY="7.0" mnemonicParsing="false" text="批量执行"/>
                 <Button fx:id="btnDataFile" layoutX="16.0" layoutY="281.0" mnemonicParsing="false"
-                        onAction="#selectDataFile" text="选择数据文件"/>
+                        onAction="#selectDataFile" style="-fx-text-fill:WHITE;-fx-background-color:#5264AE"
+                        text="选择数据文件"/>
                 <TextArea fx:id="batchDataFilePath" layoutX="114.0" layoutY="281.0" prefHeight="23.0"
                           prefWidth="373.0"/>
                 <CheckBox fx:id="checkAsync" layoutX="1043.0" layoutY="7.0" mnemonicParsing="false" text="异步"/>
                 <Button layoutX="16.0" layoutY="316.0" mnemonicParsing="false" onAction="#checkDataFile"
-                        styleClass="btn-danger" text="检查数据"/>
+                        style="-fx-text-fill:WHITE;-fx-background-color:#5264AE" text="检查数据"/>
                 <TextField fx:id="checkResult" editable="false" layoutX="91.0" layoutY="318.0" prefHeight="23.0"
                            prefWidth="352.0"/>
                 <Label fx:id="batchFileNameLabel" layoutX="832.0" layoutY="31.0" prefHeight="19.0" prefWidth="99.0"
@@ -58,11 +62,11 @@
                 <Label layoutX="823.0" layoutY="160.0" prefHeight="22.0" prefWidth="66.0" text="当前时间:"/>
                 <Label fx:id="nowTimeLabel" layoutX="889.0" layoutY="160.0" prefHeight="22.0" prefWidth="154.0"/>
                 <Button layoutX="1044.0" layoutY="160.0" mnemonicParsing="false" onAction="#openOutputFolder"
-                        text="打开输出目录"/>
+                        style="-fx-text-fill:WHITE;-fx-background-color:#5264AE" text="打开输出目录"/>
                 <TextArea fx:id="httpNameText" layoutX="5.0" layoutY="2.0" prefHeight="49.0" prefWidth="117.0"/>
                 <Label fx:id="addrValue" layoutX="124.0" layoutY="30.0" prefHeight="22.0" prefWidth="178.0"/>
                 <Button layoutX="832.0" layoutY="7.0" mnemonicParsing="false" onAction="#viewUrl" prefHeight="20.0"
-                        prefWidth="63.0" styleClass="btn-warning" text="URL"/>
+                        prefWidth="63.0" style="-fx-text-fill:WHITE;-fx-background-color:#5264AE" text="URL"/>
                 <Label fx:id="jsonCheckText" layoutX="16.0" layoutY="714.0" prefHeight="24.0" prefWidth="236.0"/>
                 <Label layoutX="16.0" layoutY="61.0" prefHeight="27.0" prefWidth="57.0" text="Headers:"/>
                 <TableView fx:id="headersTable" layoutX="13.0" layoutY="90.0" prefHeight="188.0" prefWidth="489.0">
