@@ -1,5 +1,8 @@
 [
 {
+  "name":"[Ljava.lang.reflect.Method;"
+},
+{
   "name":"[Ljavafx.collections.transformation.SortedList$Element;"
 },
 {
@@ -10,6 +13,120 @@
 {
   "name":"cn.lifay.lerverhc.LerverHCApplication",
   "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"cn.lifay.lerverhc.model.ApiModel",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"setBasePath","parameterTypes":["java.lang.String"] }, 
+    {"name":"setHost","parameterTypes":["java.lang.String"] }, 
+    {"name":"setInfo","parameterTypes":["cn.lifay.lerverhc.model.ApiModel$InfoDTO"] }, 
+    {"name":"setPaths","parameterTypes":["java.util.LinkedHashMap"] }, 
+    {"name":"setSwagger","parameterTypes":["java.lang.String"] }, 
+    {"name":"setTags","parameterTypes":["java.util.List"] }
+  ]
+},
+{
+  "name":"cn.lifay.lerverhc.model.ApiModel$ContactDTO",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"setName","parameterTypes":["java.lang.String"] }, 
+    {"name":"setUrl","parameterTypes":["java.lang.String"] }
+  ]
+},
+{
+  "name":"cn.lifay.lerverhc.model.ApiModel$HttpDTO",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"setConsumes","parameterTypes":["java.util.List"] }, 
+    {"name":"setDeprecated","parameterTypes":["java.lang.Boolean"] }, 
+    {"name":"setDescription","parameterTypes":["java.lang.String"] }, 
+    {"name":"setOperationId","parameterTypes":["java.lang.String"] }, 
+    {"name":"setParameters","parameterTypes":["java.util.List"] }, 
+    {"name":"setProduces","parameterTypes":["java.util.List"] }, 
+    {"name":"setSummary","parameterTypes":["java.lang.String"] }, 
+    {"name":"setTags","parameterTypes":["java.util.List"] }
+  ]
+},
+{
+  "name":"cn.lifay.lerverhc.model.ApiModel$InfoDTO",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"setContact","parameterTypes":["cn.lifay.lerverhc.model.ApiModel$ContactDTO"] }, 
+    {"name":"setDescription","parameterTypes":["java.lang.String"] }, 
+    {"name":"setTermsOfService","parameterTypes":["java.lang.String"] }, 
+    {"name":"setTitle","parameterTypes":["java.lang.String"] }, 
+    {"name":"setVersion","parameterTypes":["java.lang.String"] }
+  ]
+},
+{
+  "name":"cn.lifay.lerverhc.model.ApiModel$ParametersDTO",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"setDefault","parameterTypes":["java.lang.String"] }, 
+    {"name":"setDescription","parameterTypes":["java.lang.String"] }, 
+    {"name":"setIn","parameterTypes":["java.lang.String"] }, 
+    {"name":"setName","parameterTypes":["java.lang.String"] }, 
+    {"name":"setRequired","parameterTypes":["java.lang.Boolean"] }, 
+    {"name":"setType","parameterTypes":["java.lang.String"] }
+  ]
+},
+{
+  "name":"cn.lifay.lerverhc.model.ApiModel$TagsDTO",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"setDescription","parameterTypes":["java.lang.String"] }, 
+    {"name":"setName","parameterTypes":["java.lang.String"] }
+  ]
+},
+{
+  "name":"cn.lifay.lerverhc.model.HttpTool"
+},
+{
+  "name":"cn.lifay.lerverhc.model.HttpTools"
+},
+{
+  "name":"cn.lifay.lerverhc.view.AddrController",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"clearForm","parameterTypes":["javafx.event.ActionEvent"] }
+  ]
+},
+{
+  "name":"cn.lifay.lerverhc.view.ApiController",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"impFromAddr","parameterTypes":["javafx.event.ActionEvent"] }, 
+    {"name":"impFromFile","parameterTypes":["javafx.event.ActionEvent"] }
+  ]
 },
 {
   "name":"cn.lifay.lerverhc.view.BaseController",
@@ -32,7 +149,10 @@
   "queryAllDeclaredMethods":true,
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
-    {"name":"sendHttp","parameterTypes":["javafx.event.ActionEvent"] }
+    {"name":"openOutputFolder","parameterTypes":["javafx.event.ActionEvent"] }, 
+    {"name":"saveHttp","parameterTypes":["javafx.event.ActionEvent"] }, 
+    {"name":"sendHttp","parameterTypes":["javafx.event.ActionEvent"] }, 
+    {"name":"sendHttpAndSave","parameterTypes":["javafx.event.ActionEvent"] }
   ]
 },
 {
@@ -41,8 +161,59 @@
   "queryAllDeclaredMethods":true,
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
-    {"name":"convertToJsonTool","parameterTypes":["javafx.event.ActionEvent"] }
+    {"name":"addrManage","parameterTypes":["javafx.event.ActionEvent"] }, 
+    {"name":"convertToJsonTool","parameterTypes":["javafx.event.ActionEvent"] }, 
+    {"name":"darkTheme","parameterTypes":["javafx.event.ActionEvent"] }, 
+    {"name":"propertiesManage","parameterTypes":["javafx.event.ActionEvent"] }, 
+    {"name":"reloadHttpTree","parameterTypes":[] }, 
+    {"name":"whiteTheme","parameterTypes":["javafx.event.ActionEvent"] }
   ]
+},
+{
+  "name":"cn.lifay.lerverhc.view.PropertiesController",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.crypto.provider.AESCipher$General",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.crypto.provider.ARCFOURCipher",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.crypto.provider.ChaCha20Cipher$ChaCha20Poly1305",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.crypto.provider.DESCipher",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.crypto.provider.DESedeCipher",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.crypto.provider.DHParameters",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.crypto.provider.GaloisCounterMode$AESGCM",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.crypto.provider.TlsKeyMaterialGenerator",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.crypto.provider.TlsMasterSecretGenerator",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.crypto.provider.TlsPrfGenerator$V12",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"com.sun.glass.ui.Screen"
@@ -103,6 +274,10 @@
   "methods":[{"name":"loadShader","parameterTypes":["com.sun.prism.ps.ShaderFactory","java.io.InputStream"] }]
 },
 {
+  "name":"com.sun.prism.shader.Solid_Color_Loader",
+  "methods":[{"name":"loadShader","parameterTypes":["com.sun.prism.ps.ShaderFactory","java.io.InputStream"] }]
+},
+{
   "name":"com.sun.prism.shader.Solid_TextureFirstPassLCD_Loader",
   "methods":[{"name":"loadShader","parameterTypes":["com.sun.prism.ps.ShaderFactory","java.io.InputStream"] }]
 },
@@ -151,6 +326,11 @@
   "queriedMethods":[{"name":"getResourceAsStream","parameterTypes":["java.lang.String"] }]
 },
 {
+  "name":"java.lang.Object",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
   "name":"java.lang.String"
 },
 {
@@ -166,7 +346,30 @@
   "methods":[{"name":"nativeOrder","parameterTypes":[] }]
 },
 {
+  "name":"java.security.AlgorithmParametersSpi"
+},
+{
+  "name":"java.security.KeyStoreSpi"
+},
+{
   "name":"java.security.SecureRandomParameters"
+},
+{
+  "name":"java.security.interfaces.ECPrivateKey"
+},
+{
+  "name":"java.security.interfaces.ECPublicKey"
+},
+{
+  "name":"java.security.interfaces.RSAPrivateKey"
+},
+{
+  "name":"java.security.interfaces.RSAPublicKey"
+},
+{
+  "name":"java.util.LinkedHashMap",
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"javafx.animation.KeyValue"
@@ -258,6 +461,7 @@
     {"name":"setAlignment","parameterTypes":["javafx.geometry.Pos"] }, 
     {"name":"setContentDisplay","parameterTypes":["javafx.scene.control.ContentDisplay"] }, 
     {"name":"setFont","parameterTypes":["javafx.scene.text.Font"] }, 
+    {"name":"setGraphic","parameterTypes":["javafx.scene.Node"] }, 
     {"name":"setGraphicTextGap","parameterTypes":["double"] }, 
     {"name":"setLineSpacing","parameterTypes":["double"] }, 
     {"name":"setMnemonicParsing","parameterTypes":["boolean"] }, 
@@ -355,8 +559,10 @@
   "queryAllPublicConstructors":true,
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
+    {"name":"getImage","parameterTypes":[] }, 
     {"name":"setFitHeight","parameterTypes":["double"] }, 
     {"name":"setFitWidth","parameterTypes":["double"] }, 
+    {"name":"setImage","parameterTypes":["javafx.scene.image.Image"] }, 
     {"name":"setPreserveRatio","parameterTypes":["boolean"] }
   ]
 },
@@ -372,6 +578,7 @@
   "queryAllPublicConstructors":true,
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
+    {"name":"setAlignment","parameterTypes":["javafx.scene.Node","javafx.geometry.Pos"] }, 
     {"name":"setCenter","parameterTypes":["javafx.scene.Node"] }, 
     {"name":"setLeft","parameterTypes":["javafx.scene.Node"] }, 
     {"name":"setTop","parameterTypes":["javafx.scene.Node"] }
@@ -399,6 +606,8 @@
   "name":"javafx.scene.layout.Region",
   "queryAllDeclaredMethods":true,
   "methods":[
+    {"name":"setMaxHeight","parameterTypes":["double"] }, 
+    {"name":"setMaxWidth","parameterTypes":["double"] }, 
     {"name":"setMinHeight","parameterTypes":["double"] }, 
     {"name":"setMinWidth","parameterTypes":["double"] }, 
     {"name":"setPadding","parameterTypes":["javafx.geometry.Insets"] }, 
@@ -459,6 +668,11 @@
 },
 {
   "name":"javafx.stage.Window"
+},
+{
+  "name":"javax.security.auth.x500.X500Principal",
+  "fields":[{"name":"thisX500Name"}],
+  "queriedMethods":[{"name":"<init>","parameterTypes":["sun.security.x509.X500Name"] }]
 },
 {
   "name":"kotlin.Metadata",
@@ -531,12 +745,36 @@
   "name":"org.sqlite.JDBC"
 },
 {
+  "name":"sun.java2d.marlin.DMarlinRenderingEngine",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"sun.misc.Unsafe",
   "fields":[{"name":"theUnsafe"}]
 },
 {
+  "name":"sun.security.pkcs12.PKCS12KeyStore",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.pkcs12.PKCS12KeyStore$DualFormatPKCS12",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"sun.security.provider.DRBG",
   "methods":[{"name":"<init>","parameterTypes":["java.security.SecureRandomParameters"] }]
+},
+{
+  "name":"sun.security.provider.DSA$SHA224withDSA",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.provider.DSA$SHA256withDSA",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.provider.JavaKeyStore$JKS",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"sun.security.provider.MD5",
@@ -547,7 +785,103 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"sun.security.provider.SHA2$SHA224",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"sun.security.provider.SHA2$SHA256",
   "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.provider.SHA5$SHA384",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.provider.SHA5$SHA512",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.provider.X509Factory",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.rsa.PSSParameters",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.rsa.RSAKeyFactory$Legacy",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.rsa.RSAPSSSignature",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.rsa.RSASignature$SHA224withRSA",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.ssl.KeyManagerFactoryImpl$SunX509",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.ssl.SSLContextImpl$DefaultSSLContext",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.ssl.SSLContextImpl$TLSContext",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.ssl.TrustManagerFactoryImpl$PKIXFactory",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.x509.AuthorityInfoAccessExtension",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+},
+{
+  "name":"sun.security.x509.AuthorityKeyIdentifierExtension",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+},
+{
+  "name":"sun.security.x509.BasicConstraintsExtension",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+},
+{
+  "name":"sun.security.x509.CRLDistributionPointsExtension",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+},
+{
+  "name":"sun.security.x509.CertificatePoliciesExtension",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+},
+{
+  "name":"sun.security.x509.ExtendedKeyUsageExtension",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+},
+{
+  "name":"sun.security.x509.IssuerAlternativeNameExtension",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+},
+{
+  "name":"sun.security.x509.KeyUsageExtension",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+},
+{
+  "name":"sun.security.x509.NetscapeCertTypeExtension",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+},
+{
+  "name":"sun.security.x509.PrivateKeyUsageExtension",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+},
+{
+  "name":"sun.security.x509.SubjectAlternativeNameExtension",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+},
+{
+  "name":"sun.security.x509.SubjectKeyIdentifierExtension",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
 }
 ]

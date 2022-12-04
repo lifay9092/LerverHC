@@ -11,6 +11,21 @@
       "pattern":"\\QMETA-INF/services/kotlin.reflect.jvm.internal.impl.resolve.ExternalOverridabilityCondition\\E"
     }, 
     {
+      "pattern":"\\QaddrManage.fxml\\E"
+    }, 
+    {
+      "pattern":"\\QapiManage.fxml\\E"
+    }, 
+    {
+      "pattern":"\\Qcn/lifay/css/modena.css\\E"
+    }, 
+    {
+      "pattern":"\\Qcn/lifay/css/modena_dark.css\\E"
+    }, 
+    {
+      "pattern":"\\Qcn/lifay/ui/loading.gif\\E"
+    }, 
+    {
       "pattern":"\\Qconvert.png\\E"
     }, 
     {
@@ -27,6 +42,9 @@
     }, 
     {
       "pattern":"\\Qget.png\\E"
+    }, 
+    {
+      "pattern":"\\Qhttp.png\\E"
     }, 
     {
       "pattern":"\\QhttpTool.fxml\\E"
@@ -50,7 +68,13 @@
       "pattern":"\\Qpost.png\\E"
     }, 
     {
+      "pattern":"\\QpropertiesManage.fxml\\E"
+    }, 
+    {
       "pattern":"\\Qreload.png\\E"
+    }, 
+    {
+      "pattern":"\\Qsave.png\\E"
     }, 
     {
       "pattern":"\\Qsqlite-jdbc.properties\\E"
@@ -61,6 +85,7 @@
       "name":"com.sun.javafx.tk.quantum.QuantumMessagesBundle",
       "locales":[
         "", 
+        "und", 
         "zh-CN"
       ]
     }, 
@@ -68,6 +93,7 @@
       "name":"com/sun/glass/ui/win/themes",
       "locales":[
         "", 
+        "und", 
         "zh-CN"
       ]
     }, 
@@ -75,7 +101,15 @@
       "name":"com/sun/javafx/scene/control/skin/resources/controls",
       "locales":[
         "", 
+        "und", 
         "zh-CN"
+      ]
+    }, 
+    {
+      "name":"sun.awt.resources.awt",
+      "classNames":[
+        "sun.awt.resources.awt", 
+        "sun.awt.resources.awt_zh_CN"
       ]
     }
   ]
