@@ -6,12 +6,14 @@ import cn.hutool.core.util.StrUtil
 import cn.hutool.json.JSONUtil
 import cn.lifay.lerverhc.BusiService
 import cn.lifay.lerverhc.db.DbInfor
+import cn.lifay.lerverhc.hander.ConfigUtil
 import cn.lifay.lerverhc.hander.bindEscKey
 import cn.lifay.lerverhc.hander.bootstrap
 import cn.lifay.lerverhc.model.HttpTool
 import cn.lifay.lerverhc.model.HttpTools
 import cn.lifay.lerverhc.model.HttpTools.httpTools
 import cn.lifay.lerverhc.model.enums.HttpType
+import cn.lifay.lerverhc.ui.MessageView
 import cn.lifay.ui.GlobeTheme
 import cn.lifay.ui.LoadingUI
 import javafx.collections.ObservableList
@@ -69,7 +71,7 @@ class IndexController : BaseController(), Initializable {
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         /*图标渲染*/
-        reloadHttpTreeImg.image = Image(ResourceUtil.getStream("reload.png"))
+        reloadHttpTreeImg.image = Image(ConfigUtil.RELOAD_IMG)
         /*初始化http树*/
         initTreeView("")
         keywordField.textProperty().addListener { obs, ov, nv ->
@@ -85,7 +87,7 @@ class IndexController : BaseController(), Initializable {
     private fun initTreeView(keyword: String) {
         val rootTreeItem = TreeItem(
             HttpTool("0", "-1", "", "根目录", HttpType.NODE.name, "", ""),
-            ImageView(Image(ResourceUtil.getStream("folder.png")))
+            ImageView(Image(ConfigUtil.FOLDER_IMG))
         )
         //HttpTool("1","0","11111",HttpType.NODE.name,"","")
 
@@ -373,7 +375,7 @@ class IndexController : BaseController(), Initializable {
 
     private fun buildTreeItem(httpTool: HttpTool): TreeItem<HttpTool> {
         val treeItem = TreeItem(
-            httpTool, ImageView(Image(ResourceUtil.getStream(getTreeItemImg(httpTool))))
+            httpTool, ImageView(Image(ResourceUtil.getResource(getTreeItemImg(httpTool)).toExternalForm()))
         )
         return treeItem
     }
@@ -397,6 +399,9 @@ class IndexController : BaseController(), Initializable {
      */
     fun reloadHttpTree() {
         initTreeView("")
+        GlobalScope.launch {
+            MessageView.info("测试")
+        }
     }
 
     /**

@@ -1,8 +1,10 @@
 package cn.lifay.lerverhc.view
 
 import cn.hutool.core.util.ObjectUtil
+import javafx.application.Platform
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonType
+import javafx.scene.control.TextArea
 
 /**
  *@ClassName BaseController
@@ -13,13 +15,18 @@ import javafx.scene.control.ButtonType
 open class BaseController {
 
     fun errorAlert(msg: String) {
-        Alert(Alert.AlertType.ERROR, msg, ButtonType.CLOSE).show()
+        Platform.runLater {
+            Alert(Alert.AlertType.ERROR, "错误", ButtonType.CLOSE).apply {
+                dialogPane.expandableContent = TextArea(msg)
+                show()
+            }
+        }
         error(msg)
     }
 
     fun checkParam(value: Any, name: String?): Unit {
         if (ObjectUtil.isEmpty(value)) {
-            Alert(Alert.AlertType.ERROR, "${name}不能为空", ButtonType.CLOSE).show()
+            Platform.runLater { Alert(Alert.AlertType.ERROR, "${name}不能为空", ButtonType.CLOSE).show()}
             error("${name}不能为空")
         }
     }

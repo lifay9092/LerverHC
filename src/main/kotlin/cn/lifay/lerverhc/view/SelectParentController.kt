@@ -2,6 +2,7 @@ package cn.lifay.lerverhc.view
 
 import cn.hutool.core.io.resource.ResourceUtil
 import cn.lifay.lerverhc.db.DbInfor
+import cn.lifay.lerverhc.hander.ConfigUtil
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.TreeItem
@@ -47,7 +48,7 @@ class SelectParentController : BaseController(), Initializable {
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         var rootTreeItem = TreeItem(
             HttpTool("0", "-1", "", "根目录", HttpType.NODE.name, "", ""),
-            ImageView(Image(ResourceUtil.getStream("folder.png")))
+            ImageView(Image(ConfigUtil.FOLDER_IMG))
         )
         val httpTools = DbInfor.database.httpTools
         for (httpTool in httpTools.filter { it.parentId eq "0" }) {
@@ -83,7 +84,7 @@ class SelectParentController : BaseController(), Initializable {
 
     private fun buildTreeItem(httpTool: HttpTool): TreeItem<HttpTool> {
         val treeItem = TreeItem(
-            httpTool, ImageView(Image(ResourceUtil.getStream(if (httpTool.isHttp()) "http.png" else "folder.png")))
+            httpTool, ImageView(Image(ResourceUtil.getResource(if (httpTool.isHttp()) "http.png" else "folder.png").toExternalForm()))
         )
         return treeItem
     }

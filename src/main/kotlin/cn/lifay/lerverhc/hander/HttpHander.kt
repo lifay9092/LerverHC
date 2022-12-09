@@ -1,14 +1,16 @@
 package cn.lifay.lerverhc.hander
 
 import cn.hutool.core.io.FileUtil
+import cn.hutool.core.lang.Validator
 import cn.hutool.core.util.ReUtil
 import cn.hutool.core.util.StrUtil
+import cn.hutool.core.util.URLUtil
 import cn.hutool.http.*
 import cn.hutool.json.JSONObject
 import cn.hutool.json.JSONUtil
+import cn.lifay.lerverhc.hander.HttpHander.getVars
 import cn.lifay.lerverhc.model.Header
 import javafx.scene.control.Alert
-import javafx.scene.control.ButtonType
 import org.apache.commons.logging.LogFactory
 import java.io.File
 import java.nio.charset.Charset
@@ -83,6 +85,9 @@ object HttpHander {
     ): HttpResponse? {
         //组装参数信息
         try {
+            if (!checkUrl(url!!)) {
+                throw RuntimeException("$url url格式不正确")
+            }
             val httpRequest = buildHttpRequest(url, method, contentType, headers)
             if (Method.POST == method && ContentType.JSON == contentType && bodyStr.isNotBlank()) {
                 httpRequest.body(bodyStr)
@@ -91,11 +96,10 @@ object HttpHander {
             }
             return httpRequest.execute()
         } catch (e: Exception) {
-            Alert(Alert.AlertType.ERROR, "HTTP请求失败:${e.message}").show()
-            return null
+            throw RuntimeException("HTTP请求失败[$url]:${e.message}")
+//            Alert(Alert.AlertType.ERROR, "HTTP请求失败:${e.message}").show()
+//            return null
         }
-        Alert(Alert.AlertType.ERROR, "不支持当前请求:[${method.name}] [${contentType.value}]").show()
-        return null
     }
 
     /**
@@ -130,7 +134,12 @@ object HttpHander {
 //        map["file"] = File("E:\\\\TEST\\\\swserver\\\\swserver.bat")
         return HttpUtil.post(url, bodyObj)
     }
-
+    private fun checkUrl(url: String) :Boolean{
+        if (ReUtil.isMatch(Validator.URL_HTTP,url)) {
+            return url.count { i -> i.toString() == ":" } == 2
+        }
+        return false
+    }
     /**
      * 批量发送http请求并保存
      */
@@ -144,49 +153,49 @@ object HttpHander {
         batchFileNameStr: String?
     ): String? {
         var count = 0
-        try {/*解析模板和数据文件*/
-            if (!FileUtil.exist(batchDataFilePath)) {
-                Alert(Alert.AlertType.ERROR, "$batchDataFilePath 不存在", ButtonType.CLOSE).show()
-                return ""
-            }
-            val readStr = FileUtil.readString(batchDataFilePath, Charset.forName("utf-8"))
-            if (!JSONUtil.isJsonArray(readStr)) {
-                Alert(Alert.AlertType.ERROR, "$batchDataFilePath 非json数组格式", ButtonType.CLOSE).show()
-                return ""
-            }
-            //输出目录
-            val outputDir = ConfigUtil.preferences.get(
-                ConfigUtil.PROPERTIES_OUTPUT_FOLDER,
-                System.getProperty("user.dir")
-            ) + File.separator
-            //提取变量key ${}
-            val bodyKeys = getVars(bodyStr)
-            val fileNameKeys = getVars(batchFileNameStr)
-
-            //遍历
-            val jsonArray = JSONUtil.parseArray(readStr)
-            for (index in jsonArray.indices) {
-                val jsonObject: JSONObject = jsonArray[index] as JSONObject
-                //替换模板变量
-                val realBodyStr = getRealReplaceStr(bodyStr, bodyKeys, jsonObject)
-                try {
-                    val httpResponsebody = singleSendHttp(url, method, contentType, headers, realBodyStr ?: "")
-                    //println(httpRequest!!.body(realBodyStr).execute().body())
-                    //输出文件名
-                    val realFileNameStr = getRealReplaceStr(batchFileNameStr, fileNameKeys, jsonObject)
-                    val outputFilePath = "$outputDir$realFileNameStr.json"
-                    FileUtil.writeString(httpResponsebody?.body(), outputFilePath, Charset.forName("utf-8"))
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    return "执行失败,index[${index}],msg:${e.message}"
-                }
-                count++
-            }
-            return "批量执行成功,总共 ${count} 条,输出目录:$outputDir"
-        } catch (e: Exception) {
-            Alert(Alert.AlertType.ERROR, "运行出错:${e.message}", ButtonType.CLOSE).show()
+        /*解析模板和数据文件*/
+        if (!FileUtil.exist(batchDataFilePath)) {
+//                Alert(Alert.AlertType.ERROR, "$batchDataFilePath 不存在", ButtonType.CLOSE).show()
+            throw RuntimeException("$batchDataFilePath 不存在")
         }
-        return ""
+        val readStr = FileUtil.readString(batchDataFilePath, Charset.forName("utf-8"))
+        if (!JSONUtil.isJsonArray(readStr)) {
+//                Alert(Alert.AlertType.ERROR, "$batchDataFilePath 非json数组格式", ButtonType.CLOSE).show()
+            throw RuntimeException("$batchDataFilePath 非json数组格式")
+        }
+        if (!checkUrl(url)) {
+            throw RuntimeException("$url url格式不正确")
+        }
+        //输出目录
+        val outputDir = ConfigUtil.preferences.get(
+            ConfigUtil.PROPERTIES_OUTPUT_FOLDER,
+            System.getProperty("user.dir")
+        ) + File.separator
+        //提取变量key ${}
+        val bodyKeys = getVars(bodyStr)
+        val fileNameKeys = getVars(batchFileNameStr)
+
+        //遍历
+        val jsonArray = JSONUtil.parseArray(readStr)
+        for (index in jsonArray.indices) {
+            val jsonObject: JSONObject = jsonArray[index] as JSONObject
+            //替换模板变量
+            val realBodyStr = getRealReplaceStr(bodyStr, bodyKeys, jsonObject)
+            try {
+                val httpResponsebody = singleSendHttp(url, method, contentType, headers, realBodyStr ?: "")
+                //println(httpRequest!!.body(realBodyStr).execute().body())
+                //输出文件名
+                val realFileNameStr = getRealReplaceStr(batchFileNameStr, fileNameKeys, jsonObject)
+                val outputFilePath = "$outputDir$realFileNameStr.json"
+                FileUtil.writeString(httpResponsebody?.body(), outputFilePath, Charset.forName("utf-8"))
+            } catch (e: Exception) {
+                e.printStackTrace()
+                throw RuntimeException("执行失败,index[${index}],msg:${e.message}")
+            }
+            count++
+        }
+        return "批量执行成功,总共 ${count} 条,输出目录:$outputDir"
+
     }
 
     /**

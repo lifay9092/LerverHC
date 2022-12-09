@@ -4,6 +4,7 @@ import cn.hutool.core.date.DatePattern
 import cn.hutool.core.date.DateUtil
 import cn.hutool.core.date.TimeInterval
 import cn.hutool.core.io.FileUtil
+import cn.hutool.core.util.ObjectUtil
 import cn.hutool.core.util.StrUtil
 import cn.hutool.core.util.URLUtil
 import cn.hutool.http.ContentType
@@ -14,7 +15,10 @@ import cn.hutool.json.JSONObject
 import cn.hutool.json.JSONUtil
 import cn.lifay.lerverhc.db.DbInfor
 import cn.lifay.lerverhc.hander.ConfigUtil
+import cn.lifay.lerverhc.hander.DialogView
 import cn.lifay.lerverhc.hander.HttpHander
+import cn.lifay.lerverhc.hander.quickly
+import cn.lifay.lerverhc.model.BatchVO
 import cn.lifay.lerverhc.model.Header
 import cn.lifay.lerverhc.model.HttpTool
 import cn.lifay.lerverhc.model.HttpTools
@@ -28,10 +32,11 @@ import javafx.fxml.Initializable
 import javafx.scene.control.*
 import javafx.scene.control.cell.PropertyValueFactory
 import javafx.scene.control.cell.TextFieldTableCell
+import javafx.scene.image.Image
+import javafx.scene.image.ImageView
 import javafx.scene.layout.BorderPane
 import javafx.scene.paint.Color
 import javafx.stage.DirectoryChooser
-import javafx.stage.FileChooser
 import javafx.stage.Stage
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -57,6 +62,7 @@ import java.util.*
  *@Date 2022/1/4 20:09
  **/
 class HttpToolController : BaseController(), Initializable {
+
 
     //首页controller
     private lateinit var index: IndexController
@@ -87,11 +93,15 @@ class HttpToolController : BaseController(), Initializable {
 
     @FXML
     var selectContentType: ChoiceBox<ContentType> = ChoiceBox()
-/*
+
 
     @FXML
-    var authorization: TextField = TextField("")
-*/
+    lateinit var saveImg: ImageView
+
+//
+//    @FXML
+//    var saveImg = ImageView(Image(ConfigUtil.SAVE_IMG))
+
 
     @FXML
     lateinit var headersTable: TableView<Header>
@@ -110,42 +120,50 @@ class HttpToolController : BaseController(), Initializable {
 
     @FXML
     var useTimeLabel: Label = Label()
+/*
+
+    @FXML
+    var checkAsync: CheckBox = CheckBox()
+*/
+
+    //    @FXML
+//    var saveBtn: Button = Button("保存",ImageView(Image(ResourceUtil.getStream("save.png"))))
+    /*批量表单参数*/
 
     @FXML
     var checkBatch: CheckBox = CheckBox()
 
     @FXML
-    var checkAsync: CheckBox = CheckBox()
+    var viewBatchBtn = Button()
 
-    @FXML
-    val btnDataFile: Button = Button()
-
-//    @FXML
-//    var saveBtn: Button = Button("保存",ImageView(Image(ResourceUtil.getStream("save.png"))))
-
-    /*批量*/
-    @FXML
-    var batchDataFilePath: TextArea = TextArea()
-
-    @FXML
-    var batchFileNameLabel: Label = Label()
-
-    @FXML
-    var batchFileNameText: TextField = TextField()
-
-    @FXML
-    var batchFileExtLabel: Label = Label()
+    var batchVO = BatchVO()
 
     /*检查结果*/
-    @FXML
-    var checkResult = TextField()
-
     @FXML
     var jsonCheckText = Label()
 
     private var isDownFile: Boolean = false
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
+        //img
+        saveImg.apply {
+            image = Image(ConfigUtil.SAVE_IMG)
+            setOnMouseClicked {
+                if (it.clickCount == 1) {
+                    saveHttp()
+                }
+            }
+        }
+//        sendBtn = Button("发送",ImageView(Image(ConfigUtil.SEND_IMG)))
+        /*        sendImg.apply {
+                    image = Image(ConfigUtil.SEND_IMG)
+                    setOnMouseClicked {
+                        if (it.clickCount == 1) {
+                            sendHttp()
+                        }
+                    }
+                }*/
+
         //method
         selectMethod.items.addAll(Method.values().asList())
         selectMethod.value = Method.GET
@@ -169,20 +187,6 @@ class HttpToolController : BaseController(), Initializable {
                 buildTableColumn("VALUE", "value", 386.0),
             )
         )
-        //批量选项监听
-        checkBatch.selectedProperty().addListener { observable, oldValue, newValue ->
-            if (!oldValue && newValue) {
-                //显示 批量文件
-                batchFileNameLabel.isVisible = true
-                batchFileNameText.isVisible = true
-                batchFileExtLabel.isVisible = true
-            } else {
-                //隐藏 批量文件
-                batchFileNameLabel.isVisible = false
-                batchFileNameText.isVisible = false
-                batchFileExtLabel.isVisible = false
-            }
-        }
         /*初始化一些默认配置*/
         url.text = "http://192.168.218.12:8083/gisCacheOrg/getCompanyCodeByBureauCode"
         bodyStr.text = "{\n" +
@@ -198,14 +202,32 @@ class HttpToolController : BaseController(), Initializable {
                 jsonCheckText.text = "json格式:false 错误:${e.message}"
             }
         }
-
-        batchDataFilePath.text = "C:\\Users\\lifay9092\\Desktop\\temp\\测试批量数据.json"
+        viewBatchBtn.isVisible = checkBatch.isSelected
+        //批量选项监听
+        Tooltip.install(checkBatch, Tooltip("当前接口执行多个请求\n支持json数组格式数据").quickly())
+        checkBatch.selectedProperty().addListener { observable, oldValue, newValue ->
+            viewBatchBtn.isVisible = !oldValue && newValue
+        }
 
         //批量文件名
-        batchFileNameLabel.isVisible = false
-        batchFileNameText.isVisible = false
-        batchFileExtLabel.isVisible = false
+//        batchFileNameLabel.isVisible = false
+//        batchFileNameText.isVisible = false
+//        batchFileExtLabel.isVisible = false
 
+    }
+
+    /**
+     * 批量表单
+     *
+     * @author lifay
+     * @return
+     */
+    private fun showBatchForm() {
+        val view = DialogView.initForm<BatchFormController>("批量表单", "batchForm")
+        view.controller.bodyStr.bind(bodyStr.textProperty())
+        view.controller.batchDataFilePath.textProperty().bindBidirectional(batchVO.batchDataFilePath)
+        view.controller.batchFileNameText.textProperty().bindBidirectional(batchVO.batchFileNameText)
+        view.show()
     }
 
     fun initForm(indexController: IndexController, id: String) {
@@ -213,6 +235,11 @@ class HttpToolController : BaseController(), Initializable {
         this.httpTool = DbInfor.database.httpTools.find { it.id eq id }
         loadHttpForm(httpTool)
 
+    }
+
+    fun viewBatch() {
+        //显示 批量表单
+        showBatchForm()
     }
 
     private fun buildTableColumn(colName: String, valName: String, width: Double): TableColumn<Header, String> {
@@ -238,10 +265,12 @@ class HttpToolController : BaseController(), Initializable {
         selectMethod.value = Method.valueOf(dataObj["method"] as String)
         url.text = dataObj["url"] as String
         checkBatch.isSelected = dataObj["isBatch"] as Boolean
+/*
         checkAsync.isSelected = dataObj["isSync"] as Boolean
+*/
         selectContentType.value = ContentType.valueOf(dataObj["contentType"] as String)
-        batchFileNameText.text = dataObj["batchFileName"] as String?
-        batchDataFilePath.text = dataObj["batchDataFilePath"] as String?
+        batchVO.batchFileNameText.value = ObjectUtil.defaultIfBlank(dataObj.getStr("batchFileName"), "")
+        batchVO.batchDataFilePath.value = ObjectUtil.defaultIfBlank(dataObj.getStr("batchDataFilePath"), "")
 
         httpNameText.text = item.name
         item.body.let {
@@ -266,27 +295,11 @@ class HttpToolController : BaseController(), Initializable {
     }
 
     /**
-     * 定义基础请求类
-     */
-    fun buildHttpRequest(): HttpRequest {
-        val httpRequest = HttpUtil.createRequest(selectMethod.value, getFullUrl())
-        httpRequest.contentType(selectContentType.value.value)
-
-        if (headersTable.items.size > 0) {
-            for (header in headersTable.items) {
-                httpRequest.header(header.key, header.value)
-            }
-        }
-        return httpRequest
-    }
-
-    /**
      * 发送
      */
-    fun sendHttp(actionEvent: ActionEvent) {
+    fun sendHttp() {
         checkParam(selectAddr.value, "select服务地址")
         checkParam(url.text, "url")
-        val timer = DateUtil.timer()
         //是否下载文件
         if (isDownFile) {
             //下载文件
@@ -303,12 +316,14 @@ class HttpToolController : BaseController(), Initializable {
                     for (key in jsonObject.keys) {
                         fullUrl += "${key}=${jsonObject[key]}&"
                     }
+                    val timer = DateUtil.timer()
                     HttpHander.downFile(
                         if (fullUrl.endsWith("&")) fullUrl.substring(
                             0,
                             fullUrl.length - 1
                         ) else fullUrl, directory
                     )
+                    uptUseTime(timer)
                     ConfigUtil.preferences.put(ConfigUtil.PROPERTIES_OUTPUT_FOLDER, directory.absolutePath)
                 }
 
@@ -317,50 +332,62 @@ class HttpToolController : BaseController(), Initializable {
             if (checkBatch.isSelected) {
                 //批量执行
                 //检查是否有指定文件名变量格式
-                if (StrUtil.isBlank(batchFileNameText.text)) {
-                    Alert(Alert.AlertType.ERROR, "【批量模板文件名】不能为空", ButtonType.CLOSE).show()
+                if (StrUtil.isBlank(batchVO.batchFileNameText.value)) {
+                    errorAlert("【批量模板文件名】不能为空")
                     return
                 }
                 asyncDo {
-                    val result = parseJsonFmtStr(
-                        HttpHander.batchSendHttp(
-                            getFullUrl(),
-                            selectMethod.value,
-                            selectContentType.value,
-                            headersTable.items.toList(),
-                            bodyStr.text,
-                            batchDataFilePath.text,
-                            batchFileNameText.text
+                    try {
+                        val timer = DateUtil.timer()
+
+                        val result = parseJsonFmtStr(
+                            HttpHander.batchSendHttp(
+                                getFullUrl(),
+                                selectMethod.value,
+                                selectContentType.value,
+                                headersTable.items.toList(),
+                                bodyStr.text,
+                                batchVO.batchDataFilePath.value,
+                                batchVO.batchFileNameText.value
+                            )
                         )
-                    )
-                    Platform.runLater {
-                        responseStr.text = result
+                        Platform.runLater {
+                            uptUseTime(timer)
+                            responseStr.text = result
+                        }
+                    } catch (e: Exception) {
+                        errorAlert(e.message!!)
                     }
                 }
             } else {
                 //单个
                 asyncDo {
-                    val httpResponse =
-                        HttpHander.singleSendHttp(
-                            getFullUrl(),
-                            selectMethod.value,
-                            selectContentType.value,
-                            headersTable.items.toList(),
-                            bodyStr.text
-                        )
-                    val str = parseJsonFmtStr(httpResponse?.body())
+                    try {
+                        val timer = DateUtil.timer()
+                        val httpResponse =
+                            HttpHander.singleSendHttp(
+                                getFullUrl(),
+                                selectMethod.value,
+                                selectContentType.value,
+                                headersTable.items.toList(),
+                                bodyStr.text
+                            )
+                        val str = parseJsonFmtStr(httpResponse?.body())
 //                    delay(10000)
 //                    val str = "dddddd"
-                    Platform.runLater {
-                        httpStatus.text = "200"
-                        responseStr.text = str
+                        Platform.runLater {
+                            uptUseTime(timer)
+                            httpStatus.text = "200"
+                            responseStr.text = str
+                        }
+                    } catch (e: Exception) {
+                        errorAlert(e.message!!)
                     }
                 }
-                println("外部执行")
+                // println("外部执行")
             }
         }
         uptNowTime()
-        useTimeLabel.text = "${timer.interval()} 毫秒"
     }
 
     /**
@@ -381,56 +408,64 @@ class HttpToolController : BaseController(), Initializable {
         //批量
         if (checkBatch.isSelected) {
             //检查是否有指定文件名变量格式
-            if (StrUtil.isBlank(batchFileNameText.text)) {
-                Alert(Alert.AlertType.ERROR, "【批量模板文件名】不能为空", ButtonType.CLOSE).show()
+            if (StrUtil.isBlank(batchVO.batchFileNameText.value)) {
+                errorAlert("【批量模板文件名】不能为空")
                 return
             }
-            if (StrUtil.isBlank(batchDataFilePath.text)) {
-                Alert(Alert.AlertType.ERROR, "【数据文件】不能为空", ButtonType.CLOSE).show()
+            if (StrUtil.isBlank(batchVO.batchDataFilePath.value)) {
+                errorAlert("【数据文件】不能为空")
                 return
             }
             asyncDo {
-                val timer = DateUtil.timer()
-                val result = HttpHander.batchSendHttp(
-                    getFullUrl(),
-                    selectMethod.value,
-                    selectContentType.value, headersTable.items.toList(),
-                    bodyStr.text, batchDataFilePath.text, batchFileNameText.text
-                )
-                Platform.runLater {
-                    responseStr.text = result
-                    uptUseTime(timer)
+                try {
+                    val timer = DateUtil.timer()
+                    val result = HttpHander.batchSendHttp(
+                        getFullUrl(),
+                        selectMethod.value,
+                        selectContentType.value, headersTable.items.toList(),
+                        bodyStr.text, batchVO.batchDataFilePath.value, batchVO.batchFileNameText.value
+                    )
+                    Platform.runLater {
+                        responseStr.text = result
+                        uptUseTime(timer)
+                    }
+                } catch (e: Exception) {
+                    errorAlert(e.message!!)
                 }
             }
         } else {
             asyncDo {
-                val timer = DateUtil.timer()
-                val httpResponse =
-                    HttpHander.singleSendHttp(
-                        getFullUrl(),
-                        selectMethod.value,
-                        selectContentType.value,
-                        headersTable.items.toList(),
-                        bodyStr.text
-                    )
-                Platform.runLater {
-                    httpStatus.text = "200"
-                    responseStr.text = httpResponse?.body()
-                    uptUseTime(timer)
+                try {
+                    val timer = DateUtil.timer()
+                    val httpResponse =
+                        HttpHander.singleSendHttp(
+                            getFullUrl(),
+                            selectMethod.value,
+                            selectContentType.value,
+                            headersTable.items.toList(),
+                            bodyStr.text
+                        )
+                    Platform.runLater {
+                        httpStatus.text = "200"
+                        responseStr.text = httpResponse?.body()
+                        uptUseTime(timer)
+                    }
+                    //输出目录
+                    val outputDir =
+                        ConfigUtil.preferences.get(
+                            ConfigUtil.PROPERTIES_OUTPUT_FOLDER,
+                            System.getProperty("user.dir")
+                        ) + File.separator + "result"
+                    val fileName =
+                        selectAddr.selectionModel.selectedItem.name + "_" + httpNameText.text + File.separator + DateUtil.format(
+                            Date(),
+                            DatePattern.PURE_DATETIME_FORMATTER
+                        ) + ".json"
+                    val newFilePath = outputDir + File.separator + fileName
+                    FileUtil.writeString(httpResponse?.body(), newFilePath, Charset.forName("utf-8"))
+                } catch (e: Exception) {
+                    errorAlert(e.message!!)
                 }
-                //输出目录
-                val outputDir =
-                    ConfigUtil.preferences.get(
-                        ConfigUtil.PROPERTIES_OUTPUT_FOLDER,
-                        System.getProperty("user.dir")
-                    ) + File.separator + "result"
-                val fileName =
-                    selectAddr.selectionModel.selectedItem.name + "_" + httpNameText.text + File.separator + DateUtil.format(
-                        Date(),
-                        DatePattern.PURE_DATETIME_FORMATTER
-                    ) + ".json"
-                val newFilePath = outputDir + File.separator + fileName
-                FileUtil.writeString(httpResponse?.body(), newFilePath, Charset.forName("utf-8"))
             }
         }
         uptNowTime()
@@ -440,38 +475,14 @@ class HttpToolController : BaseController(), Initializable {
         useTimeLabel.text = "${timer.interval()} 毫秒"
     }
 
-    /**
-     * 选择数据文件
-     */
-    fun selectDataFile(actionEvent: ActionEvent) {
-        val fileChooser = FileChooser().apply {
-            title = "选择数据文件"
-            initialDirectory = File(System.getProperty("user.dir"))
-            extensionFilters.add(FileChooser.ExtensionFilter("JSON", "*.json"))
-        }
-
-        val file = fileChooser.showOpenDialog(index.rootPane.scene.window)
-        file?.let { batchDataFilePath.text = file?.absolutePath }
-
-    }
 
     fun checkId(actionEvent: ActionEvent) {
     }
 
     /**
-     * 检查批量【参数模板】和【数据文件】
-     */
-    fun checkDataFile(actionEvent: ActionEvent) {
-        checkParam(bodyStr.text, "参数模板")
-        checkParam(batchDataFilePath.text, "数据文件路径")
-        val result: String = HttpHander.checkDataFile(bodyStr.text, batchDataFilePath.text)
-        checkResult.text = result
-    }
-
-    /**
      * 保存http
      */
-    fun saveHttp(actionEvent: ActionEvent) {
+    fun saveHttp() {
         if (StrUtil.isBlank(httpNameText.text)) {
             Alert(Alert.AlertType.ERROR, "http名称不能为空", ButtonType.CLOSE).show()
             return
@@ -480,11 +491,13 @@ class HttpToolController : BaseController(), Initializable {
         dataObj["method"] = selectMethod.value.name
         dataObj["url"] = url.text
         dataObj["isBatch"] = checkBatch.isSelected
+/*
         dataObj["isSync"] = checkAsync.isSelected
+*/
         dataObj["contentType"] = selectContentType.value.name
         dataObj["headers"] = JSONUtil.toJsonStr(headersTable.items.toList())
-        dataObj["batchFileName"] = batchFileNameText.text
-        dataObj["batchDataFilePath"] = batchDataFilePath.text
+        dataObj["batchFileName"] = batchVO.batchFileNameText.value
+        dataObj["batchDataFilePath"] = batchVO.batchDataFilePath.value
 
         DbInfor.database.update(HttpTools) {
             set(it.name, httpNameText.text)
@@ -526,9 +539,9 @@ class HttpToolController : BaseController(), Initializable {
         alert.showAndWait().apply {
             if (this.get().text == "复制") {
                 // 获取系统剪贴板
-                var clipboard = Toolkit.getDefaultToolkit().systemClipboard
+                val clipboard = Toolkit.getDefaultToolkit().systemClipboard
                 // 封装文本内容
-                var trans = StringSelection(fullUrl)
+                val trans = StringSelection(fullUrl)
                 // 把文本内容设置到系统剪贴板
                 clipboard.setContents(trans, null)
             }

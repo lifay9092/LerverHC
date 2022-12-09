@@ -1,6 +1,7 @@
 package cn.lifay.lerverhc
 
 import cn.hutool.core.io.resource.ResourceUtil
+import cn.lifay.lerverhc.hander.ConfigUtil
 import cn.lifay.lerverhc.hander.bootstrap
 import javafx.application.Application
 import javafx.application.Platform
@@ -15,7 +16,7 @@ class LerverHCApplication : Application() {
         //index
         val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("index.fxml"))
         //indexPane.styleClass.add("panel-primary")
-        var scene = Scene(indexPane, 1500.0, 800.0).bootstrap()
+        var scene = Scene(indexPane, 1903.0, 1073.0).bootstrap()
 //        scene.stylesheets.add(BootstrapFX.bootstrapFXStylesheet())
 //        scene.stylesheets.add(
 //            ResourceUtil.getResource("custom.css")
@@ -24,7 +25,7 @@ class LerverHCApplication : Application() {
         primaryStage.apply {
             title = "LerverHC工具"
             isResizable = false
-            getIcons().add(Image(ResourceUtil.getStream("icon.png")))
+            getIcons().add(Image(ConfigUtil.ICON_IMG))
             setScene(scene)
             setOnCloseRequest { Platform.exit() }
         }

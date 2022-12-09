@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateUtil
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.io.resource.ResourceUtil
 import cn.hutool.json.JSONUtil
+import cn.lifay.lerverhc.hander.ConfigUtil
 import cn.lifay.lerverhc.hander.convert.IConvert
 import cn.lifay.lerverhc.hander.convert.JsonConvert
 import cn.lifay.lerverhc.hander.convert.TxtConvert
@@ -53,7 +54,7 @@ class ConvertToJsonToolController : Initializable {
 
     override fun initialize(p0: URL?, p1: ResourceBundle?) {
         importImg.apply {
-            image = Image(ResourceUtil.getStream("import.png"))
+            image = Image(ConfigUtil.IMPORT_IMG)
             setOnMouseClicked {
                 val fileChooser = FileChooser().apply {
                     title = "选择加载文件"
@@ -66,7 +67,7 @@ class ConvertToJsonToolController : Initializable {
         Tooltip.install(importImg, Tooltip("导入数据").quickly())
 
         exportImg.apply {
-            image = Image(ResourceUtil.getStream("export.png"))
+            image = Image(ConfigUtil.EXPORT_IMG)
             setOnMouseClicked {
                 val directoryChooser = DirectoryChooser().apply {
                     title = "选择文件导出目录"
@@ -90,7 +91,7 @@ class ConvertToJsonToolController : Initializable {
         Tooltip.install(exportImg, Tooltip("导出数据").quickly())
 
         convertImg.apply {
-            image = Image(ResourceUtil.getStream("convert.png"))
+            image = Image(ConfigUtil.CONVERT_IMG)
             setOnMouseClicked {
                 convertAction()
             }
