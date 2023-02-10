@@ -91,11 +91,17 @@
             <groupId>cn.lifay</groupId>
             <artifactId>LerverUI</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/LerverUI-1.0-SNAPSHOT.jar</systemPath>
+<!--            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/LerverUI-1.0-SNAPSHOT.jar</systemPath>-->
         </dependency>
     </dependencies>
-
+    <repositories>
+        <repository>
+            <id>gitee-repo</id>
+            <name>The Maven Repository on Gitee</name>
+            <url>https://gitee.com/lifay/LerverUI/maven-repo/</url>
+        </repository>
+    </repositories>
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
         <plugins>
