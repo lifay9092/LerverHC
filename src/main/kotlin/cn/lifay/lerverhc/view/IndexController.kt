@@ -7,6 +7,7 @@ import cn.hutool.json.JSONUtil
 import cn.lifay.lerverhc.BusiService
 import cn.lifay.lerverhc.db.DbInfor
 import cn.lifay.lerverhc.hander.ConfigUtil
+import cn.lifay.lerverhc.hander.DialogView.initForm
 import cn.lifay.lerverhc.hander.bindEscKey
 import cn.lifay.lerverhc.hander.bootstrap
 import cn.lifay.lerverhc.model.HttpTool
@@ -14,21 +15,22 @@ import cn.lifay.lerverhc.model.HttpTools
 import cn.lifay.lerverhc.model.HttpTools.httpTools
 import cn.lifay.lerverhc.model.enums.HttpType
 import cn.lifay.lerverhc.ui.MessageView
+import cn.lifay.ui.BaseView
 import cn.lifay.ui.GlobeTheme
 import cn.lifay.ui.LoadingUI
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
-import javafx.fxml.Initializable
-import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.MouseButton
 import javafx.scene.layout.BorderPane
+import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
+import javafx.scene.layout.VBox
 import javafx.stage.Modality
 import javafx.stage.Stage
 import kotlinx.coroutines.GlobalScope
@@ -40,6 +42,7 @@ import org.ktorm.entity.count
 import org.ktorm.entity.toList
 import java.net.URL
 import java.util.*
+import kotlin.reflect.KMutableProperty0
 
 
 /**
@@ -48,12 +51,16 @@ import java.util.*
  *@Author lifay
  *@Date 2022/2/25 15:21
  **/
-class IndexController : BaseController(), Initializable {
-    @FXML
-    var tabList: TabPane = TabPane()
+class IndexController : BaseView<BorderPane>() {
 
     @FXML
     var rootPane = BorderPane()
+
+    @FXML
+    var leftPane = VBox()
+
+    @FXML
+    var tabPane: TabPane = TabPane()
 
     @FXML
     var httpTreeView = TreeView<HttpTool>()
@@ -67,9 +74,22 @@ class IndexController : BaseController(), Initializable {
     /*临时http对象*/
     var currentHttpId: String = ""
     var currentHttpParentId: String = ""
+    override fun rootPane(): KMutableProperty0<BorderPane> {
+        return this::rootPane
+    }
 
+    fun fxml(): URL? {
+        return ResourceUtil.getResource("index.fxml")
+    }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
+        /*布局大小*/
+        leftPane.prefWidthProperty().bind(rootPane.prefWidthProperty().multiply(0.2))
+        leftPane.prefHeightProperty().bind(rootPane.prefHeightProperty().multiply(0.9))
+
+        tabPane.prefWidthProperty().bind(rootPane.prefWidthProperty().multiply(0.8))
+        tabPane.prefHeightProperty().bind(rootPane.prefHeightProperty())
+
         /*图标渲染*/
         reloadHttpTreeImg.image = Image(ConfigUtil.RELOAD_IMG)
         /*初始化http树*/
@@ -80,6 +100,7 @@ class IndexController : BaseController(), Initializable {
             }
         }
     }
+
 
     /**
      * 初始化树
@@ -246,7 +267,7 @@ class IndexController : BaseController(), Initializable {
                                                 selectionModel.selectedItem
                                             )
                                             //tab页
-                                            tabList.tabs.removeIf { i ->
+                                            tabPane.tabs.removeIf { i ->
                                                 i.id == selectItem.id
                                             }
                                             //树菜单
@@ -339,24 +360,37 @@ class IndexController : BaseController(), Initializable {
      */
     private fun addTabHttpForm(httpTool: HttpTool) {
         //判断是否已经打开，已打开则选择
-        for (t in tabList.tabs) {
+        for (t in tabPane.tabs) {
             if (t.id == httpTool.id) {
-                tabList.selectionModel.select(t)
+                tabPane.selectionModel.select(t)
                 return
             }
         }
         //添加并打开新的
-        val fxmlLoader = FXMLLoader(ResourceUtil.getResource("httpTool.fxml"))
-        val load = fxmlLoader.load<Any>()
-        val httpToolController = fxmlLoader.getController<HttpToolController>()
-        httpToolController.initForm(this, httpTool.id)
+        val indexController = this
+        val httpToolView = createView<HttpToolController,VBox>(ResourceUtil.getResource("httpTool.fxml")){
+            initForm(indexController, httpTool.id)
+        }
+        val httpToolPane = httpToolView.getRoot() as Pane
+
+     /*   val httpToolView = HttpToolController(ResourceUtil.getResource("httpTool.fxml")).also {
+            it.initForm(this, httpTool.id)
+        }
+        val httpToolPane = httpToolView.getRoot() as Pane*/
+
+      /*  val fxmlLoader = FXMLLoader(ResourceUtil.getResource("httpTool.fxml"))
+        val httpToolPane = fxmlLoader.load<Pane>()
+        val controller = fxmlLoader.getController<HttpToolController>()
+        controller.initForm(this, httpTool.id)*/
+
+        httpToolPane.prefWidthProperty().bind(tabPane.prefWidthProperty())
+        httpToolPane.prefHeightProperty().bind(tabPane.prefHeightProperty())
         val tab = Tab((httpTool.name)).apply {
             id = httpTool.id
-            content = load as Node?
+            content = httpToolPane
         }
-        tabList.tabs.add(tab)
-        tabList.selectionModel.select(tab)
-
+        tabPane.tabs.add(tab)
+        tabPane.selectionModel.select(tab)
     }
 
 

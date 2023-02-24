@@ -8,11 +8,10 @@ import cn.hutool.core.util.ObjectUtil
 import cn.hutool.core.util.StrUtil
 import cn.hutool.core.util.URLUtil
 import cn.hutool.http.ContentType
-import cn.hutool.http.HttpRequest
-import cn.hutool.http.HttpUtil
 import cn.hutool.http.Method
 import cn.hutool.json.JSONObject
 import cn.hutool.json.JSONUtil
+import cn.lifay.extension.checkParam
 import cn.lifay.lerverhc.db.DbInfor
 import cn.lifay.lerverhc.hander.ConfigUtil
 import cn.lifay.lerverhc.hander.DialogView
@@ -24,17 +23,19 @@ import cn.lifay.lerverhc.model.HttpTool
 import cn.lifay.lerverhc.model.HttpTools
 import cn.lifay.lerverhc.model.HttpTools.httpTools
 import cn.lifay.lerverhc.model.enums.HttpType
+import cn.lifay.ui.BaseView
 import cn.lifay.ui.LoadingUI
 import javafx.application.Platform
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
-import javafx.fxml.Initializable
 import javafx.scene.control.*
 import javafx.scene.control.cell.PropertyValueFactory
 import javafx.scene.control.cell.TextFieldTableCell
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
-import javafx.scene.layout.BorderPane
+import javafx.scene.layout.FlowPane
+import javafx.scene.layout.HBox
+import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.stage.DirectoryChooser
 import javafx.stage.Stage
@@ -53,6 +54,7 @@ import java.io.File
 import java.net.URL
 import java.nio.charset.Charset
 import java.util.*
+import kotlin.reflect.KMutableProperty0
 
 
 /**
@@ -61,8 +63,7 @@ import java.util.*
  *@Author lifay
  *@Date 2022/1/4 20:09
  **/
-class HttpToolController : BaseController(), Initializable {
-
+class HttpToolController : BaseView<VBox>() {
 
     //首页controller
     private lateinit var index: IndexController
@@ -70,8 +71,28 @@ class HttpToolController : BaseController(), Initializable {
     /*http对象*/
     private var httpTool: HttpTool? = null
 
+    /*http根界面*/
     @FXML
-    lateinit var rootPane: BorderPane
+    var httpPane = VBox()
+
+    /*http信息*/
+    @FXML
+    lateinit var httpInfoPane: FlowPane
+
+    @FXML
+    lateinit var requestPane: HBox
+
+    @FXML
+    lateinit var headPane: VBox
+
+    @FXML
+    lateinit var bodyPane: VBox
+
+    @FXML
+    lateinit var statusPane: HBox
+
+    @FXML
+    lateinit var responsePane: VBox
 
     @FXML
     var httpNameText = TextArea()
@@ -89,11 +110,7 @@ class HttpToolController : BaseController(), Initializable {
     var url: TextArea = TextArea()
 
     @FXML
-    var resultText: TextArea = TextArea()
-
-    @FXML
     var selectContentType: ChoiceBox<ContentType> = ChoiceBox()
-
 
     @FXML
     lateinit var saveImg: ImageView
@@ -104,7 +121,7 @@ class HttpToolController : BaseController(), Initializable {
 
 
     @FXML
-    lateinit var headersTable: TableView<Header>
+    var headersTable = TableView<Header>()
 
     @FXML
     var bodyStr: TextArea = TextArea()
@@ -120,11 +137,11 @@ class HttpToolController : BaseController(), Initializable {
 
     @FXML
     var useTimeLabel: Label = Label()
-/*
+    /*
 
-    @FXML
-    var checkAsync: CheckBox = CheckBox()
-*/
+        @FXML
+        var checkAsync: CheckBox = CheckBox()
+    */
 
     //    @FXML
 //    var saveBtn: Button = Button("保存",ImageView(Image(ResourceUtil.getStream("save.png"))))
@@ -144,7 +161,36 @@ class HttpToolController : BaseController(), Initializable {
 
     private var isDownFile: Boolean = false
 
+    override fun rootPane(): KMutableProperty0<VBox> {
+        return this::httpPane
+    }
+
     override fun initialize(location: URL?, resources: ResourceBundle?) {
+        //布局
+//        httpPane.prefHeightProperty().addListener { observableValue, old, new ->
+//            println("http:h=$new")
+//        }
+        httpInfoPane.prefWidthProperty().bind(httpPane.prefWidthProperty())
+        httpInfoPane.prefHeightProperty().bind(httpPane.prefHeightProperty().multiply(0.06))
+
+        requestPane.prefWidthProperty().bind(httpPane.prefWidthProperty())
+        requestPane.prefHeightProperty().bind(httpPane.prefHeightProperty().multiply(0.30))
+        headPane.prefWidthProperty().bind(httpPane.prefWidthProperty().multiply(0.45))
+        headPane.prefHeightProperty().bind(httpPane.prefHeightProperty())
+        bodyPane.prefWidthProperty().bind(httpPane.prefWidthProperty().multiply(0.45))
+        bodyPane.prefHeightProperty().bind(httpPane.prefHeightProperty())
+
+
+        statusPane.prefWidthProperty().bind(httpPane.prefWidthProperty())
+        statusPane.prefHeightProperty().bind(httpPane.prefHeightProperty().multiply(0.05))
+
+        responsePane.prefWidthProperty().bind(httpPane.prefWidthProperty())
+        responsePane.prefHeightProperty().bind(httpPane.prefHeightProperty().multiply(0.57))
+
+        responseStr.prefWidthProperty().bind(responsePane.prefWidthProperty())
+        responseStr.prefHeightProperty().bind(responsePane.prefHeightProperty().multiply(0.95))
+
+
         //img
         saveImg.apply {
             image = Image(ConfigUtil.SAVE_IMG)
@@ -216,6 +262,7 @@ class HttpToolController : BaseController(), Initializable {
 
     }
 
+
     /**
      * 批量表单
      *
@@ -265,9 +312,9 @@ class HttpToolController : BaseController(), Initializable {
         selectMethod.value = Method.valueOf(dataObj["method"] as String)
         url.text = dataObj["url"] as String
         checkBatch.isSelected = dataObj["isBatch"] as Boolean
-/*
-        checkAsync.isSelected = dataObj["isSync"] as Boolean
-*/
+        /*
+                checkAsync.isSelected = dataObj["isSync"] as Boolean
+        */
         selectContentType.value = ContentType.valueOf(dataObj["contentType"] as String)
         batchVO.batchFileNameText.value = ObjectUtil.defaultIfBlank(dataObj.getStr("batchFileName"), "")
         batchVO.batchDataFilePath.value = ObjectUtil.defaultIfBlank(dataObj.getStr("batchDataFilePath"), "")
@@ -298,8 +345,8 @@ class HttpToolController : BaseController(), Initializable {
      * 发送
      */
     fun sendHttp() {
-        checkParam(selectAddr.value, "select服务地址")
-        checkParam(url.text, "url")
+        checkParam("select服务地址", selectAddr.value)
+        checkParam("url", url.text)
         //是否下载文件
         if (isDownFile) {
             //下载文件
@@ -333,7 +380,7 @@ class HttpToolController : BaseController(), Initializable {
                 //批量执行
                 //检查是否有指定文件名变量格式
                 if (StrUtil.isBlank(batchVO.batchFileNameText.value)) {
-                    errorAlert("【批量模板文件名】不能为空")
+                    alert("【批量模板文件名】不能为空", Alert.AlertType.ERROR)
                     return
                 }
                 asyncDo {
@@ -356,7 +403,7 @@ class HttpToolController : BaseController(), Initializable {
                             responseStr.text = result
                         }
                     } catch (e: Exception) {
-                        errorAlert(e.message!!)
+                        alert(e.message!!, Alert.AlertType.ERROR)
                     }
                 }
             } else {
@@ -381,7 +428,7 @@ class HttpToolController : BaseController(), Initializable {
                             responseStr.text = str
                         }
                     } catch (e: Exception) {
-                        errorAlert(e.message!!)
+                        alert(e.message!!, Alert.AlertType.ERROR)
                     }
                 }
                 // println("外部执行")
@@ -404,16 +451,16 @@ class HttpToolController : BaseController(), Initializable {
      * 发送并保存为文件
      */
     fun sendHttpAndSave(actionEvent: ActionEvent) {
-        checkParam(url.text, "url")
+        checkParam("url", url.text)
         //批量
         if (checkBatch.isSelected) {
             //检查是否有指定文件名变量格式
             if (StrUtil.isBlank(batchVO.batchFileNameText.value)) {
-                errorAlert("【批量模板文件名】不能为空")
+                alert("【批量模板文件名】不能为空", Alert.AlertType.ERROR)
                 return
             }
             if (StrUtil.isBlank(batchVO.batchDataFilePath.value)) {
-                errorAlert("【数据文件】不能为空")
+                alert("【数据文件】不能为空", Alert.AlertType.ERROR)
                 return
             }
             asyncDo {
@@ -430,7 +477,7 @@ class HttpToolController : BaseController(), Initializable {
                         uptUseTime(timer)
                     }
                 } catch (e: Exception) {
-                    errorAlert(e.message!!)
+                    alert(e.message!!, Alert.AlertType.ERROR)
                 }
             }
         } else {
@@ -464,7 +511,7 @@ class HttpToolController : BaseController(), Initializable {
                     val newFilePath = outputDir + File.separator + fileName
                     FileUtil.writeString(httpResponse?.body(), newFilePath, Charset.forName("utf-8"))
                 } catch (e: Exception) {
-                    errorAlert(e.message!!)
+                    alert(e.message!!, Alert.AlertType.ERROR)
                 }
             }
         }
@@ -491,9 +538,9 @@ class HttpToolController : BaseController(), Initializable {
         dataObj["method"] = selectMethod.value.name
         dataObj["url"] = url.text
         dataObj["isBatch"] = checkBatch.isSelected
-/*
-        dataObj["isSync"] = checkAsync.isSelected
-*/
+        /*
+                dataObj["isSync"] = checkAsync.isSelected
+        */
         dataObj["contentType"] = selectContentType.value.name
         dataObj["headers"] = JSONUtil.toJsonStr(headersTable.items.toList())
         dataObj["batchFileName"] = batchVO.batchFileNameText.value
@@ -572,7 +619,7 @@ class HttpToolController : BaseController(), Initializable {
     }
 
     fun asyncDo(f: () -> Unit) {
-        val loadingUI = LoadingUI(rootPane.scene.window as Stage)
+        val loadingUI = LoadingUI(httpPane.scene.window as Stage)
         GlobalScope.launch {
             loadingUI.show()
             try {

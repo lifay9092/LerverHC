@@ -136,7 +136,7 @@ object HttpHander {
     }
     private fun checkUrl(url: String) :Boolean{
         if (ReUtil.isMatch(Validator.URL_HTTP,url)) {
-            return url.count { i -> i.toString() == ":" } == 2
+            return url.count { i -> i.toString() == ":" } == 1
         }
         return false
     }
