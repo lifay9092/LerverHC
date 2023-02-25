@@ -99,7 +99,9 @@
         <repository>
             <id>gitee-repo</id>
             <name>The Maven Repository on Gitee</name>
-            <url>https://gitee.com/lifay/LerverUI/maven-repo/</url>
+            <!-- http://192.168.1.40:8080/maven-repo/ -->
+            <!-- http://www.lifay.cn:33333/maven-repo/ -->
+            <url>http://192.168.1.40:8080//maven-repo/</url>
         </repository>
     </repositories>
     <build>
