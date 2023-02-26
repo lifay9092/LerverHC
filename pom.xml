@@ -90,7 +90,7 @@
         <dependency>
             <groupId>cn.lifay</groupId>
             <artifactId>LerverUI</artifactId>
-            <version>1.3-SNAPSHOT</version>
+            <version>1.4-SNAPSHOT</version>
 <!--            <scope>system</scope>
             <systemPath>${project.basedir}/libs/LerverUI-1.0-SNAPSHOT.jar</systemPath>-->
         </dependency>

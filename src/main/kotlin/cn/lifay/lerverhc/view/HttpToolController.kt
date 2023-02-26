@@ -175,17 +175,19 @@ class HttpToolController : BaseView<VBox>() {
 
         requestPane.prefWidthProperty().bind(httpPane.prefWidthProperty())
         requestPane.prefHeightProperty().bind(httpPane.prefHeightProperty().multiply(0.30))
-        headPane.prefWidthProperty().bind(httpPane.prefWidthProperty().multiply(0.45))
-        headPane.prefHeightProperty().bind(httpPane.prefHeightProperty())
-        bodyPane.prefWidthProperty().bind(httpPane.prefWidthProperty().multiply(0.45))
-        bodyPane.prefHeightProperty().bind(httpPane.prefHeightProperty())
+        headPane.prefWidthProperty().bind(requestPane.prefWidthProperty().multiply(0.45))
+        headPane.prefHeightProperty().bind(requestPane.prefHeightProperty())
+        headersTable.prefHeightProperty().bind(headPane.prefHeightProperty().subtract(32))
+        bodyPane.prefWidthProperty().bind(requestPane.prefWidthProperty().multiply(0.45))
+        bodyPane.prefHeightProperty().bind(requestPane.prefHeightProperty())
+        bodyStr.prefHeightProperty().bind(headersTable.prefHeightProperty())
 
 
         statusPane.prefWidthProperty().bind(httpPane.prefWidthProperty())
         statusPane.prefHeightProperty().bind(httpPane.prefHeightProperty().multiply(0.05))
 
         responsePane.prefWidthProperty().bind(httpPane.prefWidthProperty())
-        responsePane.prefHeightProperty().bind(httpPane.prefHeightProperty().multiply(0.57))
+        responsePane.prefHeightProperty().bind(httpPane.prefHeightProperty().multiply(0.59))
 
         responseStr.prefWidthProperty().bind(responsePane.prefWidthProperty())
         responseStr.prefHeightProperty().bind(responsePane.prefHeightProperty().multiply(0.95))
@@ -241,7 +243,7 @@ class HttpToolController : BaseView<VBox>() {
         bodyStr.textProperty().addListener { observable, oldValue, newValue ->
             try {
                 JSONUtil.parseObj(newValue)
-                jsonCheckText.textFill = Color.BLACK
+                jsonCheckText.textFill = Color.LIGHTSKYBLUE
                 jsonCheckText.text = "json格式:true"
             } catch (e: Exception) {
                 jsonCheckText.textFill = Color.RED

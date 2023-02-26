@@ -2,7 +2,7 @@ package cn.lifay.lerverhc
 
 import cn.hutool.core.io.resource.ResourceUtil
 import cn.lifay.lerverhc.hander.ConfigUtil
-import cn.lifay.lerverhc.view.IndexController
+import cn.lifay.ui.GlobeTheme
 import cn.lifay.util.StaticUtil
 import javafx.application.Application
 import javafx.application.Platform
@@ -18,6 +18,7 @@ class LerverHCApplication : Application() {
 //        FXApplication.setElementStyleEnable(true)
 //        val indexView = IndexController()
 //        val indexPane = indexView.rootPane()
+        GlobeTheme.enableElement(true)
 
         val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("index.fxml"))
         indexPane.prefWidth = StaticUtil.SCREEN_WIDTH * 0.998
