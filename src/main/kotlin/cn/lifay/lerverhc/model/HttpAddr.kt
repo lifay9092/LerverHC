@@ -8,7 +8,7 @@ import org.ktorm.schema.BaseTable
 import org.ktorm.schema.varchar
 
 data class HttpAddr(
-    var id: String,
+    var id: String?,
     var name: String,
     var addr: String,
 ) {
