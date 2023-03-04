@@ -14,14 +14,14 @@ fun Scene.bootstrap(): Scene {
 }
 
 
-fun Stage.bindEscKey(): Stage {
+/*fun Stage.bindEscKey(): Stage {
     addEventHandler(KeyEvent.KEY_PRESSED) {
         if (it.code == KeyCode.ESCAPE) {
             close()
         }
     }
     return this
-}
+}*/
 
 fun Tooltip.quickly(): Tooltip {
     showDelay = Duration(50.0)

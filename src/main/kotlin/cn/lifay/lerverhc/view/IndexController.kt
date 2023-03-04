@@ -4,11 +4,11 @@ import cn.hutool.core.io.resource.ResourceUtil
 import cn.hutool.core.util.IdUtil
 import cn.hutool.core.util.StrUtil
 import cn.hutool.json.JSONUtil
+import cn.lifay.extension.bindEscKey
 import cn.lifay.lerverhc.BusiService
 import cn.lifay.lerverhc.db.DbInfor
 import cn.lifay.lerverhc.hander.ConfigUtil
 import cn.lifay.lerverhc.hander.DialogView.initForm
-import cn.lifay.lerverhc.hander.bindEscKey
 import cn.lifay.lerverhc.hander.bootstrap
 import cn.lifay.lerverhc.model.HttpTool
 import cn.lifay.lerverhc.model.HttpTools
@@ -459,7 +459,10 @@ class IndexController : BaseView<BorderPane>() {
      * 地址管理菜单
      */
     fun addrManage(actionEvent: ActionEvent) {
-        val addrManageStage = Stage().bindEscKey()
+        val addrForm = AddrForm(null)
+        addrForm.show()
+
+      /*  val addrManageStage = Stage().bindEscKey()
         addrManageStage.initModality(Modality.WINDOW_MODAL)
         val indexPane = FXMLLoader.load<Pane>(ResourceUtil.getResource("addrManage.fxml"))
         val scene = Scene(indexPane).bootstrap()
@@ -468,7 +471,7 @@ class IndexController : BaseView<BorderPane>() {
             isResizable = false
             setScene(scene)
         }
-        addrManageStage.show()
+        addrManageStage.show()*/
     }
 
     /**

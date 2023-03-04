@@ -1,7 +1,6 @@
 package cn.lifay.lerverhc.view
 
 import cn.hutool.core.io.resource.ResourceUtil
-import cn.lifay.lerverhc.hander.bindEscKey
 import cn.lifay.lerverhc.hander.bootstrap
 import javafx.fxml.FXMLLoader
 import javafx.scene.Scene
