@@ -17,10 +17,8 @@ import cn.lifay.lerverhc.hander.ConfigUtil
 import cn.lifay.lerverhc.hander.DialogView
 import cn.lifay.lerverhc.hander.HttpHander
 import cn.lifay.lerverhc.hander.quickly
-import cn.lifay.lerverhc.model.BatchVO
-import cn.lifay.lerverhc.model.Header
-import cn.lifay.lerverhc.model.HttpTool
-import cn.lifay.lerverhc.model.HttpTools
+import cn.lifay.lerverhc.model.*
+import cn.lifay.lerverhc.model.HttpAddrs.httpAddrs
 import cn.lifay.lerverhc.model.HttpTools.httpTools
 import cn.lifay.lerverhc.model.enums.HttpType
 import cn.lifay.ui.BaseView
@@ -41,8 +39,6 @@ import javafx.stage.DirectoryChooser
 import javafx.stage.Stage
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import model.HttpAddr
-import model.HttpAddrs.httpAddrs
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.update
 import org.ktorm.entity.find
@@ -374,6 +370,7 @@ class HttpToolController : BaseView<VBox>() {
                     )
                     uptUseTime(timer)
                     ConfigUtil.preferences.put(ConfigUtil.PROPERTIES_OUTPUT_FOLDER, directory.absolutePath)
+                    showNotification("请求成功...")
                 }
 
             }
@@ -404,6 +401,7 @@ class HttpToolController : BaseView<VBox>() {
                             uptUseTime(timer)
                             responseStr.text = result
                         }
+                        showNotification("请求成功...")
                     } catch (e: Exception) {
                         alert(e.message!!, Alert.AlertType.ERROR)
                     }
@@ -429,6 +427,7 @@ class HttpToolController : BaseView<VBox>() {
                             httpStatus.text = "200"
                             responseStr.text = str
                         }
+                        showNotification("请求成功...")
                     } catch (e: Exception) {
                         alert(e.message!!, Alert.AlertType.ERROR)
                     }
@@ -560,7 +559,7 @@ class HttpToolController : BaseView<VBox>() {
             }
         }
         //显示
-
+        showNotification("保存成功", 1000)
     }
 
     /**
@@ -579,13 +578,7 @@ class HttpToolController : BaseView<VBox>() {
 
     fun viewUrl(actionEvent: ActionEvent) {
         val fullUrl = getFullUrl()
-        val alert = Alert(
-            Alert.AlertType.INFORMATION,
-            fullUrl,
-            ButtonType("复制", ButtonBar.ButtonData.OK_DONE),
-            ButtonType.CLOSE
-        )
-        alert.showAndWait().apply {
+        alertInfo(fullUrl, ButtonType("复制", ButtonBar.ButtonData.OK_DONE), ButtonType.CLOSE).apply {
             if (this.get().text == "复制") {
                 // 获取系统剪贴板
                 val clipboard = Toolkit.getDefaultToolkit().systemClipboard
@@ -595,6 +588,23 @@ class HttpToolController : BaseView<VBox>() {
                 clipboard.setContents(trans, null)
             }
         }
+        /*
+                val alert = Alert(
+                    Alert.AlertType.INFORMATION,
+                    fullUrl,
+                    ButtonType("复制", ButtonBar.ButtonData.OK_DONE),
+                    ButtonType.CLOSE
+                )
+                alert.showAndWait().apply {
+                    if (this.get().text == "复制") {
+                        // 获取系统剪贴板
+                        val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+                        // 封装文本内容
+                        val trans = StringSelection(fullUrl)
+                        // 把文本内容设置到系统剪贴板
+                        clipboard.setContents(trans, null)
+                    }
+                }*/
     }
 
     fun getFullUrl(): String {

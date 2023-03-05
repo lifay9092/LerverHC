@@ -1,6 +1,9 @@
 package cn.lifay.lerverhc.view
 
 import cn.lifay.lerverhc.db.DbInfor
+import cn.lifay.lerverhc.model.HttpAddr
+import cn.lifay.lerverhc.model.HttpAddrs
+import cn.lifay.lerverhc.model.HttpAddrs.httpAddrs
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
@@ -9,9 +12,6 @@ import javafx.scene.control.ButtonType
 import javafx.scene.control.ChoiceBox
 import javafx.scene.control.TextField
 import javafx.scene.layout.AnchorPane
-import model.HttpAddr
-import model.HttpAddrs
-import model.HttpAddrs.httpAddrs
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.insert
 import org.ktorm.dsl.update

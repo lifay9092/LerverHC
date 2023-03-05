@@ -1,4 +1,4 @@
-package model
+package cn.lifay.lerverhc.model
 
 import cn.hutool.core.util.StrUtil
 import org.ktorm.database.Database
@@ -8,7 +8,7 @@ import org.ktorm.schema.BaseTable
 import org.ktorm.schema.varchar
 
 data class HttpAddr(
-    var id: String?,
+    var id: String,
     var name: String,
     var addr: String,
 ) {

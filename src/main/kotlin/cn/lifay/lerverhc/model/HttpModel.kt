@@ -1,4 +1,4 @@
-package model
+package cn.lifay.lerverhc.model
 
 /**
  * @ClassName HttpModel

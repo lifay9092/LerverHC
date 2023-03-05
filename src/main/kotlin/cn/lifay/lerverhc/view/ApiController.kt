@@ -11,6 +11,8 @@ import cn.lifay.lerverhc.db.DbInfor
 import cn.lifay.lerverhc.hander.ConfigUtil
 import cn.lifay.lerverhc.hander.HttpHander
 import cn.lifay.lerverhc.model.ApiModel
+import cn.lifay.lerverhc.model.HttpAddr
+import cn.lifay.lerverhc.model.HttpAddrs.httpAddrs
 import cn.lifay.lerverhc.model.HttpTool
 import cn.lifay.lerverhc.model.HttpTools
 import cn.lifay.lerverhc.model.HttpTools.httpTools
@@ -30,8 +32,6 @@ import javafx.stage.Stage
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import model.HttpAddr
-import model.HttpAddrs.httpAddrs
 import org.ktorm.dsl.*
 import org.ktorm.entity.find
 import org.ktorm.entity.toList

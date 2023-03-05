@@ -1,4 +1,4 @@
-package model
+package cn.lifay.lerverhc.model
 
 import cn.hutool.http.ContentType
 import cn.hutool.http.Method

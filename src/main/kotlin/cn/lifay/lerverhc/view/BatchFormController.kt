@@ -1,10 +1,7 @@
 package cn.lifay.lerverhc.view
 
-import cn.lifay.lerverhc.db.DbInfor
 import cn.lifay.lerverhc.hander.HttpHander
 import cn.lifay.lerverhc.hander.quickly
-import cn.lifay.lerverhc.model.BatchVO
-import cn.lifay.lerverhc.model.HttpTools.addrId
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
@@ -12,15 +9,6 @@ import javafx.fxml.Initializable
 import javafx.scene.control.*
 import javafx.scene.layout.AnchorPane
 import javafx.stage.FileChooser
-import model.HttpAddr
-import model.HttpAddrs
-import model.HttpAddrs.httpAddrs
-import org.ktorm.dsl.eq
-import org.ktorm.dsl.insert
-import org.ktorm.dsl.update
-import org.ktorm.entity.count
-import org.ktorm.entity.removeIf
-import org.ktorm.entity.toList
 import java.io.File
 import java.net.URL
 import java.util.*

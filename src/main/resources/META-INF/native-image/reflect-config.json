@@ -696,10 +696,10 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"model.HttpAddr"
+  "name":"cn.lifay.lerverhc.model.HttpAddr"
 },
 {
-  "name":"model.HttpAddrs"
+  "name":"cn.lifay.lerverhc.model.HttpAddrs"
 },
 {
   "name":"model.HttpTool"
