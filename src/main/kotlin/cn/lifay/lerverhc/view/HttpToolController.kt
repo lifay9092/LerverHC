@@ -12,6 +12,7 @@ import cn.hutool.http.Method
 import cn.hutool.json.JSONObject
 import cn.hutool.json.JSONUtil
 import cn.lifay.extension.checkParam
+import cn.lifay.extension.platformRun
 import cn.lifay.lerverhc.db.DbInfor
 import cn.lifay.lerverhc.hander.ConfigUtil
 import cn.lifay.lerverhc.hander.DialogView
@@ -23,6 +24,7 @@ import cn.lifay.lerverhc.model.HttpTools.httpTools
 import cn.lifay.lerverhc.model.enums.HttpType
 import cn.lifay.ui.BaseView
 import cn.lifay.ui.LoadingUI
+import cn.lifay.ui.table.TableEditCell
 import javafx.application.Platform
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
@@ -39,6 +41,8 @@ import javafx.stage.DirectoryChooser
 import javafx.stage.Stage
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.update
 import org.ktorm.entity.find
@@ -227,8 +231,27 @@ class HttpToolController : BaseView<VBox>() {
         headersTable.isEditable = true
         headersTable.columns.addAll(
             listOf(
-                buildTableColumn("KEY", "key", 100.0),
-                buildTableColumn("VALUE", "value", 386.0),
+                TableColumn<Header, String>("KEY").apply {
+                    cellValueFactory = PropertyValueFactory("key")
+                    setCellFactory {
+                        object : TableEditCell<Header, String>() {}
+                    }
+                    setOnEditCommit { t: TableColumn.CellEditEvent<Header, String> ->
+                        (t.tableView.items[t.tablePosition.row] as Header).key = t.newValue
+                    }
+                    prefWidth = 100.0
+                },
+                TableColumn<Header, String>("VALUE").apply {
+                    cellValueFactory = PropertyValueFactory("value")
+                    setCellFactory {
+                        object : TableEditCell<Header, String>() {}
+                    }
+                    setOnEditCommit { t: TableColumn.CellEditEvent<Header, String> ->
+                        (t.tableView.items[t.tablePosition.row] as Header).value = t.newValue
+                    }
+                    prefWidth = 386.0
+                }
+
             )
         )
         /*初始化一些默认配置*/
@@ -238,7 +261,10 @@ class HttpToolController : BaseView<VBox>() {
                 "}"
         bodyStr.textProperty().addListener { observable, oldValue, newValue ->
             try {
-                JSONUtil.parseObj(newValue)
+                //判断是否空对象
+                if (newValue.isNotBlank()) {
+                    JSONUtil.parseObj(newValue)
+                }
                 jsonCheckText.textFill = Color.LIGHTSKYBLUE
                 jsonCheckText.text = "json格式:true"
             } catch (e: Exception) {
@@ -287,14 +313,6 @@ class HttpToolController : BaseView<VBox>() {
         showBatchForm()
     }
 
-    private fun buildTableColumn(colName: String, valName: String, width: Double): TableColumn<Header, String> {
-        val col = TableColumn<Header, String>(colName)
-        col.cellValueFactory = PropertyValueFactory(valName)
-        col.cellFactory = TextFieldTableCell.forTableColumn();//给需要编辑的列设置属性
-        col.prefWidth = width
-        return col
-    }
-
 
     /**
      * 加载http表单
@@ -326,7 +344,7 @@ class HttpToolController : BaseView<VBox>() {
 
         val headerStr = dataObj["headers"] as String?
         headerStr?.let {
-            val headers = JSONUtil.toList(headerStr, Header::class.java)
+            val headers = Json.decodeFromString<List<Header>>(headerStr)
             headersTable.items.addAll(headers)
         }
 
@@ -379,7 +397,7 @@ class HttpToolController : BaseView<VBox>() {
                 //批量执行
                 //检查是否有指定文件名变量格式
                 if (StrUtil.isBlank(batchVO.batchFileNameText.value)) {
-                    alert("【批量模板文件名】不能为空", Alert.AlertType.ERROR)
+                    alertError("【批量模板文件名】不能为空")
                     return
                 }
                 asyncDo {
@@ -403,7 +421,8 @@ class HttpToolController : BaseView<VBox>() {
                         }
                         showNotification("请求成功...")
                     } catch (e: Exception) {
-                        alert(e.message!!, Alert.AlertType.ERROR)
+                        e.printStackTrace()
+                        platformRun { alertError(e.message!!)}
                     }
                 }
             } else {
@@ -429,7 +448,8 @@ class HttpToolController : BaseView<VBox>() {
                         }
                         showNotification("请求成功...")
                     } catch (e: Exception) {
-                        alert(e.message!!, Alert.AlertType.ERROR)
+                        e.printStackTrace()
+                        platformRun { alertError(e.message!!) }
                     }
                 }
                 // println("外部执行")
@@ -478,7 +498,8 @@ class HttpToolController : BaseView<VBox>() {
                         uptUseTime(timer)
                     }
                 } catch (e: Exception) {
-                    alert(e.message!!, Alert.AlertType.ERROR)
+                    e.printStackTrace()
+                    platformRun { alert(e.message!!, Alert.AlertType.ERROR)}
                 }
             }
         } else {
@@ -512,7 +533,8 @@ class HttpToolController : BaseView<VBox>() {
                     val newFilePath = outputDir + File.separator + fileName
                     FileUtil.writeString(httpResponse?.body(), newFilePath, Charset.forName("utf-8"))
                 } catch (e: Exception) {
-                    alert(e.message!!, Alert.AlertType.ERROR)
+                    e.printStackTrace()
+                    platformRun { alertError(e.message!!)}
                 }
             }
         }

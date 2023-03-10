@@ -96,7 +96,7 @@ object HttpHander {
             }
             return httpRequest.execute()
         } catch (e: Exception) {
-            throw RuntimeException("HTTP请求失败[$url]:${e.message}")
+            throw RuntimeException("HTTP请求失败 [$url]:${e.message}")
 //            Alert(Alert.AlertType.ERROR, "HTTP请求失败:${e.message}").show()
 //            return null
         }
@@ -111,7 +111,6 @@ object HttpHander {
         for (header in headers) {
             httpRequest.header(header.key, header.value)
         }
-
         return httpRequest
     }
 
@@ -136,7 +135,7 @@ object HttpHander {
     }
     private fun checkUrl(url: String) :Boolean{
         if (ReUtil.isMatch(Validator.URL_HTTP,url)) {
-            return url.count { i -> i.toString() == ":" } == 1
+            return url.count { i -> i.toString() == ":" } == 2
         }
         return false
     }
