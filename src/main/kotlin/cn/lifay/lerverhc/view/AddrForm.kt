@@ -4,7 +4,6 @@ import cn.lifay.lerverhc.db.DbInfor
 import cn.lifay.lerverhc.model.HttpAddr
 import cn.lifay.lerverhc.model.HttpAddrs
 import cn.lifay.lerverhc.model.HttpAddrs.httpAddrs
-import cn.lifay.ui.form.FormElement
 import cn.lifay.ui.form.FormUI
 import cn.lifay.ui.form.text.TextElement
 import org.ktorm.dsl.eq
@@ -21,13 +20,13 @@ import java.util.*
  * @author lifay
  * @date 2023/3/3 18:39
  **/
-class AddrForm(t: HttpAddr? = null) : FormUI<HttpAddr>("地址管理", t) {
-    override fun buildElements(): List<FormElement<HttpAddr, *>> {
-        val id = TextElement("ID:", HttpAddr::id, true)
-        val name = TextElement("名称:", HttpAddr::name)
-        val addr = TextElement("地址:", HttpAddr::addr)
-        return listOf(id, name, addr)
-    }
+class AddrForm(t: HttpAddr? = null) : FormUI<HttpAddr>("地址管理", t, buildElements = {
+    val id = TextElement("ID:", HttpAddr::id, true)
+    val name = TextElement("名称:", HttpAddr::name)
+    val addr = TextElement("地址:", HttpAddr::addr)
+    listOf(id, name, addr)
+}) {
+
 
     override fun datas(): List<HttpAddr> {
         return DbInfor.database.httpAddrs.toList()

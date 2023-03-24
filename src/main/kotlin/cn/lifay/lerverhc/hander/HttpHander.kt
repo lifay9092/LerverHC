@@ -13,6 +13,7 @@ import cn.lifay.lerverhc.model.Header
 import javafx.scene.control.Alert
 import org.apache.commons.logging.LogFactory
 import java.io.File
+import java.io.Serializable
 import java.nio.charset.Charset
 import java.util.regex.Pattern
 import java.util.stream.Collectors
@@ -92,7 +93,7 @@ object HttpHander {
             if (Method.POST == method && ContentType.JSON == contentType && bodyStr.isNotBlank()) {
                 httpRequest.body(bodyStr)
             } else if (bodyStr.isNotBlank()) {
-                httpRequest.form(JSONUtil.parseObj(bodyStr))
+                httpRequest.form(parseToFile(bodyStr))
             }
             return httpRequest.execute()
         } catch (e: Exception) {
@@ -132,6 +133,26 @@ object HttpHander {
 //        val map = HashMap<String,Any>()
 //        map["file"] = File("E:\\\\TEST\\\\swserver\\\\swserver.bat")
         return HttpUtil.post(url, bodyObj)
+    }
+    private fun parseToFile(bodyObjString: String?): Map<String,Any>? {
+        if (bodyObjString == null) {
+            return null
+        }
+        val tempBodyStr =  if (bodyObjString.contains("\\"))  bodyObjString.replace("\\","\\\\") else bodyObjString
+        //是否有文件
+        val bodyObj = JSONUtil.parseObj(tempBodyStr).toMutableMap()
+        for (key in bodyObj!!.keys) {
+            bodyObj[key]?.let {
+                if (it is String && it.startsWith("@")) {
+                    val newFilePath = it.substring(1)
+                    if (!FileUtil.exist(newFilePath)) {
+                        throw Exception("文件不存在:${newFilePath}")
+                    }
+                    bodyObj[key] = File(newFilePath)
+                }
+            }
+        }
+        return bodyObj
     }
     private fun checkUrl(url: String) :Boolean{
         if (ReUtil.isMatch(Validator.URL_HTTP,url)) {

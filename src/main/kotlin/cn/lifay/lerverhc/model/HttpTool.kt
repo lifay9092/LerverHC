@@ -11,12 +11,13 @@ import org.ktorm.schema.varchar
 data class HttpTool(
     var id: String,
     var parentId: String,
-    var addrId: String,
+    var addrId: String?,
     var name: String,
     var type: String,
-    var body: String,//请求参数串
-    var datas: String,//
+    var body: String?,//请求参数串
+    var datas: String?,//
 ) {
+
     fun isNode(): Boolean {
         return HttpType.NODE.name == type
     }
@@ -31,6 +32,7 @@ data class HttpTool(
 }
 
 object HttpTools : BaseTable<HttpTool>("HTTP_TOOL") {
+
     val id = varchar("id").primaryKey()
     var parentId = varchar("parent_id")
     var addrId = varchar("addr_id")
@@ -52,4 +54,18 @@ object HttpTools : BaseTable<HttpTool>("HTTP_TOOL") {
 
     val Database.httpTools get() = this.sequenceOf(HttpTools)
 
+    val DEFAULT_ADDR_ID = "custom"
+    val DEFAULT_BODY_STR = """
+        {
+        
+        }
+    """.trimIndent()
+    val DEFAULT_DATAS = """
+                        {
+                            "method":"GET","isBatch":false,
+                            "isSync":false,
+                            "url":"http://localhost:80/temp",
+                            "authorization":"",
+                            "contentType":"FORM_URLENCODED"}
+                    """.trimIndent()
 }

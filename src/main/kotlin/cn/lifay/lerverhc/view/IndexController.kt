@@ -16,6 +16,7 @@ import cn.lifay.lerverhc.model.enums.HttpType
 import cn.lifay.ui.BaseView
 import cn.lifay.ui.GlobeTheme
 import cn.lifay.ui.LoadingUI
+import cn.lifay.ui.tree.*
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
@@ -92,11 +93,11 @@ class IndexController : BaseView<BorderPane>() {
         reloadHttpTreeImg.image = Image(ConfigUtil.RELOAD_IMG)
         /*初始化http树*/
         initTreeView("")
-        keywordField.textProperty().addListener { obs, ov, nv ->
+        /*keywordField.textProperty().addListener { obs, ov, nv ->
             if (nv != null) {
                 initTreeView(nv)
             }
-        }
+        }*/
     }
 
 
@@ -134,8 +135,7 @@ class IndexController : BaseView<BorderPane>() {
         httpTreeView.apply {
             root = ROOT_TREE_ITEM
             isShowRoot = true
-            Register(HttpTool::id, HttpTool::parentId)
-            InitTreeItems<HttpTool, String>(DbInfor.database.httpTools.toList())
+            Register(HttpTool::id, HttpTool::parentId,DbInfor.database.httpTools.toList())
             setOnMouseDragReleased {
                 println("release")
             }
@@ -144,11 +144,12 @@ class IndexController : BaseView<BorderPane>() {
             }
             //节点点击事件
             setOnMouseClicked {
-                val selectItem = selectionModel.selectedItem?.value
+                val selectItem = selectionModel.selectedItem ?: return@setOnMouseClicked
+                val selectItemValue = selectItem.value
                 if (it.button == MouseButton.SECONDARY) {
                     //右键
                     contextMenu = ContextMenu().apply {
-                        if (selectItem?.isNode() == true) {
+                        if (selectItemValue?.isNode() == true) {
                             //新增目录菜单
                             items.add(MenuItem("新增目录").apply {
                                 setOnAction {
@@ -160,19 +161,21 @@ class IndexController : BaseView<BorderPane>() {
                                             val inputStr = it.get()
                                             if (StrUtil.isNotBlank(inputStr)) {
                                                 val count = DbInfor.database.httpTools.count {
-                                                    (it.parentId eq selectItem.id) and (it.name eq inputStr)
+                                                    (it.parentId eq selectItemValue.id) and (it.name eq inputStr)
                                                 }
                                                 if (count > 0) {
                                                     alertError("请勿重复添加同名节点")
                                                     return@setOnAction
                                                 }
+                                                val httpTool = HttpTool(StrUtil.uuid(),selectItemValue.id,null,inputStr,HttpType.NODE.name,null,null)
                                                 DbInfor.database.insert(HttpTools) {
-                                                    set(HttpTools.id, StrUtil.uuid())
-                                                    set(HttpTools.parentId, selectItem.id)
-                                                    set(HttpTools.name, inputStr)
-                                                    set(HttpTools.type, HttpType.NODE.name)
+                                                    set(HttpTools.id, httpTool.id)
+                                                    set(HttpTools.parentId, httpTool.parentId)
+                                                    set(HttpTools.name, httpTool.name)
+                                                    set(HttpTools.type, httpTool.type)
                                                 }
-                                                reloadHttpTree()
+                                                //更新选中的父目录
+                                                selectItem.AddChild(httpTool)
                                             }
                                         }
                                     }
@@ -185,23 +188,12 @@ class IndexController : BaseView<BorderPane>() {
                                     //新增一个临时节点
                                     var tempHttpModel = HttpTool(
                                         id = IdUtil.fastUUID(),
-                                        parentId = selectItem.id,
+                                        parentId = selectItemValue.id,
                                         name = "新建http",
                                         type = HttpType.HTTP.name,
-                                        addrId = "custom",
-                                        body = """
-                                        {
-                                            
-                                        }
-                                    """.trimIndent(),
-                                        datas = """
-                                        {
-                                            "method":"GET","isBatch":false,
-                                            "isSync":false,
-                                            "url":"http://localhost:80/temp",
-                                            "authorization":"",
-                                            "contentType":"FORM_URLENCODED"}
-                                    """.trimIndent()
+                                        addrId = HttpTools.DEFAULT_ADDR_ID,
+                                        body = HttpTools.DEFAULT_BODY_STR,
+                                        datas = HttpTools.DEFAULT_DATAS
                                     )
                                     //入库
                                     DbInfor.database.insert(HttpTools) {
@@ -213,8 +205,8 @@ class IndexController : BaseView<BorderPane>() {
                                         set(HttpTools.body, tempHttpModel.body)
                                         set(HttpTools.datas, tempHttpModel.datas)
                                     }
-                                    //加载
-                                    addTreeItemById(httpTreeView.root.children, tempHttpModel.parentId, tempHttpModel)
+                                    //更新UI
+                                    selectItem.AddChild(tempHttpModel)
                                     addTabHttpForm(tempHttpModel)
                                 }
                             })
@@ -225,7 +217,7 @@ class IndexController : BaseView<BorderPane>() {
                                     val fxmlLoader = FXMLLoader(ResourceUtil.getResource("apiManage.fxml"))
                                     val indexPane = fxmlLoader.load<Pane>()
                                     val apiController = fxmlLoader.getController<ApiController>()
-                                    apiController.initForm(selectItem.id)
+                                    apiController.initForm(selectItemValue.id)
                                     var scene = Scene(indexPane).bootstrap()
                                     apiManageStage.apply {
                                         title = "Api管理"
@@ -240,27 +232,29 @@ class IndexController : BaseView<BorderPane>() {
                             //复制节点菜单
                             items.add(MenuItem("复制").apply {
                                 setOnAction {
-                                    val newHttpName = getNewHttpName(selectItem!!.parentId, selectItem.name)
+                                    val newHttpName = getNewHttpName(selectItemValue!!.parentId, selectItemValue.name)
+                                    val httpTool = HttpTool(StrUtil.uuid(),selectItemValue.parentId,selectItemValue.addrId,newHttpName,HttpType.HTTP.name,selectItemValue.body,selectItemValue.datas)
                                     DbInfor.database.insert(HttpTools) {
-                                        set(HttpTools.id, StrUtil.uuid())
-                                        set(HttpTools.parentId, selectItem.parentId)
-                                        set(HttpTools.name, newHttpName)
-                                        set(HttpTools.type, HttpType.HTTP.name)
-                                        set(HttpTools.addrId, selectItem.addrId)
-                                        set(HttpTools.body, selectItem.body)
-                                        set(HttpTools.datas, selectItem.datas)
+                                        set(HttpTools.id, httpTool.id)
+                                        set(HttpTools.parentId, httpTool.parentId)
+                                        set(HttpTools.name, httpTool.name)
+                                        set(HttpTools.type, httpTool.type)
+                                        set(HttpTools.addrId, httpTool.addrId)
+                                        set(HttpTools.body, httpTool.body)
+                                        set(HttpTools.datas, httpTool.datas)
                                     }
-                                    reloadHttpTree()
+                                    //更新选中的父目录
+                                    selectItem.AddChild(httpTool)
                                 }
                             })
                         }
-                        if (selectItem!!.id != "0") {
+                        if (selectItemValue!!.id != "0") {
                             //删除菜单
                             items.add(MenuItem("删除节点").apply {
                                 setOnAction {
                                     //假如是NODE,判断是否有子节点
                                     val count = DbInfor.database.httpTools.count() {
-                                        it.parentId eq selectItem!!.id
+                                        it.parentId eq selectItemValue!!.id
                                     }
                                     if (count > 0) {
                                         if (alertConfirmation("该节点下还有子节点,是否继续删除?")) {
@@ -291,13 +285,10 @@ class IndexController : BaseView<BorderPane>() {
                                             )
                                             //tab页
                                             tabPane.tabs.removeIf { i ->
-                                                i.id == selectItem.id
+                                                i.id == selectItemValue.id
                                             }
                                             //树菜单
-                                            httpTreeView.apply {
-                                                removeTreeItemById(root.children, selectItem.id)
-                                                //refresh()
-                                            }
+                                            selectItem.DeleteThis()
                                         }
                                     }
                                 }
@@ -306,7 +297,7 @@ class IndexController : BaseView<BorderPane>() {
                             //移动到 菜单
                             items.add(MenuItem("移动到").apply {
                                 setOnAction {
-                                    selectParentNode(selectItem.id)
+                                    selectParentNode(selectItem)
                                 }
                             })
                         }
@@ -314,15 +305,15 @@ class IndexController : BaseView<BorderPane>() {
                     }
                 } else if (it.clickCount == 2) {
                     //双击
-                    if (selectItem?.isHttp() == true) {
-                        addTabHttpForm(selectItem)
+                    if (selectItemValue?.isHttp() == true) {
+                        addTabHttpForm(selectItemValue)
                     } else {
                         selectionModel.selectedItem?.let { si -> si.isExpanded = true }
                     }
                 } else if (it.clickCount == 1) {
                     //单击
-                    if (selectItem?.isNode() == true) {
-                        currentHttpParentId = selectItem.id
+                    if (selectItemValue?.isNode() == true) {
+                        currentHttpParentId = selectItemValue.id
                     }
                 }
             }
@@ -466,9 +457,9 @@ class IndexController : BaseView<BorderPane>() {
     /**
      * 刷新http树
      */
-    fun reloadHttpTree() {
+ /*   fun reloadHttpTree() {
         initTreeView("")
-    }
+    }*/
 
     /**
      * 属性管理菜单
@@ -506,17 +497,26 @@ class IndexController : BaseView<BorderPane>() {
     /**
      * 移动到节点的界面
      */
-    fun selectParentNode(id: String) {
+    fun selectParentNode(selectItem: TreeItem<HttpTool>) {
         var selectParentStage = Stage().bindEscKey()
         val fxmlLoader = FXMLLoader(ResourceUtil.getResource("selectParent.fxml"))
         val indexPane = fxmlLoader.load<Pane>()
         val selectParentController = fxmlLoader.getController<SelectParentController>()
-        selectParentController.initForm(id) { initTreeView("") }
+        selectParentController.initForm(selectItem.value.id) {
+            selectItem.parent.apply {
+                AddChild(it)
+                isExpanded = false
+            }
+            selectItem.DeleteThis()
+        }
         val scene = Scene(indexPane).bootstrap()
         selectParentStage.apply {
             title = "选择新节点"
             isResizable = false
             setScene(scene)
+            setOnCloseRequest {
+                selectParentController.parentTreeView.ClearCache()
+            }
         }
         selectParentStage.show()
     }

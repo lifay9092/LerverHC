@@ -36,7 +36,7 @@ class ConvertToJsonToolController : Initializable {
 
     @FXML
     lateinit var exportImg: ImageView
-
+    private var exportType = "json"
     @FXML
     lateinit var importImg: ImageView
 
@@ -82,7 +82,7 @@ class ConvertToJsonToolController : Initializable {
                                 Date(),
                                 DatePattern.PURE_DATETIME_FORMATTER
                             )
-                        }.json"
+                        }.${exportType}"
                     )
                     Alert(Alert.AlertType.INFORMATION, "保存成功!").show()
                 }
@@ -118,13 +118,14 @@ class ConvertToJsonToolController : Initializable {
             Alert(Alert.AlertType.ERROR, "转换规则不能为空!").show()
             return
         }
-        if (!JSONUtil.isJson(ruleText.text)) {
+/*        if (!JSONUtil.isJson(ruleText.text)) {
             Alert(Alert.AlertType.ERROR, "转换规则必须遵循JSON格式!").show()
             return
-        }
+        }*/
         val convert = getConvert()
         try {
             resultText.text = convert.convert()
+            exportType = if (JSONUtil.isJson(resultText.text)) "json" else "txt"
         } catch (e: Exception) {
             e.printStackTrace()
             Alert(Alert.AlertType.ERROR, "转换失败:${e.message}").show()

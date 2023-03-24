@@ -90,20 +90,18 @@
         <dependency>
             <groupId>cn.lifay</groupId>
             <artifactId>LerverUI</artifactId>
-            <version>1.7-SNAPSHOT</version>
+            <version>1.10-SNAPSHOT</version>
 <!--            <scope>system</scope>
             <systemPath>${project.basedir}/libs/LerverUI-1.0-SNAPSHOT.jar</systemPath>-->
         </dependency>
 
     </dependencies>
         <repositories>
-<!--            <repository>
+            <repository>
                 <id>gitee-repo</id>
                 <name>The Maven Repository on Gitee</name>
-                &lt;!&ndash; http://192.168.1.40:8080/maven-repo/ &ndash;&gt;
-                 <url>http://www.lifay.cn:33333/maven-repo/</url>
-                &lt;!&ndash; <url>http://192.168.1.40:8080//maven-repo/</url> &ndash;&gt;
-             </repository>-->
+                 <url>https://lifay.gitee.io/lerverui/repodir/</url>
+             </repository>
          </repositories>
      <build>
          <sourceDirectory>src/main/kotlin</sourceDirectory>

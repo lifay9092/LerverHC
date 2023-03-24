@@ -13,6 +13,8 @@ class TxtConvert(sourceStr: String, ruleStr: String) : IConvert(sourceStr, ruleS
 
     override fun convert(): String {
         val datas = JSONArray()
+        val sb = StringBuffer()
+        val isOutJson = JSONUtil.isJson(ruleStr)
         //获取变量
         val vars = getVars(ruleStr)
         val varsSize = vars.size
@@ -23,18 +25,36 @@ class TxtConvert(sourceStr: String, ruleStr: String) : IConvert(sourceStr, ruleS
             if (line.isBlank()) {
                 continue
             }
-            val strings = line.trim().split(" ")
-            if (varsSize != strings.size) {
-                throw Exception("数量不一致:规则 [$varsSize] 条,第${i + 1}行数据 [${strings.size}] 条")
+            //判断规则串是txt还是json
+            if (isOutJson) {
+                val strings = line.trim().replace("\t", " ").split(" ")
+                if (varsSize != strings.size) {
+                    throw Exception("第${i + 1}行数据,规则数量不一致:规则-${varsSize}条, 文本-${strings.size}条")
+                }
+                //合并
+                var tempStr = ruleStr
+                for (v in vars) {
+                    tempStr = tempStr.replace("${'$'}{${v}}", strings[v.toInt() - 1])
+                }
+                datas.add(JSONUtil.parseObj(tempStr))
+            } else {
+                val strings = line.trim().replace("\t", " ").split(" ")
+                if (varsSize != strings.size) {
+                    throw Exception("第${i + 1}行数据[${line}],规则数量不一致:规则-${varsSize}条, 文本-${strings.size}条")
+                }
+                //合并
+                var tempStr = ruleStr
+                for (v in vars) {
+                    tempStr = tempStr.replace("${'$'}{${v}}", strings[v.toInt() - 1])
+                }
+                sb.append(tempStr).append("\n")
             }
-            //合并
-            var tempStr = ruleStr
-            for (v in vars) {
-                tempStr = tempStr.replace("${'$'}{${v}}", strings[v.toInt() - 1])
-            }
-            datas.add(JSONUtil.parseObj(tempStr))
         }
-        return JSONUtil.formatJsonStr(JSONUtil.toJsonStr(datas))
+        if (isOutJson) {
+            return JSONUtil.formatJsonStr(JSONUtil.toJsonStr(datas))
+        } else {
+            return sb.toString()
+        }
     }
 
 

@@ -323,7 +323,7 @@ class HttpToolController : BaseView<VBox>() {
             return
         }
         val dataObj = JSONUtil.parseObj(item.datas)
-        selectAddr.value = DbInfor.database.httpAddrs.find { it.id eq item.addrId }
+        selectAddr.value = DbInfor.database.httpAddrs.find { it.id eq item.addrId!! }
         addrValue.text = if (selectAddr.value != null) selectAddr.value.addr else ""
         selectMethod.value = Method.valueOf(dataObj["method"] as String)
         url.text = dataObj["url"] as String
