@@ -52,7 +52,7 @@ class SelectParentController : BaseController(), Initializable {
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         var rootTreeItem = TreeItem(
             HttpTool("0", "-1", "", "根目录", HttpType.NODE.name, "", ""),
-            ImageView(Image(ConfigUtil.FOLDER_IMG))
+            ImageView(ConfigUtil.FOLDER_IMG)
         )
 //        val httpTools = DbInfor.database.httpTools
 //        for (httpTool in httpTools.filter { it.parentId eq "0" }) {
@@ -62,18 +62,11 @@ class SelectParentController : BaseController(), Initializable {
         parentTreeView.apply {
             root = rootTreeItem
             isShowRoot = true
-            Register(HttpTool::id,HttpTool::parentId,DbInfor.database.httpTools.filter { it.type eq HttpType.NODE.name }.toList())
+            Register(HttpTool::id,HttpTool::parentId,true){
+                DbInfor.database.httpTools.filter { it.type eq HttpType.NODE.name }.toList()
+            }
         }
 
-    }
-
-    private fun addChild(
-        rootTreeItem: TreeItem<HttpTool>, httpTools: EntitySequence<HttpTool, HttpTools>, httpTool: HttpTool
-    ) {
-        if (httpTool.isNode()) {
-            val treeItem = buildTreeItem(httpTool)
-            rootTreeItem.children.add(treeItem)
-        }
     }
 
     private fun buildTreeItem(httpTool: HttpTool): TreeItem<HttpTool> {

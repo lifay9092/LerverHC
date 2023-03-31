@@ -40,6 +40,7 @@ import org.ktorm.entity.count
 import org.ktorm.entity.toList
 import java.net.URL
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.reflect.KMutableProperty0
 
 
@@ -92,19 +93,24 @@ class IndexController : BaseView<BorderPane>() {
         /*图标渲染*/
         reloadHttpTreeImg.image = Image(ConfigUtil.RELOAD_IMG)
         /*初始化http树*/
-        initTreeView("")
-        /*keywordField.textProperty().addListener { obs, ov, nv ->
-            if (nv != null) {
-                initTreeView(nv)
+        initTreeView()
+        keywordField.textProperty().addListener { obs, ov, nv ->
+            if (ov.isNullOrBlank() && nv.isNullOrBlank()) {
+                return@addListener
             }
-        }*/
+            if (!ov.isNullOrBlank() && nv.isNullOrBlank()) {
+                httpTreeView.RefreshTree<HttpTool,String>()
+            }else if (!nv.isNullOrBlank()){
+                httpTreeView.RefreshTree<HttpTool,String>(keyword = nv)
+            }
+        }
     }
 
 
     //    private var HTTP_TOOL_DATA_LIST = FXCollections.observableArrayList<>()
     private var ROOT_TREE_ITEM = TreeItem(
         HttpTool("0", "-1", "", "根目录", HttpType.NODE.name, "", ""),
-        ImageView(Image(ConfigUtil.FOLDER_IMG))
+        ImageView(ConfigUtil.FOLDER_IMG)
     )
     /*    private val ROOT_TREE_ITEM_PROPERTIY = SimpleObjectProperty<TreeItem<HttpTool>>().apply {
             value = ROOT_TREE_ITEM
@@ -114,28 +120,14 @@ class IndexController : BaseView<BorderPane>() {
     /**
      * 初始化树
      */
-    private fun initTreeView(keyword: String) {
-//        httpTreeView.rootProperty().bind(ROOT_TREE_ITEM_PROPERTIY)
-
-        //HttpTool("1","0","11111",HttpType.NODE.name,"","")
-        /* RegisterTreeView(httpTreeView, HttpTool::id, HttpTool::parentId)
-         var httpTools = DbInfor.database.httpTools.toList()
-         InitTreeItems(httpTreeView, httpTools)*/
-        /*       if (keyword.isNotBlank()) {
-                   val nodeIds = getAllParentNodeIds(httpTools)
-                   httpTools = httpTools.filter { it.type == HttpType.HTTP.name || nodeIds.contains(it.id) }.toList()
-
-                   httpTools = httpTools.filter { it.name.contains(keyword) }.toList()
-               }
-               for (httpTool in httpTools.filter { it.parentId == "0" }) {
-                   //child
-                   addChild(ROOT_TREE_ITEM, httpTools, httpTool)
-               }*/
+    private fun initTreeView() {
 
         httpTreeView.apply {
             root = ROOT_TREE_ITEM
             isShowRoot = true
-            Register(HttpTool::id, HttpTool::parentId,DbInfor.database.httpTools.toList())
+            Register(HttpTool::id, HttpTool::parentId,true, imgCall = {
+                it.graphic = ImageView(getTreeItemImg(it.value))
+            }){DbInfor.database.httpTools.toList()}
             setOnMouseDragReleased {
                 println("release")
             }
@@ -175,7 +167,7 @@ class IndexController : BaseView<BorderPane>() {
                                                     set(HttpTools.type, httpTool.type)
                                                 }
                                                 //更新选中的父目录
-                                                selectItem.AddChild(httpTool)
+                                                selectItem.AddChildren(httpTool)
                                             }
                                         }
                                     }
@@ -206,7 +198,7 @@ class IndexController : BaseView<BorderPane>() {
                                         set(HttpTools.datas, tempHttpModel.datas)
                                     }
                                     //更新UI
-                                    selectItem.AddChild(tempHttpModel)
+                                    selectItem.AddChildren(tempHttpModel)
                                     addTabHttpForm(tempHttpModel)
                                 }
                             })
@@ -244,7 +236,7 @@ class IndexController : BaseView<BorderPane>() {
                                         set(HttpTools.datas, httpTool.datas)
                                     }
                                     //更新选中的父目录
-                                    selectItem.AddChild(httpTool)
+                                    selectItem.AddChildren(httpTool)
                                 }
                             })
                         }
@@ -345,18 +337,6 @@ class IndexController : BaseView<BorderPane>() {
         }
     }
 
-    private fun addTreeItemById(children: ObservableList<TreeItem<HttpTool>>, parentId: String, httpTool: HttpTool) {
-
-        for (child in children) {
-            if (child.value.id == parentId && child.children != null) {
-                val treeItem = buildTreeItem(httpTool)
-                child.children.add(treeItem)
-                return
-            } else if (child.children != null) {
-                addTreeItemById(child.children, parentId, httpTool)
-            }
-        }
-    }
 
     private fun isExistTreeItemById(children: ObservableList<TreeItem<HttpTool>>, id: String): Boolean {
         return (children.find { it.value.id == id } != null)
@@ -399,16 +379,6 @@ class IndexController : BaseView<BorderPane>() {
         }
         val httpToolPane = httpToolView.getRoot() as Pane
 
-        /*   val httpToolView = HttpToolController(ResourceUtil.getResource("httpTool.fxml")).also {
-               it.initForm(this, httpTool.id)
-           }
-           val httpToolPane = httpToolView.getRoot() as Pane*/
-
-        /*  val fxmlLoader = FXMLLoader(ResourceUtil.getResource("httpTool.fxml"))
-          val httpToolPane = fxmlLoader.load<Pane>()
-          val controller = fxmlLoader.getController<HttpToolController>()
-          controller.initForm(this, httpTool.id)*/
-
         httpToolPane.prefWidthProperty().bind(tabPane.prefWidthProperty())
         httpToolPane.prefHeightProperty().bind(tabPane.prefHeightProperty())
         val tab = Tab((httpTool.name)).apply {
@@ -420,36 +390,17 @@ class IndexController : BaseView<BorderPane>() {
     }
 
 
-    private fun addChild(
-        rootTreeItem: TreeItem<HttpTool>, httpTools: List<HttpTool>, httpTool: HttpTool
-    ) {
-        val treeItem = buildTreeItem(httpTool)
-        rootTreeItem.children.add(treeItem)
-        if (httpTool.isNode()) {
-            val childHttpTools = httpTools.filter { it.parentId == httpTool.id!! }
-            for (childHttpTool in childHttpTools) {
-                addChild(treeItem, httpTools, childHttpTool)
-            }
-        }
-    }
 
-    private fun buildTreeItem(httpTool: HttpTool): TreeItem<HttpTool> {
-        val treeItem = TreeItem(
-            httpTool, ImageView(Image(ResourceUtil.getResource(getTreeItemImg(httpTool)).toExternalForm()))
-        )
-        return treeItem
-    }
-
-    private fun getTreeItemImg(httpTool: HttpTool): String {
+    private fun getTreeItemImg(httpTool: HttpTool): Image {
         if (!httpTool.isHttp()) {
-            return "folder.png"
+            return ConfigUtil.FOLDER_IMG
         } else {
             val jsonObject = JSONUtil.parseObj(httpTool.datas)
             val method = jsonObject.getStr("method")
             return when (method) {
-                "GET" -> "get.png"
-                "POST" -> "post.png"
-                else -> "http.png"
+                "GET" -> ConfigUtil.GET_IMG
+                "POST" -> ConfigUtil.POST_IMG
+                else -> ConfigUtil.HTTP_IMG
             }
         }
     }
@@ -495,7 +446,7 @@ class IndexController : BaseView<BorderPane>() {
     }
 
     /**
-     * 移动到节点的界面
+     * 移动到 新目录节点下
      */
     fun selectParentNode(selectItem: TreeItem<HttpTool>) {
         var selectParentStage = Stage().bindEscKey()
@@ -503,11 +454,8 @@ class IndexController : BaseView<BorderPane>() {
         val indexPane = fxmlLoader.load<Pane>()
         val selectParentController = fxmlLoader.getController<SelectParentController>()
         selectParentController.initForm(selectItem.value.id) {
-            selectItem.parent.apply {
-                AddChild(it)
-                isExpanded = false
-            }
             selectItem.DeleteThis()
+            httpTreeView.RefreshTree<HttpTool,String>()
         }
         val scene = Scene(indexPane).bootstrap()
         selectParentStage.apply {

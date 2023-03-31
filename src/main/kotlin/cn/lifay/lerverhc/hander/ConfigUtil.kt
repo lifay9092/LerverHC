@@ -1,6 +1,7 @@
 package cn.lifay.lerverhc.hander
 
 import cn.hutool.core.io.resource.ResourceUtil
+import javafx.scene.image.Image
 import java.io.FileOutputStream
 import java.util.prefs.Preferences
 
@@ -19,7 +20,10 @@ object ConfigUtil {
 
     val ICON_IMG = ResourceUtil.getResource("icon.png").toExternalForm()
     val RELOAD_IMG = ResourceUtil.getResource("reload.png").toExternalForm()
-    val FOLDER_IMG = ResourceUtil.getResource("folder.png").toExternalForm()
+    val FOLDER_IMG = Image(ResourceUtil.getResource("folder.png").toExternalForm())
+    val GET_IMG = Image(ResourceUtil.getResource("get.png").toExternalForm())
+    val POST_IMG = Image(ResourceUtil.getResource("post.png").toExternalForm())
+    val HTTP_IMG = Image(ResourceUtil.getResource("http.png").toExternalForm())
 
     val IMPORT_IMG = ResourceUtil.getResource("import.png").toExternalForm()
     val EXPORT_IMG = ResourceUtil.getResource("export.png").toExternalForm()
