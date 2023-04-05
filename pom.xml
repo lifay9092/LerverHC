@@ -20,7 +20,7 @@
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
         <kotlin.version>1.8.10</kotlin.version>
-        <ktorm.version>3.4.1</ktorm.version>
+        <ktorm.version>3.5.0</ktorm.version>
         <!-- Gluon/JavaFX -->
         <javafx.version>17.0.1</javafx.version>
         <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
@@ -66,6 +66,11 @@
             <artifactId>ktorm-core</artifactId>
             <version>${ktorm.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.ktorm</groupId>
+            <artifactId>ktorm-support-sqlite</artifactId>
+            <version>${ktorm.version}</version>
+        </dependency>
         <!-- sqlite -->
         <dependency>
             <groupId>org.xerial</groupId>
@@ -90,7 +95,7 @@
         <dependency>
             <groupId>cn.lifay</groupId>
             <artifactId>LerverUI</artifactId>
-            <version>1.10-SNAPSHOT</version>
+            <version>1.11-SNAPSHOT</version>
 <!--            <scope>system</scope>
             <systemPath>${project.basedir}/libs/LerverUI-1.0-SNAPSHOT.jar</systemPath>-->
         </dependency>

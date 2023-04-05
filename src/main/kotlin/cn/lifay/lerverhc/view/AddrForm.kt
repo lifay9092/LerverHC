@@ -1,5 +1,7 @@
 package cn.lifay.lerverhc.view
 
+import cn.hutool.core.util.IdUtil
+import cn.hutool.core.util.StrUtil
 import cn.lifay.lerverhc.db.DbInfor
 import cn.lifay.lerverhc.model.HttpAddr
 import cn.lifay.lerverhc.model.HttpAddrs
@@ -7,12 +9,10 @@ import cn.lifay.lerverhc.model.HttpAddrs.httpAddrs
 import cn.lifay.ui.form.FormUI
 import cn.lifay.ui.form.text.TextElement
 import org.ktorm.dsl.eq
-import org.ktorm.dsl.insert
-import org.ktorm.dsl.update
 import org.ktorm.entity.count
 import org.ktorm.entity.removeIf
 import org.ktorm.entity.toList
-import java.util.*
+import org.ktorm.support.sqlite.insertOrUpdate
 
 
 /**
@@ -42,19 +42,16 @@ class AddrForm(t: HttpAddr? = null) : FormUI<HttpAddr>("地址管理", t, buildE
             alertError("名称[${entity!!.name}]已存在!")
             return
         }
-        DbInfor.database.insert(HttpAddrs) {
-            set(HttpAddrs.id, entity!!.id ?: UUID.randomUUID().toString())
+        val id = if (StrUtil.isBlank(entity!!.id)) IdUtil.simpleUUID() else entity.id
+        DbInfor.database.insertOrUpdate(HttpAddrs) {
+            set(HttpAddrs.id, id)
             set(HttpAddrs.name, entity.name)
             set(HttpAddrs.addr, entity.addr)
+            onConflict(it.id) {
+                set(HttpAddrs.name, entity.name)
+                set(HttpAddrs.addr, entity.addr)
+            }
         }
     }
 
-    override fun editData(entity: HttpAddr?) {
-        DbInfor.database.update(HttpAddrs) {
-            set(it.id, entity!!.id)
-            set(it.name, entity.name)
-            set(it.addr, entity.addr)
-            where { it.id eq entity.id }
-        }
-    }
 }
