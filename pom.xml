@@ -14,7 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.source>17</maven.compiler.source>
-
+        <hutool.version>5.8.10</hutool.version>
         <!-- Kotlin -->
         <kotlin.code.style>official</kotlin.code.style>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
@@ -54,12 +54,12 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-http</artifactId>
-            <version>5.7.20</version>
+            <version>${hutool.version}</version>
         </dependency>
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-json</artifactId>
-            <version>5.7.20</version>
+            <version>${hutool.version}</version>
         </dependency>
         <dependency>
             <groupId>org.ktorm</groupId>
@@ -95,7 +95,7 @@
         <dependency>
             <groupId>cn.lifay</groupId>
             <artifactId>LerverUI</artifactId>
-            <version>1.11-SNAPSHOT</version>
+            <version>1.14-SNAPSHOT</version>
 <!--            <scope>system</scope>
             <systemPath>${project.basedir}/libs/LerverUI-1.0-SNAPSHOT.jar</systemPath>-->
         </dependency>

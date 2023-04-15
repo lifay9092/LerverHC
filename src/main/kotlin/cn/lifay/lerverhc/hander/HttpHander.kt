@@ -87,7 +87,7 @@ object HttpHander {
         //组装参数信息
         try {
             if (!checkUrl(url!!)) {
-                throw RuntimeException("$url url格式不正确")
+                throw RuntimeException(" url格式不正确")
             }
             val httpRequest = buildHttpRequest(url, method, contentType, headers)
             if (Method.POST == method && ContentType.JSON == contentType && bodyStr.isNotBlank()) {
@@ -155,10 +155,7 @@ object HttpHander {
         return bodyObj
     }
     private fun checkUrl(url: String) :Boolean{
-        if (ReUtil.isMatch(Validator.URL_HTTP,url)) {
-            return url.count { i -> i.toString() == ":" } == 2
-        }
-        return false
+        return ReUtil.isMatch(Validator.URL_HTTP,url)
     }
     /**
      * 批量发送http请求并保存
